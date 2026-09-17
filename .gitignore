@@ -1,0 +1,398 @@
+# ================================
+
+# Environment / Secrets
+
+# ================================
+
+.env
+.env.*
+!.env.example
+
+# ================================
+
+# Virtual Environments
+
+# ================================
+
+.venv/
+venv/
+env/
+ENV/
+
+# ================================
+
+# Python Cache / Bytecode
+
+# ================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ================================
+
+# Python Packaging / Build
+
+# ================================
+
+build/
+dist/
+downloads/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ================================
+
+# Testing
+
+# ================================
+
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+pytest.xml
+.tox/
+.nox/
+
+# ================================
+
+# Type Checking / Linting
+
+# ================================
+
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+.ruff_cache/
+
+# ================================
+
+# Jupyter
+
+# ================================
+
+.ipynb_checkpoints/
+
+# ================================
+
+# Logs
+
+# ================================
+
+*.log
+logs/
+log/
+
+# ================================
+
+# Temporary Files
+
+# ================================
+
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.swp
+*.swo
+*~
+
+# ================================
+
+# Local Databases
+
+# ================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# ================================
+
+# Generated Data
+
+# ================================
+
+data/generated/
+data/tmp/
+data/cache/
+
+# Keep manually maintained seed/config files
+
+!data/seed/
+!data/seed/**
+
+# ================================
+
+# Evaluation Outputs
+
+# ================================
+
+evaluation/results/
+evaluation/output/
+evaluation/cache/
+
+# Keep evaluation source dataset
+
+!evaluation/dataset.json
+
+# ================================
+
+# Generated Reports
+
+# ================================
+
+reports/generated/
+reports/output/
+
+# ================================
+
+# Runtime Artifacts
+
+# ================================
+
+run/
+runtime/
+*.pid
+*.pid.lock
+
+# ================================
+
+# Docker
+
+# ================================
+
+docker-compose.override.yml
+
+# Ignore local Docker volumes if stored in repo
+
+docker-data/
+postgres-data/
+pgdata/
+
+# ================================
+
+# PostgreSQL Dumps / Backups
+
+# ================================
+
+# Keep SQL source and migrations versioned; store local SQL dumps here.
+/backups/
+/dumps/
+*.dump
+*.backup
+
+# Uncomment if you intentionally version SQL migrations/dumps
+
+# !schema/*.sql
+
+# !migrations/*.sql
+
+# ================================
+
+# IDE / Editors
+
+# ================================
+
+.idea/
+.vscode/
+*.code-workspace
+
+# ================================
+
+# VS Code local configuration
+
+# ================================
+
+.history/
+
+# ================================
+
+# Operating System
+
+# ================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+ehthumbs.db
+ehthumbs_vista.db
+
+# ================================
+
+# macOS
+
+# ================================
+
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ================================
+
+# Windows
+
+# ================================
+
+$RECYCLE.BIN/
+*.lnk
+
+# ================================
+
+# Linux
+
+# ================================
+
+.directory
+.Trash-*
+
+# ================================
+
+# FastAPI / Uvicorn Runtime
+
+# ================================
+
+*.sock
+
+# ================================
+
+# Celery / Background jobs
+
+# ================================
+
+celerybeat-schedule
+celerybeat.pid
+
+# ================================
+
+# Cache
+
+# ================================
+
+.cache/
+cache/
+
+# ================================
+
+# Profiling
+
+# ================================
+
+*.prof
+
+# ================================
+
+# Documentation Builds
+
+# ================================
+
+docs/_build/
+site/
+
+# ================================
+
+# Local Config Overrides
+
+# ================================
+
+config.local.*
+settings.local.*
+
+# ================================
+
+# Generated Schema / Metadata
+
+# ================================
+
+schema/generated/
+schema/cache/
+
+# IMPORTANT:
+
+# schema/schema_spec.yaml is the source of truth
+
+# and SHOULD be committed.
+
+# ================================
+
+# NLP Generated Artifacts
+
+# ================================
+
+artifacts/
+/models/
+checkpoints/
+
+# If using lightweight trained classifiers locally
+
+*.pkl
+*.joblib
+
+# ================================
+
+# NLP / ML Experiment Tracking
+
+# ================================
+
+mlruns/
+wandb/
+runs/
+
+# ================================
+
+# Local HTTP / API Debug Files
+
+# ================================
+
+*.http.local
+requests.local.http
+
+# ================================
+
+# Security / Certificates
+
+# ================================
+
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ================================
+
+# Local Credentials
+
+# ================================
+
+credentials.json
+secrets.json
+service-account*.json
+
+# ================================
+
+# Miscellaneous
+
+# ================================
+
+*.cache
+*.lock.local
