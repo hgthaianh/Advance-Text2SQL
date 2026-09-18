@@ -1,4 +1,4 @@
-﻿"""Vietnamese text cleanup without guessing missing diacritics."""
+"""Vietnamese text cleanup without guessing missing diacritics."""
 
 import re
 import unicodedata
@@ -36,13 +36,17 @@ class Normalizer:
 
 
 def preprocess_query(text: str, *, reference_date: date) -> PreprocessedQuery:
-    """Normalize a query and parse its first date interval and literal numbers."""
+    """Normalize a query and parse its first date interval, literal numbers, and intent."""
     from src.nlp.date_parser import DateParser
+    from src.nlp.intent_classifier import RuleBasedIntentClassifier
     from src.nlp.number_parser import NumberParser
 
     normalized = Normalizer().normalize(text)
+    intent_classifier = RuleBasedIntentClassifier()
     return PreprocessedQuery(
         **normalized.model_dump(),
         date_range=DateParser().parse(normalized.normalized_text, reference_date),
         numbers=NumberParser().parse(normalized.normalized_text),
+        intent_result=intent_classifier.classify(text),
     )
+

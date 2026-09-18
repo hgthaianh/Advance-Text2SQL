@@ -4,6 +4,14 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+from src.shared.enums import Intent
+
+
+class IntentResult(BaseModel):
+    intent: Intent
+    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    reason: str | None = None
+
 
 class UserContext(BaseModel):
     user_id: str = Field(min_length=1)
@@ -68,3 +76,5 @@ class NormalizedText(BaseModel):
 class PreprocessedQuery(NormalizedText):
     date_range: DateRange | None = None
     numbers: list[ParsedNumber] = Field(default_factory=list)
+    intent_result: IntentResult | None = None
+
