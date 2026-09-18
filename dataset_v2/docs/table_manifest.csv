@@ -1,0 +1,101 @@
+﻿#,schema,table,expected_seed_rows,purpose
+1,org,tenants,3,organization hierarchy / row-scope dimensions
+2,org,locations,12,organization hierarchy / row-scope dimensions
+3,org,branches,9,organization hierarchy / row-scope dimensions
+4,org,departments,30,organization hierarchy / row-scope dimensions
+5,org,teams,60,organization hierarchy / row-scope dimensions
+6,org,cost_centers,30,organization hierarchy / row-scope dimensions
+7,hr,positions,60,employee and workforce analytics
+8,hr,employees,600,employee and workforce analytics
+9,hr,employee_job_history,1200,employee and workforce analytics
+10,hr,employment_contracts,600,employee and workforce analytics
+11,hr,attendance_records,34200,employee and workforce analytics
+12,hr,leave_types,18,employee and workforce analytics
+13,hr,leave_balances,3600,employee and workforce analytics
+14,hr,leave_requests,1800,employee and workforce analytics
+15,hr,payroll_runs,36,employee and workforce analytics
+16,hr,payroll_details,7200,employee and workforce analytics
+17,hr,performance_reviews,1200,employee and workforce analytics
+18,hr,employee_benefits,1200,employee and workforce analytics
+19,hr,training_records,1800,employee and workforce analytics
+20,iam,users,450,"identity, RBAC and row/column authorization"
+21,iam,roles,15,"identity, RBAC and row/column authorization"
+22,iam,permissions,100,"identity, RBAC and row/column authorization"
+23,iam,user_roles,450,"identity, RBAC and row/column authorization"
+24,iam,role_permissions,600,"identity, RBAC and row/column authorization"
+25,iam,user_scopes,450,"identity, RBAC and row/column authorization"
+26,iam,table_access_policies,600,"identity, RBAC and row/column authorization"
+27,iam,column_access_policies,75,"identity, RBAC and row/column authorization"
+28,iam,login_sessions,3000,"identity, RBAC and row/column authorization"
+29,customer,customer_segments,12,CRM canonical customer master
+30,customer,customer_groups,24,CRM canonical customer master
+31,customer,customers,3000,CRM canonical customer master
+32,customer,contacts,4500,CRM canonical customer master
+33,customer,addresses,3750,CRM canonical customer master
+34,customer,customer_group_members,3000,CRM canonical customer master
+35,customer,customer_contacts,3000,CRM canonical customer master
+36,customer,customer_addresses,3000,CRM canonical customer master
+37,customer,customer_owners,3000,CRM canonical customer master
+38,product,brands,60,canonical product catalog
+39,product,categories,60,canonical product catalog
+40,product,products,1500,canonical product catalog
+41,product,product_categories,3000,canonical product catalog
+42,product,product_variants,3000,canonical product catalog
+43,product,product_attributes,30,canonical product catalog
+44,product,product_attribute_values,9000,canonical product catalog
+45,product,price_lists,12,canonical product catalog
+46,product,price_list_items,6000,canonical product catalog
+47,product,product_tags,3000,canonical product catalog
+48,inventory,warehouses,12,warehouse and stock operations
+49,inventory,warehouse_zones,60,warehouse and stock operations
+50,inventory,inventory_balances,3000,warehouse and stock operations
+51,inventory,inventory_transactions,75000,warehouse and stock operations
+52,inventory,stock_lots,6000,warehouse and stock operations
+53,inventory,stock_serials,10000,warehouse and stock operations
+54,inventory,stock_reservations,4000,warehouse and stock operations
+55,inventory,stock_adjustments,2000,warehouse and stock operations
+56,inventory,stock_transfers,1500,warehouse and stock operations
+57,inventory,stock_transfer_items,6000,warehouse and stock operations
+58,procurement,suppliers,360,source-to-pay purchasing
+59,procurement,purchase_requisitions,6000,source-to-pay purchasing
+60,procurement,purchase_requisition_items,18000,source-to-pay purchasing
+61,procurement,rfqs,4500,source-to-pay purchasing
+62,procurement,supplier_quotes,9000,source-to-pay purchasing
+63,procurement,supplier_quote_items,27000,source-to-pay purchasing
+64,procurement,purchase_orders,6000,source-to-pay purchasing
+65,procurement,purchase_order_items,18000,source-to-pay purchasing
+66,procurement,goods_receipts,5700,source-to-pay purchasing
+67,procurement,goods_receipt_items,17100,source-to-pay purchasing
+68,sales,sales_teams,15,quote-to-cash customer sales
+69,sales,sales_reps,90,quote-to-cash customer sales
+70,sales,sales_targets,1080,quote-to-cash customer sales
+71,sales,quotations,9000,quote-to-cash customer sales
+72,sales,quotation_items,27000,quote-to-cash customer sales
+73,sales,orders,12000,quote-to-cash customer sales
+74,sales,order_items,42000,quote-to-cash customer sales
+75,sales,invoices,10500,quote-to-cash customer sales
+76,sales,invoice_items,37500,quote-to-cash customer sales
+77,sales,payments,2675,quote-to-cash customer sales
+78,finance,chart_of_accounts,90,"GL, budgets and accounts payable"
+79,finance,fiscal_periods,72,"GL, budgets and accounts payable"
+80,finance,journal_entries,15000,"GL, budgets and accounts payable"
+81,finance,journal_entry_lines,30000,"GL, budgets and accounts payable"
+82,finance,budgets,60,"GL, budgets and accounts payable"
+83,finance,vendor_bills,5500,"GL, budgets and accounts payable"
+84,finance,vendor_bill_lines,16500,"GL, budgets and accounts payable"
+85,finance,vendor_payments,1850,"GL, budgets and accounts payable"
+86,support,support_tickets,9000,service desk and SLA
+87,support,ticket_comments,27000,service desk and SLA
+88,support,ticket_assignments,12000,service desk and SLA
+89,support,ticket_status_history,22000,service desk and SLA
+90,support,sla_policies,48,service desk and SLA
+91,support,ticket_sla_events,18000,service desk and SLA
+92,support,knowledge_articles,600,service desk and SLA
+93,audit,api_logs,25000,observability and Text2SQL feedback
+94,audit,audit_logs,18000,observability and Text2SQL feedback
+95,audit,data_access_logs,30000,observability and Text2SQL feedback
+96,audit,error_logs,3500,observability and Text2SQL feedback
+97,audit,job_runs,2000,observability and Text2SQL feedback
+98,audit,system_events,8000,observability and Text2SQL feedback
+99,audit,text2sql_query_logs,20000,observability and Text2SQL feedback
+100,audit,text2sql_query_feedback,6000,observability and Text2SQL feedback
