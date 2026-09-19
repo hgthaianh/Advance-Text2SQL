@@ -1,12 +1,16 @@
-﻿"""Load and validate the schema specification once, without database access."""
+"""Validated in-memory metadata; no database access or permission decisions."""
 
-from collections import defaultdict
+import re
 from pathlib import Path
 from typing import Any
-
 import yaml
+from collections.abc import Iterable
 
+from src.shared.exceptions import InvalidColumnError, InvalidTableError
 from src.shared.models import SchemaColumn, SchemaRelationship, SchemaTable
+
+_IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -38,60 +42,81 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
 
 
 class SchemaRegistry:
-    """Canonical identifiers are schema.table and schema.table.column.
+    """Inject metadata from the application's schema loader at startup.
 
-    Unqualified references are accepted only when they identify a unique table.
-    Construct once at application startup and reuse the registry and linker.
+    Canonical keys are schema.table and schema.table.column. Short table names
+    work only when unique. Defaults to the schema YAML; callers may instead inject tables and relationships.
     """
 
-    def __init__(self, path: str | Path = ROOT / "schema/schema_spec.yaml") -> None:
-        data = load_yaml(path)
+    def __init__(self, tables: Iterable[SchemaTable] | str | Path | None = None,
+                 relationships: Iterable[SchemaRelationship] = (), *,
+                 path: str | Path | None = None) -> None:
+        if path is not None and tables is not None:
+            raise ValueError('Specify tables or path, not both')
+        if tables is None or isinstance(tables, (str, Path)):
+            data = load_yaml(path or tables or ROOT / 'schema/schema_spec.yaml')
+            if not isinstance(data.get('tables'), list) or not data['tables']:
+                raise ValueError('Schema must contain a nonempty tables list')
+            tables = [SchemaTable.model_validate(t) for t in data['tables']]
+            relationships = [SchemaRelationship.model_validate(r) for r in data.get('relationships', [])]
         self.tables: dict[str, SchemaTable] = {}
         self.columns: dict[str, SchemaColumn] = {}
-        self._short_names: dict[str, list[str]] = defaultdict(list)
-        if not isinstance(data.get("tables"), list) or not data["tables"]:
-            raise ValueError("Schema must contain a nonempty tables list")
-        for entry in data["tables"]:
-            table = SchemaTable.model_validate(entry)
-            name = f"{table.schema_name}.{table.name}"
-            if name in self.tables:
-                raise ValueError(f"Duplicate table: {name}")
-            if not table.columns:
-                raise ValueError(f"Table has no columns: {name}")
+        for original in tables:
+            table = SchemaTable.model_validate(original.model_dump())
+            if not all(_IDENTIFIER.fullmatch(n) for n in (table.schema_name, table.name)):
+                raise InvalidTableError('Invalid metadata table identifier')
+            name = f'{table.schema_name}.{table.name}'
+            if name in self.tables or not table.columns:
+                raise InvalidTableError(f'Duplicate or empty table: {name}')
             self.tables[name] = table
-            self._short_names[table.name].append(name)
             for column in table.columns:
-                key = f"{name}.{column.name}"
-                if key in self.columns:
-                    raise ValueError(f"Duplicate column: {key}")
+                key = f'{name}.{column.name}'
+                if not _IDENTIFIER.fullmatch(column.name) or key in self.columns:
+                    raise InvalidColumnError(f'Invalid or duplicate metadata column: {key}')
                 self.columns[key] = column
-        self.relationships = [SchemaRelationship.model_validate(r) for r in data.get("relationships", [])]
-        for relationship in self.relationships:
-            if relationship.source not in self.columns or relationship.target not in self.columns:
-                raise ValueError(f"Unknown relationship endpoint: {relationship}")
+        self.relationships: list[SchemaRelationship] = []
+        seen = set()
+        inline = [SchemaRelationship(source=f'{name}.{c.name}', target=c.foreign_key)
+                  for name, table in self.tables.items() for c in table.columns if c.foreign_key]
+        for relation in [*relationships, *inline]:
+            source = self.resolve_column(relation.source)
+            target = self.resolve_column(relation.target)
+            key = tuple(sorted((source, target)))
+            if key not in seen:
+                self.relationships.append(SchemaRelationship(source=source, target=target))
+                seen.add(key)
 
     def resolve_table(self, name: str) -> str:
-        """Resolve a qualified or unique short name, rejecting unknown/ambiguous names."""
         if not isinstance(name, str):
-            raise ValueError("Table reference must be a string")
+            raise InvalidTableError('Table reference must be a string')
         if name in self.tables:
             return name
-        matches = self._short_names.get(name, [])
+        matches = [key for key, table in self.tables.items() if table.name == name]
         if len(matches) != 1:
-            raise ValueError(f"Unknown or ambiguous table: {name}")
+            raise InvalidTableError(f'Unknown or ambiguous table: {name}')
         return matches[0]
-
-    def resolve_column(self, name: str) -> str:
-        if not isinstance(name, str) or "." not in name:
-            raise ValueError(f"Column must include its table: {name}")
-        table, column = name.rsplit(".", 1)
-        key = f"{self.resolve_table(table)}.{column}"
-        if key not in self.columns:
-            raise ValueError(f"Unknown column: {name}")
-        return key
 
     def get_table(self, name: str) -> SchemaTable | None:
         try:
             return self.tables[self.resolve_table(name)]
-        except ValueError:
+        except InvalidTableError:
             return None
+
+    def resolve_column(self, name: str, tables: Iterable[str] = ()) -> str:
+        """Resolve qualified references or a unique column among context tables."""
+        if not isinstance(name, str):
+            raise InvalidColumnError('Column reference must be a string')
+        if '.' in name:
+            table, column = name.rsplit('.', 1)
+            try:
+                key = f'{self.resolve_table(table)}.{column}'
+            except InvalidTableError as exc:
+                raise InvalidColumnError(f'Unknown table for column: {name}') from exc
+            if key not in self.columns:
+                raise InvalidColumnError(f'Unknown column: {name}')
+            return key
+        matches = [f'{self.resolve_table(t)}.{name}' for t in tables if f'{self.resolve_table(t)}.{name}' in self.columns]
+        matches = list(dict.fromkeys(matches))
+        if len(matches) != 1:
+            raise InvalidColumnError(f'Unknown or ambiguous column: {name}')
+        return matches[0]

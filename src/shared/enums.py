@@ -2,6 +2,8 @@ from enum import StrEnum
 
 
 class Intent(StrEnum):
+    LOOKUP = "lookup"
+    AVG = "avg"
     COUNT = "count"
     SUM = "sum"
     REVENUE = "revenue"
@@ -31,3 +33,9 @@ class FilterOperator(StrEnum):
 class SortDirection(StrEnum):
     ASC = "asc"
     DESC = "desc"
+
+
+class Aggregation(StrEnum):
+    COUNT = "count"
+    SUM = "sum"
+    AVG = "avg"
