@@ -26,6 +26,7 @@ class SchemaColumn(BaseModel):
     data_type: str = Field(min_length=1)
     nullable: bool = True
     primary_key: bool = False
+    foreign_key: str | None = None
     aliases: list[str] = Field(default_factory=list)
 
 
