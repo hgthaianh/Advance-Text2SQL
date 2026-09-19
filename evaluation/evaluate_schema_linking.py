@@ -44,6 +44,8 @@ def validate_cases(cases: list[dict], registry: SchemaRegistry) -> None:
         behavior = case.get('expected_behavior', 'link')
         if behavior not in ('link', 'ambiguous', 'no_match'):
             raise ValueError(f'Unknown expected behavior: {behavior}')
+        if 'tier' in case and case['tier'] not in ('A', 'B'):
+            raise ValueError('tier must be A or B')
         for label in ('table', 'column'):
             names = case.get(f'expected_{label}s')
             if not isinstance(names, list) or any(not isinstance(n, str) for n in names) or len(names) != len(set(names)):
@@ -134,7 +136,12 @@ def evaluate(linker: SchemaLinker, cases: list[dict], repeats: int = 1) -> dict:
         has_candidates = bool(predictions['table'] or predictions['column'])
         predicted_behavior = 'no_match' if not has_candidates else 'ambiguous' if result.ambiguous_terms else 'link'
         behavior = case.get('expected_behavior', 'link')
-        sample = {'kind': case.get('kind', 'challenge'), 'behavior': behavior}
+        tier = case.get('tier')
+        sample = {
+            'kind': case.get('kind', 'challenge'), 'behavior': behavior,
+            'tier': tier, 'ambiguity_rate': float(predicted_behavior == 'ambiguous'),
+            'unsupported_rate': float(not has_candidates),
+        }
         missing, unexpected = {}, {}
         if behavior == 'link':
             for label in ('table', 'column'):
@@ -144,7 +151,7 @@ def evaluate(linker: SchemaLinker, cases: list[dict], repeats: int = 1) -> dict:
                 # are not interpreted as an assertion that all columns are wrong.
                 if not expected:
                     continue
-                for k in (5, 10):
+                for k in (1, 3, 5, 10):
                     correct = len(expected & set(predicted[:k]))
                     sample[f'{label}_recall_at_{k}'] = correct / len(expected)
                     sample[f'{label}_precision_at_{k}'] = correct / len(predicted[:k]) if predicted[:k] else 0.0
@@ -177,7 +184,7 @@ def evaluate(linker: SchemaLinker, cases: list[dict], repeats: int = 1) -> dict:
                                missing=missing, unexpected=unexpected, ambiguous_terms=result.ambiguous_terms))
 
     def aggregate(rows: list[dict]) -> tuple[dict, dict]:
-        keys = sorted(set().union(*(row.keys() for row in rows)) - {'kind', 'behavior'})
+        keys = sorted(set().union(*(row.keys() for row in rows)) - {'kind', 'behavior', 'tier'})
         return (
             {key: round(mean(row[key] for row in rows if key in row), 6) for key in keys},
             {key: sum(key in row for row in rows) for key in keys},
@@ -191,6 +198,7 @@ def evaluate(linker: SchemaLinker, cases: list[dict], repeats: int = 1) -> dict:
         'behavior_counts': dict(Counter(s['behavior'] for s in samples)),
         'metrics': metrics, 'metric_case_counts': denominators,
         'metrics_by_kind': {kind: aggregate([s for s in samples if s['kind'] == kind])[0] for kind in sorted({s['kind'] for s in samples})},
+        'metrics_by_tier': {tier: aggregate([s for s in samples if s['tier'] == tier])[0] for tier in sorted({s['tier'] for s in samples if s['tier'] is not None})},
         'metrics_by_domain': {domain: aggregate([s for s, c in zip(samples, cases) if c['domain'] == domain])[0] for domain in sorted({c['domain'] for c in cases})},
         'latency_ms': {'median': round(median(times), 3), 'p95': round(sorted(times)[int((len(times)-1)*0.95)], 3), 'max': round(max(times), 3)},
         'failures_at_10': failures, 'errors': errors,

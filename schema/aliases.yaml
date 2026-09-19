@@ -44,6 +44,7 @@ tables:
     - cán bộ
     - employee
     - staff
+    - nv
   hr.employee_job_history:
     aliases:
     - lịch sử công tác
@@ -160,6 +161,7 @@ tables:
     - người mua
     - khách
     - customer
+    - kh
   customer.contacts:
     aliases:
     - người liên hệ
@@ -206,6 +208,7 @@ tables:
     - mặt hàng
     - hàng hóa
     - product
+    - sp
   product.product_categories:
     aliases:
     - phân loại sản phẩm
@@ -385,6 +388,7 @@ tables:
     - hóa đơn bán hàng
     - hóa đơn khách hàng
     - invoice
+    - sales invoice
   sales.invoice_items:
     aliases:
     - chi tiết hóa đơn bán hàng
@@ -395,6 +399,7 @@ tables:
     - thanh toán khách hàng
     - thu tiền khách hàng
     - customer payment
+    - receipt
   finance.chart_of_accounts:
     aliases:
     - hệ thống tài khoản kế toán
@@ -1606,6 +1611,7 @@ columns:
     - mã sản phẩm của tồn kho
   inventory.inventory_balances.qty_on_hand:
     aliases:
+    - stock on hand
     - số lượng tồn thực tế của tồn kho
     - số lượng tồn thực tế
     - số lượng tồn kho
@@ -2025,6 +2031,7 @@ columns:
     - tổng giá trị của đơn mua hàng
     - tổng tiền
     - tổng giá trị
+    - po total
   procurement.purchase_orders.buyer_employee_id:
     aliases:
     - mã nhân viên của đơn mua hàng
@@ -2263,6 +2270,7 @@ columns:
     - tổng tiền đơn hàng
     - revenue
     - sales revenue
+    - gross sales
   sales.order_items.order_id:
     aliases:
     - mã đơn hàng của chi tiết đơn hàng
@@ -2278,6 +2286,7 @@ columns:
     - số lượng
     - số lượng bán
     - số sản phẩm bán
+    - sold quantity
   sales.order_items.unit_price:
     aliases:
     - đơn giá của chi tiết đơn hàng
@@ -2371,6 +2380,7 @@ columns:
     - số tiền
     - tiền khách hàng thanh toán
     - tiền thu khách hàng
+    - collected amount
   sales.payments.payment_method:
     aliases:
     - phương thức thanh toán của thanh toán khách hàng
@@ -2635,6 +2645,7 @@ columns:
     - tiêu đề yêu cầu của yêu cầu hỗ trợ
     - tiêu đề yêu cầu
     - tiêu đề ticket
+    - ticket title
   support.support_tickets.description:
     aliases:
     - mô tả của yêu cầu hỗ trợ
@@ -3032,3 +3043,11 @@ concepts:
     columns:
     - customer.customers.vip_flag
     - customer.customer_groups.name
+  ho_chi_minh:
+    aliases:
+    - hcm
+    - ho chi minh
+    tables:
+    - org.branches
+    columns:
+    - org.locations.city

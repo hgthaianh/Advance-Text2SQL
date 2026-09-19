@@ -60,9 +60,10 @@ def test_multiple_tables_and_noise(linker):
 def test_long_query_concepts(linker):
     result = linker.link('top 5 sản phẩm bán chạy của khách hàng vip tại chi nhánh hcm tháng trước')
     assert {'product.products', 'sales.order_items', 'sales.orders', 'customer.customers', 'customer.customer_groups', 'org.branches'} <= {t.name for t in result.tables}
-    assert {c.name for c in result.concepts} == {'best_sellers', 'vip_customers'}
+    assert {c.name for c in result.concepts} == {'best_sellers', 'vip_customers', 'ho_chi_minh'}
     assert any(c.reason == 'best_sellers' and c.match_type == 'related_business_concept' for c in result.tables)
-    assert 'hcm' in result.unmatched_terms
+    assert 'hcm' not in result.unmatched_terms
+    assert 'org.locations.city' in {c.name for c in result.columns}
     assert 'sản phẩm bán chạy' not in result.ambiguous_terms
 
 
