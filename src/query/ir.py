@@ -26,3 +26,4 @@ class QueryIR(BaseModel):
     group_by: list[str] = Field(default_factory=list)
     order_by: list[OrderBy] = Field(default_factory=list)
     limit: int = Field(default=100, ge=1, le=1000)
+    joins: list[tuple[str, str]] = Field(default_factory=list)
