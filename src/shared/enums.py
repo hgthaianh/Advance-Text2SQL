@@ -39,3 +39,11 @@ class Aggregation(StrEnum):
     COUNT = "count"
     SUM = "sum"
     AVG = "avg"
+
+
+class PermissionScope(StrEnum):
+    GLOBAL = "GLOBAL"
+    BRANCH = "BRANCH"
+    DEPARTMENT = "DEPARTMENT"
+    TEAM = "TEAM"
+    SELF = "SELF"
