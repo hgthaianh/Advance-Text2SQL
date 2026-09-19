@@ -1,21 +1,143 @@
-from abc import ABC, abstractmethod
+"""Validate and canonicalize QueryIR without NLP or permission decisions."""
+
+from pydantic import ValidationError
 
 from src.permission.models import PermissionContext
-from src.query.ir import QueryIR
-from src.query.join_resolver import FKJoinResolver, JoinResolver
-from src.schema.relationship_graph import FKRelationshipGraph, RelationshipGraph
 from src.shared.exceptions import PermissionDeniedError
+from src.schema.relationship_graph import FKRelationshipGraph
+from src.query.join_resolver import FKJoinResolver
+
+from src.query.ir import QueryIR, SelectItem
+from src.query.join_resolver import JoinResolver
+from src.query.models import QueryPlan
+from src.schema.registry import SchemaRegistry
+from src.schema.relationship_graph import RelationshipGraph
+from src.shared.enums import Aggregation, FilterOperator, Intent
+from src.shared.exceptions import (
+    MalformedQueryIRError, MissingAggregationColumnError, UnsupportedIntentError,
+)
+
+_LOOKUP = {Intent.LOOKUP, Intent.SELECT, Intent.LIST, Intent.DETAIL, Intent.FILTER}
+_AGGREGATES = {Intent.COUNT: Aggregation.COUNT, Intent.SUM: Aggregation.SUM,
+               Intent.AVG: Aggregation.AVG, Intent.AVERAGE: Aggregation.AVG}
+_NUMERIC_TYPES = {'smallint', 'integer', 'int', 'bigint', 'numeric', 'decimal', 'real',
+                  'float', 'double precision', 'money', 'int2', 'int4', 'int8', 'float4', 'float8'}
 
 
-class QueryPlanner(ABC):
-    @abstractmethod
-    def plan(self, query: QueryIR, permissions: PermissionContext) -> QueryIR:
-        """Plan a QueryIR query by validating permissions and resolving join paths."""
-        raise NotImplementedError
+class QueryPlanner:
+    def __init__(self, registry: SchemaRegistry, graph: RelationshipGraph | None = None) -> None:
+        self.registry = registry
+        self.graph = graph if graph is not None else RelationshipGraph(registry)
+        if self.graph.registry is not registry:
+            raise MalformedQueryIRError('Planner and graph must use the same registry')
+        self.join_resolver = JoinResolver()
+
+    def plan(self, query: QueryIR | dict) -> QueryPlan:
+        """Resolve identifiers, aggregate semantics, filters and unique FK paths.
+
+        Qualified column references can add owner tables (including injected
+        filters). Bare columns resolve only against explicitly requested tables.
+        Permission filters must already be present in query.filters.
+        """
+        if not isinstance(query, (QueryIR, dict)):
+            raise MalformedQueryIRError('Expected QueryIR or a query mapping')
+        try:
+            # Revalidate model instances too: callers can mutate or model_construct.
+            validated = QueryIR.model_validate(query.model_dump() if isinstance(query, QueryIR) else query)
+        except ValidationError as exc:
+            raise MalformedQueryIRError(str(exc)) from exc
+        if validated.intent not in _LOOKUP | _AGGREGATES.keys():
+            raise UnsupportedIntentError(f'Unsupported planning intent: {validated.intent}')
+        requested = list(dict.fromkeys(self.registry.resolve_table(t) for t in validated.tables))
+        if not requested:
+            raise MalformedQueryIRError('An explicit base table is required')
+        tables = list(requested)
+
+        def resolve(column: str) -> str:
+            name = self.registry.resolve_column(column, requested)
+            owner = name.rsplit('.', 1)[0]
+            if owner not in tables:
+                tables.append(owner)
+            return name
+
+        groups = list(dict.fromkeys(resolve(c) for c in validated.group_by))
+        expected_aggregation = _AGGREGATES.get(validated.intent)
+        raw_select = validated.select
+        if not raw_select:
+            if expected_aggregation == Aggregation.COUNT:
+                raw_select = [SelectItem(column='*', aggregation=Aggregation.COUNT)]
+            elif expected_aggregation:
+                raise MissingAggregationColumnError('SUM/AVG require a selected numeric column')
+            else:
+                raise MalformedQueryIRError('LOOKUP/FILTER require explicit selected columns')
+        selected = []
+        for raw in raw_select:
+            item = SelectItem(column=raw) if isinstance(raw, str) else raw.model_copy()
+            if item.column not in (None, '*'):
+                item.column = resolve(item.column)
+            if item.aggregation is None and item.column not in groups:
+                item.aggregation = expected_aggregation
+            if expected_aggregation and item.aggregation not in (None, expected_aggregation):
+                raise MalformedQueryIRError('Select aggregation conflicts with query intent')
+            if not item.column or item.column == '*':
+                if item.aggregation == Aggregation.COUNT:
+                    item.column = '*'
+                elif item.aggregation:
+                    raise MissingAggregationColumnError('SUM/AVG require a column')
+                else:
+                    raise MalformedQueryIRError('Wildcard projection is supported only as COUNT(*)')
+            if item.aggregation in (Aggregation.SUM, Aggregation.AVG):
+                data_type = self.registry.columns[item.column].data_type.lower().split('(')[0].strip()
+                if data_type not in _NUMERIC_TYPES:
+                    raise MalformedQueryIRError(f'Non-numeric aggregation column: {item.column}')
+            selected.append(item)
+        aggregate_query = any(s.aggregation for s in selected)
+        if expected_aggregation and not aggregate_query:
+            raise MissingAggregationColumnError('An aggregate projection is required')
+        if aggregate_query and any(s.aggregation is None and s.column not in groups for s in selected):
+            raise MalformedQueryIRError('Non-aggregate projections must appear in group_by')
+        if not aggregate_query and groups:
+            raise MalformedQueryIRError('group_by requires an aggregate query')
+        filters = []
+        for original in validated.filters:
+            condition = original.model_copy(update={'column': resolve(original.column)})
+            if condition.operator == FilterOperator.IN:
+                if not isinstance(condition.value, list) or any(v is None for v in condition.value):
+                    raise MalformedQueryIRError('IN requires a list of non-null scalar values')
+            elif isinstance(condition.value, list):
+                raise MalformedQueryIRError('Only IN accepts a list value')
+            elif condition.value is None and condition.operator not in (FilterOperator.EQ, FilterOperator.NE):
+                raise MalformedQueryIRError('NULL is supported only with = or !=')
+            elif condition.operator == FilterOperator.LIKE and not isinstance(condition.value, str):
+                raise MalformedQueryIRError('LIKE requires a string')
+            filters.append(condition)
+        order = []
+        for item in validated.order_by:
+            column = resolve(item.column)
+            if aggregate_query and column not in groups:
+                matching = [s for s in selected if s.column == column and s.aggregation]
+                if len(matching) != 1:
+                    raise MalformedQueryIRError('Aggregate ordering requires a group key or one aggregate projection')
+            order.append(item.model_copy(update={'column': column}))
+        normalized = validated.model_copy(update={
+            'tables': tables, 'select': selected, 'filters': filters,
+            'group_by': groups, 'order_by': order,
+        })
+        joins = self.join_resolver.resolve(tables, self.graph)
+        if validated.joins:
+            supplied = {frozenset((self.registry.resolve_column(a), self.registry.resolve_column(b)))
+                        for a, b in validated.joins}
+            expected = {frozenset((j.source, j.target)) for j in joins}
+            if supplied != expected:
+                raise MalformedQueryIRError('Supplied joins differ from validated FK paths')
+        physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
+        return QueryPlan(query=normalized, tables=physical_tables, joins=joins)
 
 
-class FKQueryPlanner(QueryPlanner):
-    """Query planner that resolves foreign key joins, injects row permissions, and checks table access."""
+
+
+class FKQueryPlanner:
+    """Legacy permission adapter preserved from dev; QueryPlanner remains policy-free."""
 
     def __init__(
         self,
@@ -27,24 +149,32 @@ class FKQueryPlanner(QueryPlanner):
 
     def plan(self, query: QueryIR, permissions: PermissionContext) -> QueryIR:
         """Validate permissions and generate a complete execution plan with resolved joins."""
+        # Include injected filters before discovering tables and checking access.
+        query = query.model_copy(deep=True)
+        for row_filter in permissions.row_filters:
+            if row_filter not in query.filters:
+                query.filters.append(row_filter)
         # 1. Gather all requested table names from query fields
         requested_tables: list[str] = list(query.tables)
 
-        for col_str in query.select + query.group_by:
+        for projection in query.select + query.group_by:
+            col_str = projection if isinstance(projection, str) else projection.column
+            if not col_str or col_str == '*':
+                continue
             if "." in col_str:
-                table_name = col_str.split(".")[0]
+                table_name = col_str.rsplit(".", 1)[0]
                 if table_name not in requested_tables:
                     requested_tables.append(table_name)
 
         for qf in query.filters:
             if "." in qf.column:
-                table_name = qf.column.split(".")[0]
+                table_name = qf.column.rsplit(".", 1)[0]
                 if table_name not in requested_tables:
                     requested_tables.append(table_name)
 
         for ob in query.order_by:
             if "." in ob.column:
-                table_name = ob.column.split(".")[0]
+                table_name = ob.column.rsplit(".", 1)[0]
                 if table_name not in requested_tables:
                     requested_tables.append(table_name)
 

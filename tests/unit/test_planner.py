@@ -104,10 +104,7 @@ def test_planner_handles_no_path_disconnected_graph(ecommerce_planner: FKQueryPl
     )
     permissions = PermissionContext(allowed_tables=["*"])
 
-    planned_ir = ecommerce_planner.plan(query, permissions)
-
-    # Tables are both in IR tables, but no join path connects them
-    assert "orders" in planned_ir.tables
-    assert "isolated_a" in planned_ir.tables
-    assert len(planned_ir.joins) == 0
-
+    from src.shared.exceptions import JoinPathNotFoundError
+    # A disconnected plan must not reach a builder as a potential Cartesian join.
+    with pytest.raises(JoinPathNotFoundError):
+        ecommerce_planner.plan(query, permissions)

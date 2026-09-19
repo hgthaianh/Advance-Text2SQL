@@ -41,11 +41,6 @@ class SchemaTable(BaseModel):
     description: str | None = None
 
 
-class SchemaRelationship(BaseModel):
-    source: str
-    target: str
-
-
 class SchemaCandidate(BaseModel):
     """Ranked evidence, not a resolved schema choice or a calibrated probability."""
 
@@ -65,6 +60,13 @@ class SchemaLinkResult(BaseModel):
     concepts: list[SchemaCandidate] = Field(default_factory=list)
     unmatched_terms: list[str] = Field(default_factory=list)
     ambiguous_terms: list[str] = Field(default_factory=list)
+
+
+class SchemaRelationship(BaseModel):
+    """Single-column foreign key, expressed as schema.table.column endpoints."""
+
+    source: str
+    target: str
 
 
 class QueryResult(BaseModel):

@@ -1,4 +1,4 @@
-﻿import json
+import json
 from pathlib import Path
 
 import pytest
@@ -118,9 +118,10 @@ def test_graph_and_reverse_path(registry):
     graph = RelationshipGraph(registry)
     assert graph.find_path('orders', 'customers') == [('sales.orders', 'customer.customers')]
     assert graph.find_path('customers', 'orders') == [('customer.customers', 'sales.orders')]
-    path = graph.find_path('customer_groups', 'customers')
-    assert path[0][0] == 'customer.customer_groups'
-    assert path[-1][-1] == 'customer.customers'
+    # Both tenant and membership bridges are shortest: do not silently choose.
+    from src.shared.exceptions import AmbiguousJoinPathError
+    with pytest.raises(AmbiguousJoinPathError):
+        graph.find_path('customer_groups', 'customers')
     assert graph.find_path('orders', 'orders') == []
 
 
