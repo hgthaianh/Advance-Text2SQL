@@ -1,0 +1,2022 @@
+[
+  {
+    "id": "heldout-location_coords-1",
+    "group_id": "location_coords",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Tôi cần tọa độ GPS của các địa điểm làm việc.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.locations"
+    ],
+    "expected_columns": [
+      "org.locations.latitude",
+      "org.locations.longitude"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-location_coords-2",
+    "group_id": "location_coords",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Lấy kinh độ và vĩ độ tại từng địa điểm.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.locations"
+    ],
+    "expected_columns": [
+      "org.locations.latitude",
+      "org.locations.longitude"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-department_parent-1",
+    "group_id": "department_parent",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Phòng ban nào trực thuộc phòng ban nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.departments"
+    ],
+    "expected_columns": [
+      "org.departments.parent_department_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-department_parent-2",
+    "group_id": "department_parent",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Tôi muốn biết mã phòng ban cấp trên của từng bộ phận.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.departments"
+    ],
+    "expected_columns": [
+      "org.departments.parent_department_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-cost_budget-1",
+    "group_id": "cost_budget",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Mỗi trung tâm chi phí được cấp bao nhiêu tiền trong năm?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.cost_centers"
+    ],
+    "expected_columns": [
+      "org.cost_centers.annual_budget"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-cost_budget-2",
+    "group_id": "cost_budget",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Liệt kê ngân sách năm của các đơn vị chi phí.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.cost_centers"
+    ],
+    "expected_columns": [
+      "org.cost_centers.annual_budget"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-employee_hired-1",
+    "group_id": "employee_hired",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Những nhân viên nào bắt đầu làm từ tháng trước?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.employees.hire_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-employee_hired-2",
+    "group_id": "employee_hired",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Tìm nhân sự có ngày vào làm trong tháng trước.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.employees.hire_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-contract_dates-1",
+    "group_id": "contract_dates",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Hợp đồng lao động nào hết hạn trong tháng tới?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employment_contracts"
+    ],
+    "expected_columns": [
+      "hr.employment_contracts.end_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-contract_dates-2",
+    "group_id": "contract_dates",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Lấy ngày kết thúc của hợp đồng nhân viên để xem hợp đồng sắp hết hạn.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employment_contracts"
+    ],
+    "expected_columns": [
+      "hr.employment_contracts.end_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-leave_remaining-1",
+    "group_id": "leave_remaining",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Mỗi người còn bao nhiêu ngày phép chưa dùng?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.leave_balances"
+    ],
+    "expected_columns": [
+      "hr.leave_balances.remaining_days"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-leave_remaining-2",
+    "group_id": "leave_remaining",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Choo xem số ngày nghỉ còn lại trong số dư nghỉ phép.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.leave_balances"
+    ],
+    "expected_columns": [
+      "hr.leave_balances.remaining_days"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-payroll_takehome-1",
+    "group_id": "payroll_takehome",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Tiền nhân viên thực lĩnh trên từng phiếu lương là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.payroll_details"
+    ],
+    "expected_columns": [
+      "hr.payroll_details.net_salary"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-payroll_takehome-2",
+    "group_id": "payroll_takehome",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "  Tôi   cần   lương   sau   khấu   trừ   ở   chi   tiết   bảng   lương.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.payroll_details"
+    ],
+    "expected_columns": [
+      "hr.payroll_details.net_salary"
+    ],
+    "tags": [
+      "paraphrase",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-training_finish-1",
+    "group_id": "training_finish",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Các khóa học trong hồ sơ đào tạo được hoàn thành ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.training_records"
+    ],
+    "expected_columns": [
+      "hr.training_records.completion_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-training_finish-2",
+    "group_id": "training_finish",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Cho xem ngày học xong ghi trong kết quả đào tạo.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.training_records"
+    ],
+    "expected_columns": [
+      "hr.training_records.completion_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-role_active-1",
+    "group_id": "role_active",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Nhóm quyền nào hiện còn được kích hoạt?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.roles"
+    ],
+    "expected_columns": [
+      "iam.roles.is_active"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-role_active-2",
+    "group_id": "role_active",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Liệt kê vai trò và cờ còn hoạt động của chúng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.roles"
+    ],
+    "expected_columns": [
+      "iam.roles.is_active"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-column_mask-1",
+    "group_id": "column_mask",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Những kiểu che dữ liệu nào được áp dụng ở chính sách truy cập cột?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.column_access_policies"
+    ],
+    "expected_columns": [
+      "iam.column_access_policies.mask_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-column_mask-2",
+    "group_id": "column_mask",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Cho xem cách làm mờ giá trị được cấu hình cho quyền đọc cột.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.column_access_policies"
+    ],
+    "expected_columns": [
+      "iam.column_access_policies.mask_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-role_expiry-1",
+    "group_id": "role_expiry",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Việc gán vai trò cho tài khoản có hiệu lực đến lúc nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.user_roles"
+    ],
+    "expected_columns": [
+      "iam.user_roles.valid_to"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-role_expiry-2",
+    "group_id": "role_expiry",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Cho xem ngày hết hiệu lực của vai trò người dùng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.user_roles"
+    ],
+    "expected_columns": [
+      "iam.user_roles.valid_to"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-customer_industry-1",
+    "group_id": "customer_industry",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Các khách mua hàng đang hoạt động trong lĩnh vực nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.industry"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-customer_industry-2",
+    "group_id": "customer_industry",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Cho biết ngành nghề kinh doanh của khách hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.industry"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-contact_title-1",
+    "group_id": "contact_title",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Chức danh công việc của đầu mối liên hệ là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.contacts"
+    ],
+    "expected_columns": [
+      "customer.contacts.job_title"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-contact_title-2",
+    "group_id": "contact_title",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Cho xem người liên hệ đang giữ chức danh nào.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.contacts"
+    ],
+    "expected_columns": [
+      "customer.contacts.job_title"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-group_joined-1",
+    "group_id": "group_joined",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Khách được thêm vào nhóm từ ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_group_members"
+    ],
+    "expected_columns": [
+      "customer.customer_group_members.joined_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-group_joined-2",
+    "group_id": "group_joined",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Cho xem thời điểm tham gia của thành viên nhóm khách hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_group_members"
+    ],
+    "expected_columns": [
+      "customer.customer_group_members.joined_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-segment_notes-1",
+    "group_id": "segment_notes",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Các phân khúc người mua được mô tả thế nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_segments"
+    ],
+    "expected_columns": [
+      "customer.customer_segments.description"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-segment_notes-2",
+    "group_id": "segment_notes",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Cho xem phần mô tả của từng phân khúc khách hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_segments"
+    ],
+    "expected_columns": [
+      "customer.customer_segments.description"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-product_reorder-1",
+    "group_id": "product_reorder",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Mặt hàng chạm mức tồn nào thì phải đặt mua lại?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.reorder_level"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-product_reorder-2",
+    "group_id": "product_reorder",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Cho xem ngưỡng tái đặt hàng cấu hình trên sản phẩm.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.reorder_level"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-variant_sku-1",
+    "group_id": "variant_sku",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Mã SKU của từng phiên bản sản phẩm là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.sku"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-variant_sku-2",
+    "group_id": "variant_sku",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Choo xem SKU trong hồ sơ biến thể hàng hóa.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.sku"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-price_item_unit-1",
+    "group_id": "price_item_unit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Một mặt hàng được niêm yết bao nhiêu trong chi tiết bảng giá?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.price_list_items"
+    ],
+    "expected_columns": [
+      "product.price_list_items.unit_price"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-price_item_unit-2",
+    "group_id": "price_item_unit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Liệt kê đơn giá tại từng dòng bảng giá.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.price_list_items"
+    ],
+    "expected_columns": [
+      "product.price_list_items.unit_price"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-category_parent-1",
+    "group_id": "category_parent",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Loại sản phẩm nào nằm dưới loại nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.categories"
+    ],
+    "expected_columns": [
+      "product.categories.parent_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-category_parent-2",
+    "group_id": "category_parent",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Cho xem mã danh mục cha của các danh mục sản phẩm.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.categories"
+    ],
+    "expected_columns": [
+      "product.categories.parent_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-stock_cost-1",
+    "group_id": "stock_cost",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Một đơn vị hàng tồn đang có giá vốn bình quân bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.avg_unit_cost"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-stock_cost-2",
+    "group_id": "stock_cost",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "  Cho   xem   chi   phí   bình   quân   đơn   vị   ở   số   dư   tồn   kho.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.avg_unit_cost"
+    ],
+    "tags": [
+      "paraphrase",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-zone_cold-1",
+    "group_id": "zone_cold",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Nhiệt độ nhỏ nhất và lớn nhất được phép ở từng khu vực kho là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.warehouse_zones"
+    ],
+    "expected_columns": [
+      "inventory.warehouse_zones.temperature_min",
+      "inventory.warehouse_zones.temperature_max"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-zone_cold-2",
+    "group_id": "zone_cold",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Cho xem giới hạn nhiệt độ của các vùng lưu trữ.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.warehouse_zones"
+    ],
+    "expected_columns": [
+      "inventory.warehouse_zones.temperature_min",
+      "inventory.warehouse_zones.temperature_max"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-transfer_route-1",
+    "group_id": "transfer_route",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Một phiếu chuyển hàng đi từ kho nào tới kho nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_transfers"
+    ],
+    "expected_columns": [
+      "inventory.stock_transfers.source_warehouse_id",
+      "inventory.stock_transfers.destination_warehouse_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-transfer_route-2",
+    "group_id": "transfer_route",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Cho biết mã kho nguồn và kho đích trên phiếu chuyển kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_transfers"
+    ],
+    "expected_columns": [
+      "inventory.stock_transfers.source_warehouse_id",
+      "inventory.stock_transfers.destination_warehouse_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-transaction_qty-1",
+    "group_id": "transaction_qty",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Mỗi lần xuất nhập kho có bao nhiêu đơn vị hàng?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_transactions"
+    ],
+    "expected_columns": [
+      "inventory.inventory_transactions.quantity"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-transaction_qty-2",
+    "group_id": "transaction_qty",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Tôi cần số lượng ghi nhận trên từng giao dịch kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_transactions"
+    ],
+    "expected_columns": [
+      "inventory.inventory_transactions.quantity"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-requisition_need-1",
+    "group_id": "requisition_need",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Bộ phận yêu cầu mua hàng cần nhận hàng vào ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_requisitions"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisitions.required_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-requisition_need-2",
+    "group_id": "requisition_need",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Lấy ngày cần hàng ghi trên đề nghị mua hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_requisitions"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisitions.required_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-rfq_close-1",
+    "group_id": "rfq_close",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Khi nào hết thời gian nhận chào giá mua?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.rfqs"
+    ],
+    "expected_columns": [
+      "procurement.rfqs.closing_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-rfq_close-2",
+    "group_id": "rfq_close",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem hạn đóng của các yêu cầu báo giá mua.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.rfqs"
+    ],
+    "expected_columns": [
+      "procurement.rfqs.closing_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-purchase_expected-1",
+    "group_id": "purchase_expected",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Đơn đặt mua dự kiến được giao ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_orders"
+    ],
+    "expected_columns": [
+      "procurement.purchase_orders.expected_delivery_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-purchase_expected-2",
+    "group_id": "purchase_expected",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem lịch giao hàng dự kiến trên đơn mua hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_orders"
+    ],
+    "expected_columns": [
+      "procurement.purchase_orders.expected_delivery_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-purchase_received-1",
+    "group_id": "purchase_received",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Số lượng đã nhận của từng dòng đơn mua là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_order_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_order_items.received_qty"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-purchase_received-2",
+    "group_id": "purchase_received",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem lượng hàng thực nhận trên chi tiết đơn mua hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_order_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_order_items.received_qty"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sold_quantities-1",
+    "group_id": "sold_quantities",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Mỗi mặt hàng bán được bao nhiêu đơn vị trong các dòng đơn bán?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.order_items"
+    ],
+    "expected_columns": [
+      "sales.order_items.quantity",
+      "sales.order_items.product_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sold_quantities-2",
+    "group_id": "sold_quantities",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Choo số lượng bán theo mã sản phẩm từ chi tiết đơn hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.order_items"
+    ],
+    "expected_columns": [
+      "sales.order_items.quantity",
+      "sales.order_items.product_id"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-payment_method-1",
+    "group_id": "payment_method",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Người mua đã trả tiền bằng hình thức nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.payments"
+    ],
+    "expected_columns": [
+      "sales.payments.payment_method"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-payment_method-2",
+    "group_id": "payment_method",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Lấy phương thức dùng để thanh toán khách hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.payments"
+    ],
+    "expected_columns": [
+      "sales.payments.payment_method"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-target_revenue-1",
+    "group_id": "target_revenue",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Mỗi nhân viên bán hàng được giao doanh số mục tiêu bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.sales_targets"
+    ],
+    "expected_columns": [
+      "sales.sales_targets.revenue_target"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-target_revenue-2",
+    "group_id": "target_revenue",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Lấy chỉ tiêu doanh thu từ bảng mục tiêu bán hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.sales_targets"
+    ],
+    "expected_columns": [
+      "sales.sales_targets.revenue_target"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-budget_commit-1",
+    "group_id": "budget_commit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Ngân sách đã cam kết chi bao nhiêu tiền?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.committed_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-budget_commit-2",
+    "group_id": "budget_commit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Tôi cần khoản tiền cam kết ở từng dự toán.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.committed_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-journal_credit-1",
+    "group_id": "journal_credit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Mỗi dòng định khoản ghi có bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.credit_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-journal_credit-2",
+    "group_id": "journal_credit",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Cho xem tiền bên có trong chi tiết bút toán.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.credit_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-vendor_due-1",
+    "group_id": "vendor_due",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Hóa đơn đầu vào phải trả trước ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.vendor_bills"
+    ],
+    "expected_columns": [
+      "finance.vendor_bills.due_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-vendor_due-2",
+    "group_id": "vendor_due",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "  Cho   xem   hạn   thanh   toán   trên   hóa   đơn   nhà   cung   cấp.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.vendor_bills"
+    ],
+    "expected_columns": [
+      "finance.vendor_bills.due_date"
+    ],
+    "tags": [
+      "paraphrase",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-account_type-1",
+    "group_id": "account_type",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Các tài khoản kế toán thuộc những loại nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.chart_of_accounts"
+    ],
+    "expected_columns": [
+      "finance.chart_of_accounts.account_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-account_type-2",
+    "group_id": "account_type",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Lấy loại tài khoản trong hệ thống tài khoản kế toán.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.chart_of_accounts"
+    ],
+    "expected_columns": [
+      "finance.chart_of_accounts.account_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-ticket_done-1",
+    "group_id": "ticket_done",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Yêu cầu hỗ trợ được xử lý xong lúc nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.resolved_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-ticket_done-2",
+    "group_id": "ticket_done",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Cho xem thời điểm giải quyết trên phiếu hỗ trợ.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.resolved_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sla_breach-1",
+    "group_id": "sla_breach",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Các sự kiện SLA chậm cam kết bao nhiêu phút?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.ticket_sla_events"
+    ],
+    "expected_columns": [
+      "support.ticket_sla_events.breach_minutes"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sla_breach-2",
+    "group_id": "sla_breach",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Cho xem số phút vi phạm trong sự kiện sla.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.ticket_sla_events"
+    ],
+    "expected_columns": [
+      "support.ticket_sla_events.breach_minutes"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sla_first-1",
+    "group_id": "sla_first",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Theo chính sách dịch vụ thì phải trả lời lần đầu trong bao lâu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.sla_policies"
+    ],
+    "expected_columns": [
+      "support.sla_policies.first_response_minutes"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-sla_first-2",
+    "group_id": "sla_first",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Cho xem số phút phản hồi đầu tiên trong chính sách sla.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.sla_policies"
+    ],
+    "expected_columns": [
+      "support.sla_policies.first_response_minutes"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-error_message-1",
+    "group_id": "error_message",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Nội dung báo lỗi được lưu ở nhật ký lỗi là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.error_logs"
+    ],
+    "expected_columns": [
+      "audit.error_logs.message"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-error_message-2",
+    "group_id": "error_message",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Cho xem thông báo của từng bản ghi log lỗi.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.error_logs"
+    ],
+    "expected_columns": [
+      "audit.error_logs.message"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-query_outcome-1",
+    "group_id": "query_outcome",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Các câu hỏi Text2SQL đã thực thi thành công hay thất bại?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.text2sql_query_logs"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_logs.execution_status"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-query_outcome-2",
+    "group_id": "query_outcome",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Choo xem trạng thái chạy trong nhật ký truy vấn text2sql.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.text2sql_query_logs"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_logs.execution_status"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-access_columns-1",
+    "group_id": "access_columns",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Nhật ký đọc dữ liệu ghi nhận đã xem những cột nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.data_access_logs"
+    ],
+    "expected_columns": [
+      "audit.data_access_logs.accessed_columns"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-access_columns-2",
+    "group_id": "access_columns",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Cho xem danh sách cột đã truy cập trong nhật ký truy cập dữ liệu.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.data_access_logs"
+    ],
+    "expected_columns": [
+      "audit.data_access_logs.accessed_columns"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-amount_unspecified",
+    "group_id": "amount_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Tổng tiền là bao nhiêu?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.orders"
+        ],
+        "columns": [
+          "sales.orders.total_amount"
+        ]
+      },
+      {
+        "tables": [
+          "procurement.purchase_orders"
+        ],
+        "columns": [
+          "procurement.purchase_orders.total_amount"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-phone_unspecified",
+    "group_id": "phone_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Lấy số điện thoại.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "customer.customers"
+        ],
+        "columns": [
+          "customer.customers.phone"
+        ]
+      },
+      {
+        "tables": [
+          "hr.employees"
+        ],
+        "columns": [
+          "hr.employees.phone"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-start_unspecified",
+    "group_id": "start_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Ngày bắt đầu là lúc nào?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "hr.employment_contracts"
+        ],
+        "columns": [
+          "hr.employment_contracts.start_date"
+        ]
+      },
+      {
+        "tables": [
+          "hr.leave_requests"
+        ],
+        "columns": [
+          "hr.leave_requests.start_date"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-code_unspecified",
+    "group_id": "code_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Tra mã giúp tôi.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "product.products"
+        ],
+        "columns": [
+          "product.products.code"
+        ]
+      },
+      {
+        "tables": [
+          "org.branches"
+        ],
+        "columns": [
+          "org.branches.code"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-quantity_unspecified",
+    "group_id": "quantity_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Số lượng bao nhiêu?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.order_items"
+        ],
+        "columns": [
+          "sales.order_items.quantity"
+        ]
+      },
+      {
+        "tables": [
+          "inventory.inventory_transactions"
+        ],
+        "columns": [
+          "inventory.inventory_transactions.quantity"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-rating_unspecified",
+    "group_id": "rating_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Điểm đánh giá thế nào?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "procurement.suppliers"
+        ],
+        "columns": [
+          "procurement.suppliers.rating"
+        ]
+      },
+      {
+        "tables": [
+          "audit.text2sql_query_feedback"
+        ],
+        "columns": [
+          "audit.text2sql_query_feedback.rating"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-order_date_unspecified",
+    "group_id": "order_date_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Ngày đặt hàng?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.orders"
+        ],
+        "columns": [
+          "sales.orders.order_date"
+        ]
+      },
+      {
+        "tables": [
+          "procurement.purchase_orders"
+        ],
+        "columns": [
+          "procurement.purchase_orders.order_date"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-manager_unspecified",
+    "group_id": "manager_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Ai quản lý?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "org.branches"
+        ],
+        "columns": [
+          "org.branches.manager_employee_id"
+        ]
+      },
+      {
+        "tables": [
+          "inventory.warehouses"
+        ],
+        "columns": [
+          "inventory.warehouses.manager_employee_id"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-account_unspecified",
+    "group_id": "account_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Liệt kê tài khoản.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "iam.users"
+        ],
+        "columns": [
+          "iam.users.username"
+        ]
+      },
+      {
+        "tables": [
+          "finance.chart_of_accounts"
+        ],
+        "columns": [
+          "finance.chart_of_accounts.account_code"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-review_score_unspecified",
+    "group_id": "review_score_unspecified",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Cho xem điểm.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "hr.training_records"
+        ],
+        "columns": [
+          "hr.training_records.score"
+        ]
+      },
+      {
+        "tables": [
+          "hr.performance_reviews"
+        ],
+        "columns": [
+          "hr.performance_reviews.performance_score"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-recipe",
+    "group_id": "recipe",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Chỉ tôi cách nấu canh chua.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-math",
+    "group_id": "math",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Căn bậc hai của 144 là bao nhiêu?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-music",
+    "group_id": "music",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Gợi ý một bản nhạc không lời để thư giãn.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-health",
+    "group_id": "health",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Tập thở sâu thế nào cho đúng?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-astronomy",
+    "group_id": "astronomy",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Vì sao mặt trăng có lúc tròn lúc khuyết?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-idiom_warehouse",
+    "group_id": "idiom_warehouse",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Kể một câu chuyện về kho báu dưới biển.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-idiom_customer",
+    "group_id": "idiom_customer",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Từ khách sáo dùng trong giao tiếp nghĩa là gì?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-idiom_order",
+    "group_id": "idiom_order",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Viết bài giải thích khái niệm đơn điệu trong âm nhạc.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-idiom_position",
+    "group_id": "idiom_position",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Vị trí của sao Bắc Đẩu trên bầu trời ở đâu?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "heldout-idiom_error",
+    "group_id": "idiom_error",
+    "split": "heldout",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Tôi mắc lỗi chính tả trong bài văn, chỉ cách tự kiểm tra.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  }
+]

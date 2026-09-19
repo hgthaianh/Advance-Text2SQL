@@ -1,0 +1,2045 @@
+[
+  {
+    "id": "dev-tenant_currency-1",
+    "group_id": "tenant_currency",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Mỗi công ty đang dùng đồng tiền nào để hạch toán?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.tenants"
+    ],
+    "expected_columns": [
+      "org.tenants.currency"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-tenant_currency-2",
+    "group_id": "tenant_currency",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "  Choo   biet   tien   te   cau   hinh   cho   tung   doanh   nghiep.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.tenants"
+    ],
+    "expected_columns": [
+      "org.tenants.currency"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented",
+      "typo",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-branch_manager-1",
+    "group_id": "branch_manager",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Ai đang đứng đầu từng chi nhánh?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.branches"
+    ],
+    "expected_columns": [
+      "org.branches.manager_employee_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-branch_manager-2",
+    "group_id": "branch_manager",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Mã nhân viên quản lý của mỗi chi nhánh là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.branches"
+    ],
+    "expected_columns": [
+      "org.branches.manager_employee_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-team_branch-1",
+    "group_id": "team_branch",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Các tổ công tác thuộc cơ sở kinh doanh nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.teams"
+    ],
+    "expected_columns": [
+      "org.teams.branch_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-team_branch-2",
+    "group_id": "team_branch",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "org",
+    "question": "Cho biet ma chi nhanh gan voi tung nhom lam viec.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "org.teams"
+    ],
+    "expected_columns": [
+      "org.teams.branch_id"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-salary_bounds-1",
+    "group_id": "salary_bounds",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Khoảng lương thấp nhất và cao nhất của mỗi chức vụ là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.positions"
+    ],
+    "expected_columns": [
+      "hr.positions.min_salary",
+      "hr.positions.max_salary"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-salary_bounds-2",
+    "group_id": "salary_bounds",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Cho xem sàn và trần lương theo vị trí công việc.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.positions"
+    ],
+    "expected_columns": [
+      "hr.positions.min_salary",
+      "hr.positions.max_salary"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-job_move-1",
+    "group_id": "job_move",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Tôi muốn biết phòng ban trước và sau mỗi lần điều chuyển.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employee_job_history"
+    ],
+    "expected_columns": [
+      "hr.employee_job_history.old_department_id",
+      "hr.employee_job_history.new_department_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-job_move-2",
+    "group_id": "job_move",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Lich su cong tac ghi ma bo phan cu va bo phan moi ra sao?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.employee_job_history"
+    ],
+    "expected_columns": [
+      "hr.employee_job_history.old_department_id",
+      "hr.employee_job_history.new_department_id"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-attendance_overtime-1",
+    "group_id": "attendance_overtime",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Ai đã làm thêm bao nhiêu giờ trong bảng công?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.attendance_records"
+    ],
+    "expected_columns": [
+      "hr.attendance_records.overtime_hours"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-attendance_overtime-2",
+    "group_id": "attendance_overtime",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Tổng hợp số giờ tăng ca từ hồ sơ chấm công.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.attendance_records"
+    ],
+    "expected_columns": [
+      "hr.attendance_records.overtime_hours"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-leave_request_days-1",
+    "group_id": "leave_request_days",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Một đơn xin nghỉ kéo dài mấy ngày?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.leave_requests"
+    ],
+    "expected_columns": [
+      "hr.leave_requests.total_days"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-leave_request_days-2",
+    "group_id": "leave_request_days",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Cho xem tong so ngay nghi tren tung don nghi phep.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.leave_requests"
+    ],
+    "expected_columns": [
+      "hr.leave_requests.total_days"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-review_skills-1",
+    "group_id": "review_skills",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Điểm năng lực trong các đợt đánh giá nhân viên như thế nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.performance_reviews"
+    ],
+    "expected_columns": [
+      "hr.performance_reviews.competency_score"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-review_skills-2",
+    "group_id": "review_skills",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "hr",
+    "question": "Liệt kê điểm về năng lực từ đánh giá hiệu suất.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "hr.performance_reviews"
+    ],
+    "expected_columns": [
+      "hr.performance_reviews.competency_score"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-user_username-1",
+    "group_id": "user_username",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Tên dùng để đăng nhập của các tài khoản là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.users"
+    ],
+    "expected_columns": [
+      "iam.users.username"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-user_username-2",
+    "group_id": "user_username",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Cho toi username cua tung nguoi dung.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.users"
+    ],
+    "expected_columns": [
+      "iam.users.username"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-scope_kind-1",
+    "group_id": "scope_kind",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Tài khoản được giới hạn ở loại phạm vi dữ liệu nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.user_scopes"
+    ],
+    "expected_columns": [
+      "iam.user_scopes.scope_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-scope_kind-2",
+    "group_id": "scope_kind",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Xem loại phạm vi trong cấu hình phạm vi người dùng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.user_scopes"
+    ],
+    "expected_columns": [
+      "iam.user_scopes.scope_type"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-session_expiry-1",
+    "group_id": "session_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Phiên đăng nhập của người dùng khi nào hết hạn?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.login_sessions"
+    ],
+    "expected_columns": [
+      "iam.login_sessions.expires_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-session_expiry-2",
+    "group_id": "session_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "iam",
+    "question": "Cho xem moc het hieu luc cua tung phien dang nhap.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "iam.login_sessions"
+    ],
+    "expected_columns": [
+      "iam.login_sessions.expires_at"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-customer_phone-1",
+    "group_id": "customer_phone",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Tôi cần số để gọi cho từng người mua.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.phone"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-customer_phone-2",
+    "group_id": "customer_phone",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Liệt kê số điện thoại cua các khách mua hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.phone"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-customer_vip-1",
+    "group_id": "customer_vip",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Trong danh sách người mua ai được đánh dấu VIP?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.vip_flag"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-customer_vip-2",
+    "group_id": "customer_vip",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Cho xem co VIP tren ho so khach hang.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.vip_flag"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-address_postal-1",
+    "group_id": "address_postal",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Mã bưu điện trên từng địa chỉ là gì?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.addresses"
+    ],
+    "expected_columns": [
+      "customer.addresses.postal_code"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-address_postal-2",
+    "group_id": "address_postal",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "  Tôi   cần   mã   vùng   bưu   chính   của   các   địa   chỉ   liên   lạc.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.addresses"
+    ],
+    "expected_columns": [
+      "customer.addresses.postal_code"
+    ],
+    "tags": [
+      "paraphrase",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-owner_assigned-1",
+    "group_id": "owner_assigned",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Người phụ trách khách hàng được giao việc từ lúc nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_owners"
+    ],
+    "expected_columns": [
+      "customer.customer_owners.assigned_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-owner_assigned-2",
+    "group_id": "owner_assigned",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "customer",
+    "question": "Xem thoi diem phan cong trong ho so nguoi quan ly khach hang.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "customer.customer_owners"
+    ],
+    "expected_columns": [
+      "customer.customer_owners.assigned_at"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-product_cost-1",
+    "group_id": "product_cost",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Giá vốn định mức của mỗi mặt hàng là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.standard_cost"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-product_cost-2",
+    "group_id": "product_cost",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Tôi cần chi phí tiêu chuẩn của từng sản phẩm.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.standard_cost"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-variant_sell-1",
+    "group_id": "variant_sell",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Giá bán của từng phiên bản hàng hóa là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.selling_price"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-variant_sell-2",
+    "group_id": "variant_sell",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Lay gia ban cua cac bien the san pham.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.selling_price"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-price_valid-1",
+    "group_id": "price_valid",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Bảng giá có hiệu lực từ ngày nào đến ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.price_lists"
+    ],
+    "expected_columns": [
+      "product.price_lists.valid_from",
+      "product.price_lists.valid_to"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-price_valid-2",
+    "group_id": "price_valid",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Tôi cần khoảng thời gian áp dụng của từng bảng giá.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.price_lists"
+    ],
+    "expected_columns": [
+      "product.price_lists.valid_from",
+      "product.price_lists.valid_to"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-attribute_number-1",
+    "group_id": "attribute_number",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Tôi muốn phần giá trị số của các đặc tính sản phẩm.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_attribute_values"
+    ],
+    "expected_columns": [
+      "product.product_attribute_values.value_number"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-attribute_number-2",
+    "group_id": "attribute_number",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "product",
+    "question": "Lay gia tri thuoc tinh san pham duoc luu duoi dang so.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "product.product_attribute_values"
+    ],
+    "expected_columns": [
+      "product.product_attribute_values.value_number"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-available_stock-1",
+    "group_id": "available_stock",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Còn bao nhiêu hàng có thể xuất ngay ở mỗi kho?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.qty_available",
+      "inventory.inventory_balances.warehouse_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-available_stock-2",
+    "group_id": "available_stock",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Tôi cần lượng tồn khả dụng theo mã kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.qty_available",
+      "inventory.inventory_balances.warehouse_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-lot_expiry-1",
+    "group_id": "lot_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Lô hàng nào sắp quá hạn dùng?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_lots"
+    ],
+    "expected_columns": [
+      "inventory.stock_lots.expiry_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-lot_expiry-2",
+    "group_id": "lot_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Tim han su dung cua tung lo ton kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_lots"
+    ],
+    "expected_columns": [
+      "inventory.stock_lots.expiry_date"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-adjust_difference-1",
+    "group_id": "adjust_difference",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Số lượng kiểm kê lệch so với hệ thống bao nhiêu trên mỗi lần điều chỉnh?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_adjustments"
+    ],
+    "expected_columns": [
+      "inventory.stock_adjustments.variance_qty"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-adjust_difference-2",
+    "group_id": "adjust_difference",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Lấy lượng chênh lệch trong hồ sơ điều chỉnh tồn kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_adjustments"
+    ],
+    "expected_columns": [
+      "inventory.stock_adjustments.variance_qty"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-reserve_expiry-1",
+    "group_id": "reserve_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Hàng giữ chỗ sẽ được giải phóng khi hết hạn lúc nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_reservations"
+    ],
+    "expected_columns": [
+      "inventory.stock_reservations.expires_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-reserve_expiry-2",
+    "group_id": "reserve_expiry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "inventory",
+    "question": "Choo xem thoi diem het han cua cac lan dat giu ton kho.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "inventory.stock_reservations"
+    ],
+    "expected_columns": [
+      "inventory.stock_reservations.expires_at"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-supplier_terms-1",
+    "group_id": "supplier_terms",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Các bên cung ứng yêu cầu điều khoản trả tiền như thế nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.suppliers"
+    ],
+    "expected_columns": [
+      "procurement.suppliers.payment_terms"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-supplier_terms-2",
+    "group_id": "supplier_terms",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem điều kiện thanh toán của nhà cung cấp.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.suppliers"
+    ],
+    "expected_columns": [
+      "procurement.suppliers.payment_terms"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-requisition_estimate-1",
+    "group_id": "requisition_estimate",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Dòng đề nghị mua này dự trù tổng chi phí bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_requisition_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisition_items.estimated_total"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-requisition_estimate-2",
+    "group_id": "requisition_estimate",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem tong tien uoc tinh cua chi tiet yeu cau mua hang.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.purchase_requisition_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisition_items.estimated_total"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-supplier_delivery-1",
+    "group_id": "supplier_delivery",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Bên cung ứng hứa giao trong mấy ngày trên báo giá?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.supplier_quotes"
+    ],
+    "expected_columns": [
+      "procurement.supplier_quotes.delivery_days"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-supplier_delivery-2",
+    "group_id": "supplier_delivery",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Cho xem số ngày giao hàng ở báo giá nhà cung cấp.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.supplier_quotes"
+    ],
+    "expected_columns": [
+      "procurement.supplier_quotes.delivery_days"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-receipt_rejected-1",
+    "group_id": "receipt_rejected",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "Có bao nhiêu hàng bị loại ở từng dòng nhận hàng?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.goods_receipt_items"
+    ],
+    "expected_columns": [
+      "procurement.goods_receipt_items.rejected_qty"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-receipt_rejected-2",
+    "group_id": "receipt_rejected",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "procurement",
+    "question": "  Lay   so   luong   bi   tu   choi   trong   chi   tiet   phieu   nhap   hang.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "procurement.goods_receipt_items"
+    ],
+    "expected_columns": [
+      "procurement.goods_receipt_items.rejected_qty"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-revenue_branch-1",
+    "group_id": "revenue_branch",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Tổng doanh số theo mã chi nhánh là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.orders"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount",
+      "sales.orders.branch_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-revenue_branch-2",
+    "group_id": "revenue_branch",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Tôi cần doanh thu phân theo mã chi nhánh ghi trên đơn hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.orders"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount",
+      "sales.orders.branch_id"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-invoice_deadline-1",
+    "group_id": "invoice_deadline",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Các hóa đơn gửi người mua đến hạn thanh toán ngày nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.invoices"
+    ],
+    "expected_columns": [
+      "sales.invoices.due_date"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-invoice_deadline-2",
+    "group_id": "invoice_deadline",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Cho xem ngay phai tra tien tren hoa don ban hang.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.invoices"
+    ],
+    "expected_columns": [
+      "sales.invoices.due_date"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-rep_commission-1",
+    "group_id": "rep_commission",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Tỷ lệ hưởng hoa hồng của đại diện kinh doanh là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.sales_reps"
+    ],
+    "expected_columns": [
+      "sales.sales_reps.commission_rate"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-rep_commission-2",
+    "group_id": "rep_commission",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "sales",
+    "question": "Cho xem phần trăm hoa hồng của đại diện bán hàng.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "sales.sales_reps"
+    ],
+    "expected_columns": [
+      "sales.sales_reps.commission_rate"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-budget_actual-1",
+    "group_id": "budget_actual",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Phần chi thực tế so với dự toán ngân sách đang là bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.actual_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-budget_actual-2",
+    "group_id": "budget_actual",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Cho xem so tien thuc te duoc ghi trong ngan sach.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.actual_amount"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-journal_debit-1",
+    "group_id": "journal_debit",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Mỗi dòng định khoản ghi nợ bao nhiêu?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.debit_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-journal_debit-2",
+    "group_id": "journal_debit",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Cho xem tiền bên nợ trong chi tiết bút toán.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.debit_amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-journal_posted-1",
+    "group_id": "journal_posted",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Bút toán được ghi sổ vào lúc nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entries"
+    ],
+    "expected_columns": [
+      "finance.journal_entries.posted_at"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-journal_posted-2",
+    "group_id": "journal_posted",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Toi can thoi diem ghi so cua chung tu ke toan.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.journal_entries"
+    ],
+    "expected_columns": [
+      "finance.journal_entries.posted_at"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-vendor_paid-1",
+    "group_id": "vendor_paid",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Công ty đã trả bên cung ứng bao nhiêu tiền mỗi lần?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.vendor_payments"
+    ],
+    "expected_columns": [
+      "finance.vendor_payments.amount"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-vendor_paid-2",
+    "group_id": "vendor_paid",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "finance",
+    "question": "Choo xem số tiền chi ở từng thanh toán nhà cung cấp.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "finance.vendor_payments"
+    ],
+    "expected_columns": [
+      "finance.vendor_payments.amount"
+    ],
+    "tags": [
+      "paraphrase",
+      "typo"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-ticket_priority-1",
+    "group_id": "ticket_priority",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Các yêu cầu trợ giúp được xếp mức khẩn cấp nào?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.priority"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-ticket_priority-2",
+    "group_id": "ticket_priority",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Toi can do uu tien cua tung phieu ho tro.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.priority"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-comment_internal-1",
+    "group_id": "comment_internal",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Trao đổi hỗ trợ nào chỉ dành cho nội bộ?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.ticket_comments"
+    ],
+    "expected_columns": [
+      "support.ticket_comments.is_internal"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-comment_internal-2",
+    "group_id": "comment_internal",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Tìm cờ nội bộ trên bình luận phiếu hỗ trợ.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.ticket_comments"
+    ],
+    "expected_columns": [
+      "support.ticket_comments.is_internal"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-article_views-1",
+    "group_id": "article_views",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Bài hướng dẫn nào có nhiều lượt đọc nhất?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.knowledge_articles"
+    ],
+    "expected_columns": [
+      "support.knowledge_articles.view_count"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-article_views-2",
+    "group_id": "article_views",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "support",
+    "question": "Lay luot xem cua tung bai viet kien thuc.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "support.knowledge_articles"
+    ],
+    "expected_columns": [
+      "support.knowledge_articles.view_count"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-api_slow-1",
+    "group_id": "api_slow",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Mỗi lời gọi API mất bao nhiêu mili giây?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.api_logs"
+    ],
+    "expected_columns": [
+      "audit.api_logs.latency_ms"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-api_slow-2",
+    "group_id": "api_slow",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Lấy độ trễ ghi trong nhật ký api.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.api_logs"
+    ],
+    "expected_columns": [
+      "audit.api_logs.latency_ms"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-job_rows-1",
+    "group_id": "job_rows",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Mỗi lần chạy tác vụ xử lý được bao nhiêu dòng?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.job_runs"
+    ],
+    "expected_columns": [
+      "audit.job_runs.rows_processed"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-job_rows-2",
+    "group_id": "job_rows",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Toi can so ban ghi da xu ly trong lich su tac vu.",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.job_runs"
+    ],
+    "expected_columns": [
+      "audit.job_runs.rows_processed"
+    ],
+    "tags": [
+      "paraphrase",
+      "unaccented"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-feedback_correct-1",
+    "group_id": "feedback_correct",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "Người dùng đánh dấu câu trả lời Text2SQL đúng hay sai?",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.text2sql_query_feedback"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_feedback.is_correct"
+    ],
+    "tags": [
+      "paraphrase"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-feedback_correct-2",
+    "group_id": "feedback_correct",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "audit",
+    "question": "  Lấy   cờ   kết   quả   đúng   trong   phản   hồi   truy   vấn   text2sql.!!!",
+    "expected_behavior": "link",
+    "expected_tables": [
+      "audit.text2sql_query_feedback"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_feedback.is_correct"
+    ],
+    "tags": [
+      "paraphrase",
+      "noise"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-name_unspecified",
+    "group_id": "name_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Cho xem tên.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "customer.customers"
+        ],
+        "columns": [
+          "customer.customers.name"
+        ]
+      },
+      {
+        "tables": [
+          "product.products"
+        ],
+        "columns": [
+          "product.products.name"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-salary_unspecified",
+    "group_id": "salary_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Mức lương cơ bản?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "hr.employees"
+        ],
+        "columns": [
+          "hr.employees.base_salary"
+        ]
+      },
+      {
+        "tables": [
+          "hr.employment_contracts"
+        ],
+        "columns": [
+          "hr.employment_contracts.base_salary"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-status_unspecified",
+    "group_id": "status_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Lọc theo trạng thái.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.orders"
+        ],
+        "columns": [
+          "sales.orders.status"
+        ]
+      },
+      {
+        "tables": [
+          "support.support_tickets"
+        ],
+        "columns": [
+          "support.support_tickets.status"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-end_unspecified",
+    "group_id": "end_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Ngày kết thúc?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "hr.employment_contracts"
+        ],
+        "columns": [
+          "hr.employment_contracts.end_date"
+        ]
+      },
+      {
+        "tables": [
+          "product.price_lists"
+        ],
+        "columns": [
+          "product.price_lists.valid_to"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-payment_date_unspecified",
+    "group_id": "payment_date_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Ngày thanh toán là ngày nào?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.payments"
+        ],
+        "columns": [
+          "sales.payments.payment_date"
+        ]
+      },
+      {
+        "tables": [
+          "finance.vendor_payments"
+        ],
+        "columns": [
+          "finance.vendor_payments.payment_date"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-email_unspecified",
+    "group_id": "email_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Tôi cần email.",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "customer.customers"
+        ],
+        "columns": [
+          "customer.customers.email"
+        ]
+      },
+      {
+        "tables": [
+          "hr.employees"
+        ],
+        "columns": [
+          "hr.employees.email"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-currency_unspecified",
+    "group_id": "currency_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Dùng loại tiền nào?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "product.price_lists"
+        ],
+        "columns": [
+          "product.price_lists.currency"
+        ]
+      },
+      {
+        "tables": [
+          "sales.invoices"
+        ],
+        "columns": [
+          "sales.invoices.currency"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-unit_price_unspecified",
+    "group_id": "unit_price_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Đơn giá bao nhiêu?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "sales.order_items"
+        ],
+        "columns": [
+          "sales.order_items.unit_price"
+        ]
+      },
+      {
+        "tables": [
+          "procurement.purchase_order_items"
+        ],
+        "columns": [
+          "procurement.purchase_order_items.unit_price"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-location_unspecified",
+    "group_id": "location_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Địa điểm giao dịch ở đâu?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "org.locations"
+        ],
+        "columns": [
+          "org.locations.address_line"
+        ]
+      },
+      {
+        "tables": [
+          "customer.addresses"
+        ],
+        "columns": [
+          "customer.addresses.line1"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-group_unspecified",
+    "group_id": "group_unspecified",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "ambiguous",
+    "question": "Danh sách nhóm?",
+    "expected_behavior": "ambiguous",
+    "expected_tables": [],
+    "expected_columns": [],
+    "acceptable_interpretations": [
+      {
+        "tables": [
+          "org.teams"
+        ],
+        "columns": [
+          "org.teams.name"
+        ]
+      },
+      {
+        "tables": [
+          "customer.customer_groups"
+        ],
+        "columns": [
+          "customer.customer_groups.name"
+        ]
+      }
+    ],
+    "tags": [
+      "underspecified"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-weather",
+    "group_id": "weather",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Ngày mai trời có mưa không?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-poetry",
+    "group_id": "poetry",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Viết một bài thơ về mùa thu.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-translation",
+    "group_id": "translation",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Dịch câu good morning sang tiếng Việt.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-travel",
+    "group_id": "travel",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Du lịch Đà Lạt mùa nào đẹp nhất?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-chess",
+    "group_id": "chess",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Giải thích cách đi của quân mã trong cờ vua.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-idiom_salary",
+    "group_id": "idiom_salary",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Giải thích thành ngữ lương tâm thanh thản.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-idiom_branch",
+    "group_id": "idiom_branch",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Chi nhánh cây trong bức tranh này bị gãy, sửa câu cho tự nhiên.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-idiom_product",
+    "group_id": "idiom_product",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Tác phẩm này là sản phẩm của trí tưởng tượng, hãy diễn đạt lại câu.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-idiom_role",
+    "group_id": "idiom_role",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Vai trò của ánh nắng đối với cây xanh là gì?",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  },
+  {
+    "id": "dev-idiom_budget",
+    "group_id": "idiom_budget",
+    "split": "dev",
+    "kind": "business_synthetic",
+    "domain": "out_of_scope",
+    "question": "Tưởng tượng một thế giới không cần tiền, viết đoạn văn ngắn.",
+    "expected_behavior": "no_match",
+    "expected_tables": [],
+    "expected_columns": [],
+    "tags": [
+      "out_of_scope",
+      "lexical_trap"
+    ],
+    "gold_status": "provisional"
+  }
+]
