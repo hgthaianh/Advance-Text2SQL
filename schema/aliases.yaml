@@ -1,0 +1,3034 @@
+# Curated vocabulary. Unaccented forms are supplied by the normalizer.
+# Shared aliases across targets intentionally preserve ambiguity.
+version: 1
+tables:
+  org.tenants:
+    aliases:
+    - đơn vị thuê hệ thống
+    - doanh nghiệp
+    - tenant
+  org.locations:
+    aliases:
+    - địa điểm
+    - vị trí địa lý
+    - location
+  org.branches:
+    aliases:
+    - chi nhánh
+    - cơ sở kinh doanh
+    - branch
+  org.departments:
+    aliases:
+    - phòng ban
+    - bộ phận
+    - department
+  org.teams:
+    aliases:
+    - nhóm làm việc
+    - tổ công tác
+    - team
+  org.cost_centers:
+    aliases:
+    - trung tâm chi phí
+    - đơn vị chi phí
+    - cost center
+  hr.positions:
+    aliases:
+    - chức vụ
+    - vị trí công việc
+    - position
+  hr.employees:
+    aliases:
+    - nhân viên
+    - nhân sự
+    - cán bộ
+    - employee
+    - staff
+  hr.employee_job_history:
+    aliases:
+    - lịch sử công tác
+    - lịch sử điều chuyển nhân viên
+    - job history
+  hr.employment_contracts:
+    aliases:
+    - hợp đồng lao động
+    - hợp đồng nhân viên
+    - employment contract
+  hr.attendance_records:
+    aliases:
+    - chấm công
+    - bảng công
+    - attendance
+  hr.leave_types:
+    aliases:
+    - loại nghỉ phép
+    - hình thức nghỉ phép
+    - leave type
+  hr.leave_balances:
+    aliases:
+    - số dư nghỉ phép
+    - phép còn lại
+    - leave balance
+  hr.leave_requests:
+    aliases:
+    - đơn nghỉ phép
+    - yêu cầu nghỉ phép
+    - leave request
+  hr.payroll_runs:
+    aliases:
+    - kỳ trả lương
+    - đợt tính lương
+    - payroll run
+  hr.payroll_details:
+    aliases:
+    - chi tiết bảng lương
+    - phiếu lương
+    - payroll detail
+  hr.performance_reviews:
+    aliases:
+    - đánh giá hiệu suất
+    - đánh giá nhân viên
+    - performance review
+  hr.employee_benefits:
+    aliases:
+    - phúc lợi nhân viên
+    - chế độ đãi ngộ
+    - employee benefit
+  hr.training_records:
+    aliases:
+    - hồ sơ đào tạo
+    - kết quả đào tạo
+    - training record
+  iam.users:
+    aliases:
+    - người dùng
+    - tài khoản người dùng
+    - user
+  iam.roles:
+    aliases:
+    - vai trò
+    - nhóm quyền
+    - role
+  iam.permissions:
+    aliases:
+    - quyền truy cập
+    - quyền hệ thống
+    - permission
+  iam.user_roles:
+    aliases:
+    - vai trò người dùng
+    - gán quyền người dùng
+    - user role
+  iam.role_permissions:
+    aliases:
+    - quyền của vai trò
+    - phân quyền vai trò
+    - role permission
+  iam.user_scopes:
+    aliases:
+    - phạm vi người dùng
+    - phạm vi dữ liệu người dùng
+    - user scope
+  iam.table_access_policies:
+    aliases:
+    - chính sách truy cập bảng
+    - quyền đọc bảng
+    - table access policy
+  iam.column_access_policies:
+    aliases:
+    - chính sách truy cập cột
+    - quyền đọc cột
+    - column access policy
+  iam.login_sessions:
+    aliases:
+    - phiên đăng nhập
+    - lịch sử phiên đăng nhập
+    - login session
+  customer.customer_segments:
+    aliases:
+    - phân khúc khách hàng
+    - phân loại thị trường
+    - customer segment
+  customer.customer_groups:
+    aliases:
+    - nhóm khách hàng
+    - nhóm người mua
+    - customer group
+  customer.customers:
+    aliases:
+    - khách hàng
+    - người mua
+    - khách
+    - customer
+  customer.contacts:
+    aliases:
+    - người liên hệ
+    - đầu mối liên hệ
+    - contact
+  customer.addresses:
+    aliases:
+    - địa chỉ
+    - địa chỉ liên lạc
+    - address
+  customer.customer_group_members:
+    aliases:
+    - thành viên nhóm khách hàng
+    - khách thuộc nhóm
+    - customer group member
+  customer.customer_contacts:
+    aliases:
+    - liên hệ khách hàng
+    - đầu mối khách hàng
+    - customer contact
+  customer.customer_addresses:
+    aliases:
+    - địa chỉ khách hàng
+    - địa chỉ người mua
+    - customer address
+  customer.customer_owners:
+    aliases:
+    - người phụ trách khách hàng
+    - quản lý khách hàng
+    - customer owner
+  product.brands:
+    aliases:
+    - thương hiệu
+    - nhãn hiệu
+    - brand
+  product.categories:
+    aliases:
+    - danh mục sản phẩm
+    - loại sản phẩm
+    - category
+  product.products:
+    aliases:
+    - sản phẩm
+    - mặt hàng
+    - hàng hóa
+    - product
+  product.product_categories:
+    aliases:
+    - phân loại sản phẩm
+    - gán danh mục sản phẩm
+    - product category
+  product.product_variants:
+    aliases:
+    - biến thể sản phẩm
+    - phiên bản sản phẩm
+    - product variant
+  product.product_attributes:
+    aliases:
+    - thuộc tính sản phẩm
+    - đặc tính sản phẩm
+    - product attribute
+  product.product_attribute_values:
+    aliases:
+    - giá trị thuộc tính sản phẩm
+    - giá trị đặc tính sản phẩm
+    - product attribute value
+  product.price_lists:
+    aliases:
+    - bảng giá
+    - danh sách giá bán
+    - price list
+  product.price_list_items:
+    aliases:
+    - chi tiết bảng giá
+    - giá trong bảng giá
+    - price list item
+  product.product_tags:
+    aliases:
+    - nhãn sản phẩm
+    - thẻ sản phẩm
+    - product tag
+  inventory.warehouses:
+    aliases:
+    - kho hàng
+    - nhà kho
+    - kho
+    - warehouse
+  inventory.warehouse_zones:
+    aliases:
+    - khu vực kho
+    - vùng lưu trữ
+    - warehouse zone
+  inventory.inventory_balances:
+    aliases:
+    - tồn kho
+    - số dư tồn kho
+    - inventory balance
+  inventory.inventory_transactions:
+    aliases:
+    - giao dịch kho
+    - xuất nhập kho
+    - inventory transaction
+  inventory.stock_lots:
+    aliases:
+    - lô hàng
+    - lô tồn kho
+    - stock lot
+  inventory.stock_serials:
+    aliases:
+    - số sê ri hàng hóa
+    - hàng theo số serial
+    - stock serial
+  inventory.stock_reservations:
+    aliases:
+    - giữ hàng
+    - đặt giữ tồn kho
+    - stock reservation
+  inventory.stock_adjustments:
+    aliases:
+    - điều chỉnh tồn kho
+    - chênh lệch kiểm kê
+    - stock adjustment
+  inventory.stock_transfers:
+    aliases:
+    - phiếu chuyển kho
+    - điều chuyển kho
+    - stock transfer
+  inventory.stock_transfer_items:
+    aliases:
+    - chi tiết chuyển kho
+    - dòng chuyển kho
+    - stock transfer item
+  procurement.suppliers:
+    aliases:
+    - nhà cung cấp
+    - đối tác cung ứng
+    - supplier
+    - ncc
+  procurement.purchase_requisitions:
+    aliases:
+    - yêu cầu mua hàng
+    - đề nghị mua hàng
+    - purchase requisition
+  procurement.purchase_requisition_items:
+    aliases:
+    - chi tiết yêu cầu mua hàng
+    - dòng đề nghị mua
+    - purchase requisition item
+  procurement.rfqs:
+    aliases:
+    - yêu cầu báo giá mua
+    - mời chào giá
+    - rfq
+  procurement.supplier_quotes:
+    aliases:
+    - báo giá nhà cung cấp
+    - chào giá nhà cung cấp
+    - supplier quote
+  procurement.supplier_quote_items:
+    aliases:
+    - chi tiết báo giá nhà cung cấp
+    - dòng chào giá nhà cung cấp
+    - supplier quote item
+  procurement.purchase_orders:
+    aliases:
+    - đơn mua hàng
+    - đơn đặt hàng nhà cung cấp
+    - purchase order
+    - po
+  procurement.purchase_order_items:
+    aliases:
+    - chi tiết đơn mua hàng
+    - dòng đơn mua
+    - purchase order item
+  procurement.goods_receipts:
+    aliases:
+    - phiếu nhập hàng
+    - biên nhận hàng
+    - goods receipt
+  procurement.goods_receipt_items:
+    aliases:
+    - chi tiết phiếu nhập hàng
+    - dòng nhận hàng
+    - goods receipt item
+  sales.sales_teams:
+    aliases:
+    - nhóm bán hàng
+    - đội kinh doanh
+    - sales team
+  sales.sales_reps:
+    aliases:
+    - đại diện bán hàng
+    - nhân viên kinh doanh
+    - sales rep
+  sales.sales_targets:
+    aliases:
+    - chỉ tiêu bán hàng
+    - mục tiêu doanh số
+    - sales target
+  sales.quotations:
+    aliases:
+    - báo giá bán hàng
+    - báo giá khách hàng
+    - quotation
+  sales.quotation_items:
+    aliases:
+    - chi tiết báo giá bán hàng
+    - dòng báo giá bán
+    - quotation item
+  sales.orders:
+    aliases:
+    - đơn hàng
+    - đơn bán hàng
+    - giao dịch bán hàng
+    - order
+  sales.order_items:
+    aliases:
+    - chi tiết đơn hàng
+    - dòng đơn hàng
+    - order item
+  sales.invoices:
+    aliases:
+    - hóa đơn bán hàng
+    - hóa đơn khách hàng
+    - invoice
+  sales.invoice_items:
+    aliases:
+    - chi tiết hóa đơn bán hàng
+    - dòng hóa đơn bán
+    - invoice item
+  sales.payments:
+    aliases:
+    - thanh toán khách hàng
+    - thu tiền khách hàng
+    - customer payment
+  finance.chart_of_accounts:
+    aliases:
+    - hệ thống tài khoản kế toán
+    - danh mục tài khoản kế toán
+    - chart of accounts
+    - coa
+  finance.fiscal_periods:
+    aliases:
+    - kỳ kế toán
+    - kỳ tài chính
+    - fiscal period
+  finance.journal_entries:
+    aliases:
+    - bút toán kế toán
+    - chứng từ kế toán
+    - journal entry
+  finance.journal_entry_lines:
+    aliases:
+    - chi tiết bút toán
+    - dòng định khoản
+    - journal entry line
+  finance.budgets:
+    aliases:
+    - ngân sách
+    - dự toán
+    - budget
+  finance.vendor_bills:
+    aliases:
+    - hóa đơn nhà cung cấp
+    - hóa đơn mua hàng
+    - vendor bill
+  finance.vendor_bill_lines:
+    aliases:
+    - chi tiết hóa đơn nhà cung cấp
+    - dòng hóa đơn mua
+    - vendor bill line
+  finance.vendor_payments:
+    aliases:
+    - thanh toán nhà cung cấp
+    - chi tiền nhà cung cấp
+    - vendor payment
+  support.support_tickets:
+    aliases:
+    - yêu cầu hỗ trợ
+    - phiếu hỗ trợ
+    - ticket
+    - support ticket
+  support.ticket_comments:
+    aliases:
+    - bình luận phiếu hỗ trợ
+    - trao đổi hỗ trợ
+    - ticket comment
+  support.ticket_assignments:
+    aliases:
+    - phân công hỗ trợ
+    - giao xử lý phiếu hỗ trợ
+    - ticket assignment
+  support.ticket_status_history:
+    aliases:
+    - lịch sử trạng thái hỗ trợ
+    - lịch sử trạng thái ticket
+    - ticket status history
+  support.sla_policies:
+    aliases:
+    - chính sách sla
+    - cam kết chất lượng dịch vụ
+    - sla policy
+  support.ticket_sla_events:
+    aliases:
+    - sự kiện sla
+    - vi phạm sla
+    - ticket sla event
+  support.knowledge_articles:
+    aliases:
+    - bài viết kiến thức
+    - tài liệu hỗ trợ
+    - knowledge article
+  audit.api_logs:
+    aliases:
+    - nhật ký api
+    - log api
+    - api log
+  audit.audit_logs:
+    aliases:
+    - nhật ký kiểm toán
+    - lịch sử thao tác
+    - audit log
+  audit.data_access_logs:
+    aliases:
+    - nhật ký truy cập dữ liệu
+    - lịch sử đọc dữ liệu
+    - data access log
+  audit.error_logs:
+    aliases:
+    - nhật ký lỗi
+    - log lỗi
+    - error log
+  audit.job_runs:
+    aliases:
+    - lần chạy tác vụ
+    - lịch sử tác vụ
+    - job run
+  audit.system_events:
+    aliases:
+    - sự kiện hệ thống
+    - biến cố hệ thống
+    - system event
+  audit.text2sql_query_logs:
+    aliases:
+    - nhật ký truy vấn text2sql
+    - lịch sử câu hỏi text2sql
+    - text2sql query log
+  audit.text2sql_query_feedback:
+    aliases:
+    - phản hồi truy vấn text2sql
+    - đánh giá câu trả lời text2sql
+    - text2sql query feedback
+columns:
+  org.tenants.name:
+    aliases:
+    - tên đơn vị thuê hệ thống
+    - tên
+  org.tenants.tax_code:
+    aliases:
+    - mã số thuế của đơn vị thuê hệ thống
+    - mã số thuế
+  org.tenants.country:
+    aliases:
+    - quốc gia của đơn vị thuê hệ thống
+    - quốc gia
+  org.tenants.currency:
+    aliases:
+    - tiền tệ của đơn vị thuê hệ thống
+    - đơn vị tiền của đơn vị thuê hệ thống
+    - tiền tệ
+    - đơn vị tiền
+  org.locations.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của địa điểm
+  org.locations.name:
+    aliases:
+    - tên địa điểm
+    - tên
+  org.locations.address_line:
+    aliases:
+    - địa chỉ đường của địa điểm
+    - địa chỉ đường
+  org.locations.city:
+    aliases:
+    - thành phố của địa điểm
+    - thành phố
+  org.locations.province:
+    aliases:
+    - tỉnh của địa điểm
+    - tỉnh
+  org.locations.country:
+    aliases:
+    - quốc gia của địa điểm
+    - quốc gia
+  org.locations.latitude:
+    aliases:
+    - vĩ độ của địa điểm
+    - vĩ độ
+  org.locations.longitude:
+    aliases:
+    - kinh độ của địa điểm
+    - kinh độ
+  org.branches.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của chi nhánh
+  org.branches.location_id:
+    aliases:
+    - mã địa điểm của chi nhánh
+  org.branches.name:
+    aliases:
+    - tên chi nhánh
+    - tên
+  org.branches.manager_employee_id:
+    aliases:
+    - mã nhân viên của chi nhánh
+  org.departments.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của phòng ban
+  org.departments.branch_id:
+    aliases:
+    - mã chi nhánh của phòng ban
+  org.departments.parent_department_id:
+    aliases:
+    - mã phòng ban của phòng ban
+  org.departments.name:
+    aliases:
+    - tên phòng ban
+    - tên
+  org.departments.manager_employee_id:
+    aliases:
+    - mã nhân viên của phòng ban
+  org.teams.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhóm làm việc
+  org.teams.branch_id:
+    aliases:
+    - mã chi nhánh của nhóm làm việc
+  org.teams.department_id:
+    aliases:
+    - mã phòng ban của nhóm làm việc
+  org.teams.name:
+    aliases:
+    - tên nhóm làm việc
+    - tên
+  org.cost_centers.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của trung tâm chi phí
+  org.cost_centers.department_id:
+    aliases:
+    - mã phòng ban của trung tâm chi phí
+  org.cost_centers.name:
+    aliases:
+    - tên trung tâm chi phí
+    - tên
+  org.cost_centers.manager_employee_id:
+    aliases:
+    - mã nhân viên của trung tâm chi phí
+  org.cost_centers.annual_budget:
+    aliases:
+    - ngân sách năm của trung tâm chi phí
+    - ngân sách năm
+  org.cost_centers.currency:
+    aliases:
+    - tiền tệ của trung tâm chi phí
+    - đơn vị tiền của trung tâm chi phí
+    - tiền tệ
+    - đơn vị tiền
+  hr.positions.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của chức vụ
+  hr.positions.department_id:
+    aliases:
+    - mã phòng ban của chức vụ
+  hr.positions.name:
+    aliases:
+    - tên chức vụ
+    - tên
+  hr.positions.job_level:
+    aliases:
+    - cấp bậc công việc của chức vụ
+    - cấp bậc công việc
+  hr.positions.employment_type:
+    aliases:
+    - hình thức làm việc của chức vụ
+    - hình thức làm việc
+  hr.positions.min_salary:
+    aliases:
+    - lương tối thiểu của chức vụ
+    - lương tối thiểu
+  hr.positions.max_salary:
+    aliases:
+    - lương tối đa của chức vụ
+    - lương tối đa
+  hr.employees.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhân viên
+  hr.employees.branch_id:
+    aliases:
+    - mã chi nhánh của nhân viên
+  hr.employees.department_id:
+    aliases:
+    - mã phòng ban của nhân viên
+  hr.employees.team_id:
+    aliases:
+    - mã nhóm làm việc của nhân viên
+  hr.employees.position_id:
+    aliases:
+    - mã chức vụ của nhân viên
+  hr.employees.manager_id:
+    aliases:
+    - mã nhân viên của nhân viên
+  hr.employees.employee_code:
+    aliases:
+    - mã nhân viên của nhân viên
+    - mã nhân viên
+  hr.employees.full_name:
+    aliases:
+    - họ tên nhân viên
+    - tên đầy đủ nhân viên
+    - tên nhân viên
+    - tên nhân sự
+    - employee name
+  hr.employees.email:
+    aliases:
+    - email của nhân viên
+    - thư điện tử của nhân viên
+    - email
+    - thư điện tử
+  hr.employees.phone:
+    aliases:
+    - số điện thoại của nhân viên
+    - điện thoại của nhân viên
+    - số điện thoại
+    - điện thoại
+  hr.employees.hire_date:
+    aliases:
+    - ngày vào làm của nhân viên
+    - ngày tuyển dụng của nhân viên
+    - ngày vào làm
+    - ngày tuyển dụng
+  hr.employees.employment_status:
+    aliases:
+    - tình trạng việc làm của nhân viên
+    - tình trạng việc làm
+  hr.employees.base_salary:
+    aliases:
+    - lương cơ bản của nhân viên
+    - lương của nhân viên
+    - lương cơ bản
+    - lương
+    - lương nhân viên
+    - lương nhân sự
+    - employee salary
+    - staff salary
+    - salary
+  hr.employee_job_history.employee_id:
+    aliases:
+    - mã nhân viên của lịch sử công tác
+  hr.employee_job_history.old_department_id:
+    aliases:
+    - mã phòng ban của lịch sử công tác
+  hr.employee_job_history.new_department_id:
+    aliases:
+    - mã phòng ban của lịch sử công tác
+  hr.employee_job_history.old_position_id:
+    aliases:
+    - mã chức vụ của lịch sử công tác
+  hr.employee_job_history.new_position_id:
+    aliases:
+    - mã chức vụ của lịch sử công tác
+  hr.employee_job_history.effective_date:
+    aliases:
+    - ngày hiệu lực của lịch sử công tác
+    - ngày hiệu lực
+  hr.employee_job_history.change_type:
+    aliases:
+    - loại thay đổi của lịch sử công tác
+    - loại thay đổi
+  hr.employee_job_history.reason:
+    aliases:
+    - lý do của lịch sử công tác
+    - lý do
+  hr.employee_job_history.approved_by_employee_id:
+    aliases:
+    - mã nhân viên của lịch sử công tác
+  hr.employment_contracts.employee_id:
+    aliases:
+    - mã nhân viên của hợp đồng lao động
+  hr.employment_contracts.contract_number:
+    aliases:
+    - số hợp đồng của hợp đồng lao động
+    - số hợp đồng
+  hr.employment_contracts.contract_type:
+    aliases:
+    - loại hợp đồng của hợp đồng lao động
+    - loại hợp đồng
+  hr.employment_contracts.start_date:
+    aliases:
+    - ngày bắt đầu của hợp đồng lao động
+    - ngày bắt đầu
+  hr.employment_contracts.end_date:
+    aliases:
+    - ngày kết thúc của hợp đồng lao động
+    - ngày kết thúc
+  hr.employment_contracts.base_salary:
+    aliases:
+    - lương cơ bản của hợp đồng lao động
+    - lương của hợp đồng lao động
+    - lương cơ bản
+    - lương
+    - salary
+  hr.employment_contracts.working_hours_per_week:
+    aliases:
+    - giờ làm mỗi tuần của hợp đồng lao động
+    - giờ làm mỗi tuần
+  hr.employment_contracts.signed_date:
+    aliases:
+    - ngày ký của hợp đồng lao động
+    - ngày ký
+  hr.attendance_records.employee_id:
+    aliases:
+    - mã nhân viên của chấm công
+  hr.attendance_records.work_date:
+    aliases:
+    - ngày làm việc của chấm công
+    - ngày làm việc
+  hr.attendance_records.check_in_time:
+    aliases:
+    - giờ vào làm của chấm công
+    - giờ vào làm
+  hr.attendance_records.check_out_time:
+    aliases:
+    - giờ tan ca của chấm công
+    - giờ tan ca
+  hr.attendance_records.working_hours:
+    aliases:
+    - giờ làm việc của chấm công
+    - giờ làm việc
+  hr.attendance_records.overtime_hours:
+    aliases:
+    - giờ tăng ca của chấm công
+    - giờ làm thêm của chấm công
+    - giờ tăng ca
+    - giờ làm thêm
+  hr.attendance_records.attendance_status:
+    aliases:
+    - trạng thái chấm công của chấm công
+    - trạng thái chấm công
+  hr.attendance_records.source:
+    aliases:
+    - nguồn dữ liệu của chấm công
+    - nguồn dữ liệu
+  hr.leave_types.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của loại nghỉ phép
+  hr.leave_types.name:
+    aliases:
+    - tên loại nghỉ phép
+    - tên
+  hr.leave_types.annual_entitlement_days:
+    aliases:
+    - số ngày phép năm của loại nghỉ phép
+    - số ngày phép năm
+  hr.leave_types.is_paid:
+    aliases:
+    - nghỉ có lương của loại nghỉ phép
+    - nghỉ có lương
+  hr.leave_types.requires_approval:
+    aliases:
+    - yêu cầu phê duyệt của loại nghỉ phép
+    - yêu cầu phê duyệt
+  hr.leave_types.carry_forward_allowed:
+    aliases:
+    - được chuyển phép của loại nghỉ phép
+    - được chuyển phép
+  hr.leave_balances.employee_id:
+    aliases:
+    - mã nhân viên của số dư nghỉ phép
+  hr.leave_balances.leave_type_id:
+    aliases:
+    - mã loại nghỉ phép của số dư nghỉ phép
+  hr.leave_balances.fiscal_year:
+    aliases:
+    - năm tài chính của số dư nghỉ phép
+    - năm tài chính
+  hr.leave_balances.entitled_days:
+    aliases:
+    - ngày phép được hưởng của số dư nghỉ phép
+    - ngày phép được hưởng
+  hr.leave_balances.used_days:
+    aliases:
+    - ngày phép đã dùng của số dư nghỉ phép
+    - ngày phép đã dùng
+  hr.leave_balances.remaining_days:
+    aliases:
+    - ngày phép còn lại của số dư nghỉ phép
+    - ngày phép còn lại
+  hr.leave_requests.employee_id:
+    aliases:
+    - mã nhân viên của đơn nghỉ phép
+  hr.leave_requests.leave_type_id:
+    aliases:
+    - mã loại nghỉ phép của đơn nghỉ phép
+  hr.leave_requests.start_date:
+    aliases:
+    - ngày bắt đầu của đơn nghỉ phép
+    - ngày bắt đầu
+  hr.leave_requests.end_date:
+    aliases:
+    - ngày kết thúc của đơn nghỉ phép
+    - ngày kết thúc
+  hr.leave_requests.total_days:
+    aliases:
+    - tổng ngày nghỉ của đơn nghỉ phép
+    - tổng ngày nghỉ
+  hr.leave_requests.reason:
+    aliases:
+    - lý do của đơn nghỉ phép
+    - lý do
+  hr.leave_requests.approved_by_employee_id:
+    aliases:
+    - mã nhân viên của đơn nghỉ phép
+  hr.leave_requests.requested_at:
+    aliases:
+    - thời điểm yêu cầu của đơn nghỉ phép
+    - thời điểm yêu cầu
+  hr.payroll_runs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của kỳ trả lương
+  hr.payroll_runs.branch_id:
+    aliases:
+    - mã chi nhánh của kỳ trả lương
+  hr.payroll_runs.payroll_period:
+    aliases:
+    - kỳ lương của kỳ trả lương
+    - kỳ lương
+  hr.payroll_runs.start_date:
+    aliases:
+    - ngày bắt đầu của kỳ trả lương
+    - ngày bắt đầu
+  hr.payroll_runs.end_date:
+    aliases:
+    - ngày kết thúc của kỳ trả lương
+    - ngày kết thúc
+  hr.payroll_runs.payment_date:
+    aliases:
+    - ngày thanh toán của kỳ trả lương
+    - ngày thanh toán
+  hr.payroll_runs.total_gross:
+    aliases:
+    - tổng lương trước khấu trừ của kỳ trả lương
+    - tổng lương trước khấu trừ
+  hr.payroll_runs.total_deductions:
+    aliases:
+    - tổng khấu trừ của kỳ trả lương
+    - tổng khấu trừ
+  hr.payroll_runs.total_net:
+    aliases:
+    - tổng lương thực nhận của kỳ trả lương
+    - tổng lương thực nhận
+  hr.payroll_details.payroll_run_id:
+    aliases:
+    - mã kỳ trả lương của chi tiết bảng lương
+  hr.payroll_details.employee_id:
+    aliases:
+    - mã nhân viên của chi tiết bảng lương
+  hr.payroll_details.base_salary:
+    aliases:
+    - lương cơ bản của chi tiết bảng lương
+    - lương của chi tiết bảng lương
+    - lương cơ bản
+    - lương
+    - salary
+  hr.payroll_details.allowances:
+    aliases:
+    - phụ cấp của chi tiết bảng lương
+    - phụ cấp
+  hr.payroll_details.overtime_pay:
+    aliases:
+    - tiền tăng ca của chi tiết bảng lương
+    - tiền tăng ca
+  hr.payroll_details.bonus:
+    aliases:
+    - tiền thưởng của chi tiết bảng lương
+    - tiền thưởng
+  hr.payroll_details.deductions:
+    aliases:
+    - khấu trừ của chi tiết bảng lương
+    - khấu trừ
+  hr.payroll_details.tax_amount:
+    aliases:
+    - tiền thuế của chi tiết bảng lương
+    - tiền thuế
+  hr.payroll_details.net_salary:
+    aliases:
+    - lương thực nhận của chi tiết bảng lương
+    - lương thực nhận
+  hr.performance_reviews.employee_id:
+    aliases:
+    - mã nhân viên của đánh giá hiệu suất
+  hr.performance_reviews.reviewer_employee_id:
+    aliases:
+    - mã nhân viên của đánh giá hiệu suất
+  hr.performance_reviews.review_period:
+    aliases:
+    - kỳ đánh giá của đánh giá hiệu suất
+    - kỳ đánh giá
+  hr.performance_reviews.performance_score:
+    aliases:
+    - điểm hiệu suất của đánh giá hiệu suất
+    - điểm hiệu suất
+  hr.performance_reviews.goal_score:
+    aliases:
+    - điểm mục tiêu của đánh giá hiệu suất
+    - điểm mục tiêu
+  hr.performance_reviews.competency_score:
+    aliases:
+    - điểm năng lực của đánh giá hiệu suất
+    - điểm năng lực
+  hr.performance_reviews.comments:
+    aliases:
+    - nhận xét của đánh giá hiệu suất
+    - nhận xét
+  hr.performance_reviews.review_date:
+    aliases:
+    - ngày đánh giá của đánh giá hiệu suất
+    - ngày đánh giá
+  hr.employee_benefits.employee_id:
+    aliases:
+    - mã nhân viên của phúc lợi nhân viên
+  hr.employee_benefits.benefit_type:
+    aliases:
+    - loại phúc lợi của phúc lợi nhân viên
+    - loại phúc lợi
+  hr.employee_benefits.provider:
+    aliases:
+    - đơn vị cung cấp của phúc lợi nhân viên
+    - đơn vị cung cấp
+  hr.employee_benefits.start_date:
+    aliases:
+    - ngày bắt đầu của phúc lợi nhân viên
+    - ngày bắt đầu
+  hr.employee_benefits.end_date:
+    aliases:
+    - ngày kết thúc của phúc lợi nhân viên
+    - ngày kết thúc
+  hr.employee_benefits.employee_contribution:
+    aliases:
+    - đóng góp nhân viên của phúc lợi nhân viên
+    - đóng góp nhân viên
+  hr.employee_benefits.employer_contribution:
+    aliases:
+    - đóng góp doanh nghiệp của phúc lợi nhân viên
+    - đóng góp doanh nghiệp
+  hr.training_records.employee_id:
+    aliases:
+    - mã nhân viên của hồ sơ đào tạo
+  hr.training_records.course_name:
+    aliases:
+    - tên khóa học của hồ sơ đào tạo
+    - tên khóa học
+  hr.training_records.provider:
+    aliases:
+    - đơn vị cung cấp của hồ sơ đào tạo
+    - đơn vị cung cấp
+  hr.training_records.start_date:
+    aliases:
+    - ngày bắt đầu của hồ sơ đào tạo
+    - ngày bắt đầu
+  hr.training_records.completion_date:
+    aliases:
+    - ngày hoàn thành của hồ sơ đào tạo
+    - ngày hoàn thành
+  hr.training_records.score:
+    aliases:
+    - điểm số của hồ sơ đào tạo
+    - điểm số
+  hr.training_records.certificate_code:
+    aliases:
+    - mã chứng chỉ của hồ sơ đào tạo
+    - mã chứng chỉ
+  iam.users.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của người dùng
+  iam.users.branch_id:
+    aliases:
+    - mã chi nhánh của người dùng
+  iam.users.department_id:
+    aliases:
+    - mã phòng ban của người dùng
+  iam.users.team_id:
+    aliases:
+    - mã nhóm làm việc của người dùng
+  iam.users.employee_id:
+    aliases:
+    - mã nhân viên của người dùng
+  iam.users.username:
+    aliases:
+    - tên đăng nhập của người dùng
+    - tên đăng nhập
+  iam.users.full_name:
+    aliases:
+    - họ tên người dùng
+    - tên đầy đủ người dùng
+  iam.users.email:
+    aliases:
+    - email của người dùng
+    - thư điện tử của người dùng
+    - email
+    - thư điện tử
+  iam.users.password_hash:
+    aliases:
+    - mã băm mật khẩu của người dùng
+    - mã băm mật khẩu
+  iam.roles.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của vai trò
+  iam.roles.name:
+    aliases:
+    - tên vai trò
+    - tên
+  iam.roles.description:
+    aliases:
+    - mô tả của vai trò
+    - mô tả
+  iam.permissions.resource_type:
+    aliases:
+    - loại tài nguyên của quyền truy cập
+    - loại tài nguyên
+  iam.permissions.schema_name:
+    aliases:
+    - tên lược đồ của quyền truy cập
+    - tên lược đồ
+  iam.permissions.table_name:
+    aliases:
+    - tên bảng của quyền truy cập
+    - tên bảng
+  iam.permissions.column_name:
+    aliases:
+    - tên cột của quyền truy cập
+    - tên cột
+  iam.permissions.action:
+    aliases:
+    - hành động của quyền truy cập
+    - hành động
+  iam.permissions.description:
+    aliases:
+    - mô tả của quyền truy cập
+    - mô tả
+  iam.user_roles.user_id:
+    aliases:
+    - mã người dùng của vai trò người dùng
+  iam.user_roles.role_id:
+    aliases:
+    - mã vai trò của vai trò người dùng
+  iam.user_roles.assigned_at:
+    aliases:
+    - thời điểm phân công của vai trò người dùng
+    - thời điểm phân công
+  iam.user_roles.valid_to:
+    aliases:
+    - hết hiệu lực của vai trò người dùng
+    - hết hiệu lực
+  iam.role_permissions.role_id:
+    aliases:
+    - mã vai trò của quyền của vai trò
+  iam.role_permissions.permission_id:
+    aliases:
+    - mã quyền truy cập của quyền của vai trò
+  iam.user_scopes.user_id:
+    aliases:
+    - mã người dùng của phạm vi người dùng
+  iam.user_scopes.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của phạm vi người dùng
+  iam.user_scopes.branch_id:
+    aliases:
+    - mã chi nhánh của phạm vi người dùng
+  iam.user_scopes.department_id:
+    aliases:
+    - mã phòng ban của phạm vi người dùng
+  iam.user_scopes.team_id:
+    aliases:
+    - mã nhóm làm việc của phạm vi người dùng
+  iam.user_scopes.scope_type:
+    aliases:
+    - loại phạm vi của phạm vi người dùng
+    - loại phạm vi
+  iam.table_access_policies.role_id:
+    aliases:
+    - mã vai trò của chính sách truy cập bảng
+  iam.table_access_policies.schema_name:
+    aliases:
+    - tên lược đồ của chính sách truy cập bảng
+    - tên lược đồ
+  iam.table_access_policies.table_name:
+    aliases:
+    - tên bảng của chính sách truy cập bảng
+    - tên bảng
+  iam.table_access_policies.can_select:
+    aliases:
+    - được phép đọc của chính sách truy cập bảng
+    - được phép đọc
+  iam.table_access_policies.row_scope_mode:
+    aliases:
+    - chế độ phạm vi dòng của chính sách truy cập bảng
+    - chế độ phạm vi dòng
+  iam.column_access_policies.role_id:
+    aliases:
+    - mã vai trò của chính sách truy cập cột
+  iam.column_access_policies.schema_name:
+    aliases:
+    - tên lược đồ của chính sách truy cập cột
+    - tên lược đồ
+  iam.column_access_policies.table_name:
+    aliases:
+    - tên bảng của chính sách truy cập cột
+    - tên bảng
+  iam.column_access_policies.column_name:
+    aliases:
+    - tên cột của chính sách truy cập cột
+    - tên cột
+  iam.column_access_policies.can_select:
+    aliases:
+    - được phép đọc của chính sách truy cập cột
+    - được phép đọc
+  iam.column_access_policies.can_filter:
+    aliases:
+    - được phép lọc của chính sách truy cập cột
+    - được phép lọc
+  iam.column_access_policies.mask_type:
+    aliases:
+    - kiểu che dữ liệu của chính sách truy cập cột
+    - kiểu che dữ liệu
+  iam.login_sessions.user_id:
+    aliases:
+    - mã người dùng của phiên đăng nhập
+  iam.login_sessions.session_token_hash:
+    aliases:
+    - mã băm phiên của phiên đăng nhập
+    - mã băm phiên
+  iam.login_sessions.ip_address:
+    aliases:
+    - địa chỉ ip của phiên đăng nhập
+    - địa chỉ ip
+  iam.login_sessions.user_agent:
+    aliases:
+    - trình duyệt truy cập của phiên đăng nhập
+    - trình duyệt truy cập
+  iam.login_sessions.login_at:
+    aliases:
+    - thời điểm đăng nhập của phiên đăng nhập
+    - thời điểm đăng nhập
+  iam.login_sessions.expires_at:
+    aliases:
+    - thời điểm hết hạn của phiên đăng nhập
+    - thời điểm hết hạn
+  iam.login_sessions.revoked_at:
+    aliases:
+    - thời điểm thu hồi của phiên đăng nhập
+    - thời điểm thu hồi
+  customer.customer_segments.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của phân khúc khách hàng
+  customer.customer_segments.name:
+    aliases:
+    - tên phân khúc khách hàng
+    - tên
+  customer.customer_segments.description:
+    aliases:
+    - mô tả của phân khúc khách hàng
+    - mô tả
+  customer.customer_groups.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhóm khách hàng
+  customer.customer_groups.name:
+    aliases:
+    - tên nhóm khách hàng
+    - tên
+  customer.customer_groups.description:
+    aliases:
+    - mô tả của nhóm khách hàng
+    - mô tả
+  customer.customers.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của khách hàng
+  customer.customers.branch_id:
+    aliases:
+    - mã chi nhánh của khách hàng
+  customer.customers.segment_id:
+    aliases:
+    - mã phân khúc khách hàng của khách hàng
+  customer.customers.name:
+    aliases:
+    - tên khách hàng
+    - customer name
+    - tên
+  customer.customers.customer_type:
+    aliases:
+    - loại khách hàng của khách hàng
+    - loại khách hàng
+  customer.customers.industry:
+    aliases:
+    - ngành nghề của khách hàng
+    - ngành nghề
+  customer.customers.tax_id:
+    aliases:
+    - mã số thuế của khách hàng
+    - mã số thuế
+  customer.customers.email:
+    aliases:
+    - email của khách hàng
+    - thư điện tử của khách hàng
+    - email
+    - thư điện tử
+  customer.customers.phone:
+    aliases:
+    - số điện thoại của khách hàng
+    - điện thoại của khách hàng
+    - số điện thoại
+    - điện thoại
+    - số điện thoại khách hàng
+    - điện thoại khách hàng
+    - customer phone
+  customer.customers.customer_tier:
+    aliases:
+    - hạng khách hàng của khách hàng
+    - hạng khách hàng
+  customer.customers.vip_flag:
+    aliases:
+    - cờ khách hàng vip của khách hàng
+    - cờ khách hàng vip
+    - khách hàng vip
+    - khách vip
+  customer.contacts.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của người liên hệ
+  customer.contacts.full_name:
+    aliases:
+    - họ tên người liên hệ
+    - tên đầy đủ người liên hệ
+  customer.contacts.email:
+    aliases:
+    - email của người liên hệ
+    - thư điện tử của người liên hệ
+    - email
+    - thư điện tử
+  customer.contacts.phone:
+    aliases:
+    - số điện thoại của người liên hệ
+    - điện thoại của người liên hệ
+    - số điện thoại
+    - điện thoại
+  customer.contacts.job_title:
+    aliases:
+    - chức danh của người liên hệ
+    - chức danh
+  customer.addresses.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của địa chỉ
+  customer.addresses.line1:
+    aliases:
+    - dòng địa chỉ thứ nhất của địa chỉ
+    - dòng địa chỉ thứ nhất
+  customer.addresses.line2:
+    aliases:
+    - dòng địa chỉ thứ hai của địa chỉ
+    - dòng địa chỉ thứ hai
+  customer.addresses.city:
+    aliases:
+    - thành phố của địa chỉ
+    - thành phố
+  customer.addresses.province:
+    aliases:
+    - tỉnh của địa chỉ
+    - tỉnh
+  customer.addresses.country:
+    aliases:
+    - quốc gia của địa chỉ
+    - quốc gia
+  customer.addresses.postal_code:
+    aliases:
+    - mã bưu chính của địa chỉ
+    - mã bưu chính
+  customer.customer_group_members.customer_id:
+    aliases:
+    - mã khách hàng của thành viên nhóm khách hàng
+  customer.customer_group_members.group_id:
+    aliases:
+    - mã nhóm khách hàng của thành viên nhóm khách hàng
+  customer.customer_group_members.joined_at:
+    aliases:
+    - ngày tham gia của thành viên nhóm khách hàng
+    - ngày tham gia
+  customer.customer_contacts.customer_id:
+    aliases:
+    - mã khách hàng của liên hệ khách hàng
+  customer.customer_contacts.contact_id:
+    aliases:
+    - mã người liên hệ của liên hệ khách hàng
+  customer.customer_contacts.contact_type:
+    aliases:
+    - loại liên hệ của liên hệ khách hàng
+    - loại liên hệ
+  customer.customer_contacts.is_primary:
+    aliases:
+    - là chính của liên hệ khách hàng
+    - là chính
+  customer.customer_addresses.customer_id:
+    aliases:
+    - mã khách hàng của địa chỉ khách hàng
+  customer.customer_addresses.address_id:
+    aliases:
+    - mã địa chỉ của địa chỉ khách hàng
+  customer.customer_addresses.address_type:
+    aliases:
+    - loại địa chỉ của địa chỉ khách hàng
+    - loại địa chỉ
+  customer.customer_addresses.is_primary:
+    aliases:
+    - là chính của địa chỉ khách hàng
+    - là chính
+  customer.customer_owners.customer_id:
+    aliases:
+    - mã khách hàng của người phụ trách khách hàng
+  customer.customer_owners.user_id:
+    aliases:
+    - mã người dùng của người phụ trách khách hàng
+  customer.customer_owners.assigned_at:
+    aliases:
+    - thời điểm phân công của người phụ trách khách hàng
+    - thời điểm phân công
+  customer.customer_owners.is_primary:
+    aliases:
+    - là chính của người phụ trách khách hàng
+    - là chính
+  product.brands.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của thương hiệu
+  product.brands.name:
+    aliases:
+    - tên thương hiệu
+    - tên
+  product.categories.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của danh mục sản phẩm
+  product.categories.parent_id:
+    aliases:
+    - mã danh mục sản phẩm của danh mục sản phẩm
+  product.categories.name:
+    aliases:
+    - tên danh mục sản phẩm
+    - tên
+  product.categories.description:
+    aliases:
+    - mô tả của danh mục sản phẩm
+    - mô tả
+  product.products.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của sản phẩm
+  product.products.brand_id:
+    aliases:
+    - mã thương hiệu của sản phẩm
+  product.products.name:
+    aliases:
+    - tên sản phẩm
+    - product name
+    - tên
+  product.products.description:
+    aliases:
+    - mô tả của sản phẩm
+    - mô tả
+  product.products.uom:
+    aliases:
+    - đơn vị tính của sản phẩm
+    - đơn vị tính
+  product.products.standard_cost:
+    aliases:
+    - giá vốn tiêu chuẩn của sản phẩm
+    - giá vốn tiêu chuẩn
+  product.products.base_price:
+    aliases:
+    - giá cơ sở của sản phẩm
+    - giá cơ sở
+    - giá sản phẩm
+    - giá cơ bản sản phẩm
+  product.products.reorder_level:
+    aliases:
+    - ngưỡng đặt lại hàng của sản phẩm
+    - ngưỡng đặt lại hàng
+  product.product_categories.product_id:
+    aliases:
+    - mã sản phẩm của phân loại sản phẩm
+  product.product_categories.category_id:
+    aliases:
+    - mã danh mục sản phẩm của phân loại sản phẩm
+  product.product_categories.is_primary:
+    aliases:
+    - là chính của phân loại sản phẩm
+    - là chính
+  product.product_variants.product_id:
+    aliases:
+    - mã sản phẩm của biến thể sản phẩm
+  product.product_variants.sku:
+    aliases:
+    - mã sku của biến thể sản phẩm
+    - mã sku
+  product.product_variants.variant_name:
+    aliases:
+    - tên biến thể của biến thể sản phẩm
+    - tên biến thể
+  product.product_variants.attributes:
+    aliases:
+    - thuộc tính của biến thể sản phẩm
+    - thuộc tính
+  product.product_variants.cost_price:
+    aliases:
+    - giá vốn của biến thể sản phẩm
+    - giá vốn
+  product.product_variants.selling_price:
+    aliases:
+    - giá bán của biến thể sản phẩm
+    - giá bán
+  product.product_attributes.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của thuộc tính sản phẩm
+  product.product_attributes.name:
+    aliases:
+    - tên thuộc tính sản phẩm
+    - tên
+  product.product_attributes.data_type:
+    aliases:
+    - kiểu dữ liệu của thuộc tính sản phẩm
+    - kiểu dữ liệu
+  product.product_attribute_values.product_id:
+    aliases:
+    - mã sản phẩm của giá trị thuộc tính sản phẩm
+  product.product_attribute_values.attribute_id:
+    aliases:
+    - mã thuộc tính sản phẩm của giá trị thuộc tính sản phẩm
+  product.product_attribute_values.value_text:
+    aliases:
+    - giá trị văn bản của giá trị thuộc tính sản phẩm
+    - giá trị văn bản
+  product.product_attribute_values.value_number:
+    aliases:
+    - giá trị số của giá trị thuộc tính sản phẩm
+    - giá trị số
+  product.product_attribute_values.value_boolean:
+    aliases:
+    - giá trị logic của giá trị thuộc tính sản phẩm
+    - giá trị logic
+  product.price_lists.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của bảng giá
+  product.price_lists.name:
+    aliases:
+    - tên bảng giá
+    - tên
+  product.price_lists.currency:
+    aliases:
+    - tiền tệ của bảng giá
+    - đơn vị tiền của bảng giá
+    - tiền tệ
+    - đơn vị tiền
+  product.price_lists.valid_from:
+    aliases:
+    - bắt đầu hiệu lực của bảng giá
+    - bắt đầu hiệu lực
+  product.price_lists.valid_to:
+    aliases:
+    - hết hiệu lực của bảng giá
+    - hết hiệu lực
+  product.price_list_items.price_list_id:
+    aliases:
+    - mã bảng giá của chi tiết bảng giá
+  product.price_list_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết bảng giá
+  product.price_list_items.variant_id:
+    aliases:
+    - mã biến thể sản phẩm của chi tiết bảng giá
+  product.price_list_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết bảng giá
+    - đơn giá
+  product.product_tags.product_id:
+    aliases:
+    - mã sản phẩm của nhãn sản phẩm
+  product.product_tags.tag:
+    aliases:
+    - nhãn của nhãn sản phẩm
+  inventory.warehouses.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của kho hàng
+  inventory.warehouses.branch_id:
+    aliases:
+    - mã chi nhánh của kho hàng
+  inventory.warehouses.location_id:
+    aliases:
+    - mã địa điểm của kho hàng
+  inventory.warehouses.name:
+    aliases:
+    - tên kho hàng
+    - tên
+  inventory.warehouses.warehouse_type:
+    aliases:
+    - loại kho của kho hàng
+    - loại kho
+  inventory.warehouses.manager_employee_id:
+    aliases:
+    - mã nhân viên của kho hàng
+  inventory.warehouse_zones.warehouse_id:
+    aliases:
+    - mã kho hàng của khu vực kho
+  inventory.warehouse_zones.name:
+    aliases:
+    - tên khu vực kho
+    - tên
+  inventory.warehouse_zones.zone_type:
+    aliases:
+    - loại khu vực kho của khu vực kho
+    - loại khu vực kho
+  inventory.warehouse_zones.capacity_qty:
+    aliases:
+    - sức chứa của khu vực kho
+    - sức chứa
+  inventory.warehouse_zones.temperature_min:
+    aliases:
+    - nhiệt độ tối thiểu của khu vực kho
+    - nhiệt độ tối thiểu
+  inventory.warehouse_zones.temperature_max:
+    aliases:
+    - nhiệt độ tối đa của khu vực kho
+    - nhiệt độ tối đa
+  inventory.inventory_balances.warehouse_id:
+    aliases:
+    - mã kho hàng của tồn kho
+  inventory.inventory_balances.zone_id:
+    aliases:
+    - mã khu vực kho của tồn kho
+  inventory.inventory_balances.product_id:
+    aliases:
+    - mã sản phẩm của tồn kho
+  inventory.inventory_balances.qty_on_hand:
+    aliases:
+    - số lượng tồn thực tế của tồn kho
+    - số lượng tồn thực tế
+    - số lượng tồn kho
+    - tồn thực tế
+  inventory.inventory_balances.qty_reserved:
+    aliases:
+    - số lượng đã giữ của tồn kho
+    - số lượng đã giữ
+  inventory.inventory_balances.qty_available:
+    aliases:
+    - số lượng khả dụng của tồn kho
+    - số lượng khả dụng
+    - tồn khả dụng
+    - tồn sẵn có
+  inventory.inventory_balances.avg_unit_cost:
+    aliases:
+    - giá vốn bình quân của tồn kho
+    - giá vốn bình quân
+  inventory.inventory_balances.last_counted_at:
+    aliases:
+    - lần kiểm kê gần nhất của tồn kho
+    - lần kiểm kê gần nhất
+  inventory.inventory_transactions.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của giao dịch kho
+  inventory.inventory_transactions.product_id:
+    aliases:
+    - mã sản phẩm của giao dịch kho
+  inventory.inventory_transactions.warehouse_id:
+    aliases:
+    - mã kho hàng của giao dịch kho
+  inventory.inventory_transactions.zone_id:
+    aliases:
+    - mã khu vực kho của giao dịch kho
+  inventory.inventory_transactions.transaction_type:
+    aliases:
+    - loại giao dịch của giao dịch kho
+    - loại giao dịch
+  inventory.inventory_transactions.quantity:
+    aliases:
+    - số lượng của giao dịch kho
+    - số lượng
+  inventory.inventory_transactions.unit_cost:
+    aliases:
+    - giá vốn đơn vị của giao dịch kho
+    - giá vốn đơn vị
+  inventory.inventory_transactions.reference_type:
+    aliases:
+    - loại tham chiếu của giao dịch kho
+    - loại tham chiếu
+  inventory.inventory_transactions.transaction_at:
+    aliases:
+    - thời điểm giao dịch của giao dịch kho
+    - thời điểm giao dịch
+  inventory.stock_lots.product_id:
+    aliases:
+    - mã sản phẩm của lô hàng
+  inventory.stock_lots.warehouse_id:
+    aliases:
+    - mã kho hàng của lô hàng
+  inventory.stock_lots.lot_number:
+    aliases:
+    - số lô của lô hàng
+    - số lô
+  inventory.stock_lots.manufacture_date:
+    aliases:
+    - ngày sản xuất của lô hàng
+    - ngày sản xuất
+  inventory.stock_lots.expiry_date:
+    aliases:
+    - hạn sử dụng của lô hàng
+    - hạn sử dụng
+  inventory.stock_lots.received_qty:
+    aliases:
+    - số lượng đã nhận của lô hàng
+    - số lượng đã nhận
+  inventory.stock_lots.remaining_qty:
+    aliases:
+    - số lượng còn lại của lô hàng
+    - số lượng còn lại
+  inventory.stock_lots.supplier_id:
+    aliases:
+    - mã nhà cung cấp của lô hàng
+  inventory.stock_serials.product_id:
+    aliases:
+    - mã sản phẩm của số sê ri hàng hóa
+  inventory.stock_serials.warehouse_id:
+    aliases:
+    - mã kho hàng của số sê ri hàng hóa
+  inventory.stock_serials.lot_id:
+    aliases:
+    - mã lô hàng của số sê ri hàng hóa
+  inventory.stock_serials.serial_number:
+    aliases:
+    - số sê ri của số sê ri hàng hóa
+    - số sê ri
+  inventory.stock_serials.received_at:
+    aliases:
+    - thời điểm nhận hàng của số sê ri hàng hóa
+    - thời điểm nhận hàng
+  inventory.stock_serials.issued_at:
+    aliases:
+    - thời điểm xuất hàng của số sê ri hàng hóa
+    - thời điểm xuất hàng
+  inventory.stock_reservations.product_id:
+    aliases:
+    - mã sản phẩm của giữ hàng
+  inventory.stock_reservations.warehouse_id:
+    aliases:
+    - mã kho hàng của giữ hàng
+  inventory.stock_reservations.quantity:
+    aliases:
+    - số lượng của giữ hàng
+    - số lượng
+  inventory.stock_reservations.reserved_for_type:
+    aliases:
+    - loại đối tượng giữ hàng của giữ hàng
+    - loại đối tượng giữ hàng
+  inventory.stock_reservations.reserved_by_employee_id:
+    aliases:
+    - mã nhân viên của giữ hàng
+  inventory.stock_reservations.reserved_at:
+    aliases:
+    - thời điểm giữ hàng của giữ hàng
+    - thời điểm giữ hàng
+  inventory.stock_reservations.expires_at:
+    aliases:
+    - thời điểm hết hạn của giữ hàng
+    - thời điểm hết hạn
+  inventory.stock_adjustments.warehouse_id:
+    aliases:
+    - mã kho hàng của điều chỉnh tồn kho
+  inventory.stock_adjustments.product_id:
+    aliases:
+    - mã sản phẩm của điều chỉnh tồn kho
+  inventory.stock_adjustments.system_qty:
+    aliases:
+    - số lượng trên hệ thống của điều chỉnh tồn kho
+    - số lượng trên hệ thống
+  inventory.stock_adjustments.counted_qty:
+    aliases:
+    - số lượng kiểm kê của điều chỉnh tồn kho
+    - số lượng kiểm kê
+  inventory.stock_adjustments.variance_qty:
+    aliases:
+    - số lượng chênh lệch của điều chỉnh tồn kho
+    - số lượng chênh lệch
+  inventory.stock_adjustments.reason_code:
+    aliases:
+    - mã lý do của điều chỉnh tồn kho
+    - mã lý do
+  inventory.stock_adjustments.approved_by_employee_id:
+    aliases:
+    - mã nhân viên của điều chỉnh tồn kho
+  inventory.stock_adjustments.adjusted_at:
+    aliases:
+    - thời điểm điều chỉnh của điều chỉnh tồn kho
+    - thời điểm điều chỉnh
+  inventory.stock_transfers.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của phiếu chuyển kho
+  inventory.stock_transfers.transfer_number:
+    aliases:
+    - số phiếu chuyển kho của phiếu chuyển kho
+    - số phiếu chuyển kho
+  inventory.stock_transfers.source_warehouse_id:
+    aliases:
+    - mã kho hàng của phiếu chuyển kho
+  inventory.stock_transfers.destination_warehouse_id:
+    aliases:
+    - mã kho hàng của phiếu chuyển kho
+  inventory.stock_transfers.requested_by_employee_id:
+    aliases:
+    - mã nhân viên của phiếu chuyển kho
+  inventory.stock_transfers.transfer_date:
+    aliases:
+    - ngày chuyển kho của phiếu chuyển kho
+    - ngày chuyển kho
+  inventory.stock_transfer_items.transfer_id:
+    aliases:
+    - mã phiếu chuyển kho của chi tiết chuyển kho
+  inventory.stock_transfer_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết chuyển kho
+  inventory.stock_transfer_items.requested_qty:
+    aliases:
+    - số lượng yêu cầu của chi tiết chuyển kho
+    - số lượng yêu cầu
+  inventory.stock_transfer_items.shipped_qty:
+    aliases:
+    - số lượng đã giao của chi tiết chuyển kho
+    - số lượng đã giao
+  inventory.stock_transfer_items.received_qty:
+    aliases:
+    - số lượng đã nhận của chi tiết chuyển kho
+    - số lượng đã nhận
+  procurement.suppliers.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhà cung cấp
+  procurement.suppliers.name:
+    aliases:
+    - tên nhà cung cấp
+    - tên
+  procurement.suppliers.tax_code:
+    aliases:
+    - mã số thuế của nhà cung cấp
+    - mã số thuế
+  procurement.suppliers.contact_name:
+    aliases:
+    - tên người liên hệ của nhà cung cấp
+    - tên người liên hệ
+  procurement.suppliers.contact_email:
+    aliases:
+    - email liên hệ của nhà cung cấp
+    - email liên hệ
+  procurement.suppliers.contact_phone:
+    aliases:
+    - điện thoại liên hệ của nhà cung cấp
+    - điện thoại liên hệ
+  procurement.suppliers.payment_terms:
+    aliases:
+    - điều khoản thanh toán của nhà cung cấp
+    - điều khoản thanh toán
+  procurement.suppliers.rating:
+    aliases:
+    - điểm đánh giá của nhà cung cấp
+    - điểm đánh giá
+  procurement.purchase_requisitions.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của yêu cầu mua hàng
+  procurement.purchase_requisitions.requisition_no:
+    aliases:
+    - số yêu cầu mua của yêu cầu mua hàng
+    - số yêu cầu mua
+  procurement.purchase_requisitions.department_id:
+    aliases:
+    - mã phòng ban của yêu cầu mua hàng
+  procurement.purchase_requisitions.requested_by_employee_id:
+    aliases:
+    - mã nhân viên của yêu cầu mua hàng
+  procurement.purchase_requisitions.request_date:
+    aliases:
+    - ngày yêu cầu của yêu cầu mua hàng
+    - ngày yêu cầu
+  procurement.purchase_requisitions.required_date:
+    aliases:
+    - ngày cần hàng của yêu cầu mua hàng
+    - ngày cần hàng
+  procurement.purchase_requisitions.purpose:
+    aliases:
+    - mục đích của yêu cầu mua hàng
+    - mục đích
+  procurement.purchase_requisitions.priority:
+    aliases:
+    - mức ưu tiên của yêu cầu mua hàng
+    - mức ưu tiên
+  procurement.purchase_requisition_items.requisition_id:
+    aliases:
+    - mã yêu cầu mua hàng của chi tiết yêu cầu mua hàng
+  procurement.purchase_requisition_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết yêu cầu mua hàng
+  procurement.purchase_requisition_items.description:
+    aliases:
+    - mô tả của chi tiết yêu cầu mua hàng
+    - mô tả
+  procurement.purchase_requisition_items.requested_qty:
+    aliases:
+    - số lượng yêu cầu của chi tiết yêu cầu mua hàng
+    - số lượng yêu cầu
+  procurement.purchase_requisition_items.uom:
+    aliases:
+    - đơn vị tính của chi tiết yêu cầu mua hàng
+    - đơn vị tính
+  procurement.purchase_requisition_items.estimated_unit_price:
+    aliases:
+    - đơn giá dự kiến của chi tiết yêu cầu mua hàng
+    - đơn giá dự kiến
+  procurement.purchase_requisition_items.estimated_total:
+    aliases:
+    - tổng tiền dự kiến của chi tiết yêu cầu mua hàng
+    - tổng tiền dự kiến
+  procurement.purchase_requisition_items.required_date:
+    aliases:
+    - ngày cần hàng của chi tiết yêu cầu mua hàng
+    - ngày cần hàng
+  procurement.rfqs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của yêu cầu báo giá mua
+  procurement.rfqs.rfq_no:
+    aliases:
+    - số yêu cầu báo giá của yêu cầu báo giá mua
+    - số yêu cầu báo giá
+  procurement.rfqs.requisition_id:
+    aliases:
+    - mã yêu cầu mua hàng của yêu cầu báo giá mua
+  procurement.rfqs.created_by_employee_id:
+    aliases:
+    - mã nhân viên của yêu cầu báo giá mua
+  procurement.rfqs.issue_date:
+    aliases:
+    - ngày phát hành của yêu cầu báo giá mua
+    - ngày phát hành
+  procurement.rfqs.closing_date:
+    aliases:
+    - ngày đóng thầu của yêu cầu báo giá mua
+    - ngày đóng thầu
+  procurement.rfqs.currency:
+    aliases:
+    - tiền tệ của yêu cầu báo giá mua
+    - đơn vị tiền của yêu cầu báo giá mua
+    - tiền tệ
+    - đơn vị tiền
+  procurement.rfqs.delivery_location:
+    aliases:
+    - địa điểm giao hàng của yêu cầu báo giá mua
+    - địa điểm giao hàng
+  procurement.supplier_quotes.rfq_id:
+    aliases:
+    - mã yêu cầu báo giá mua của báo giá nhà cung cấp
+  procurement.supplier_quotes.supplier_id:
+    aliases:
+    - mã nhà cung cấp của báo giá nhà cung cấp
+  procurement.supplier_quotes.quote_no:
+    aliases:
+    - số báo giá mua của báo giá nhà cung cấp
+    - số báo giá mua
+  procurement.supplier_quotes.quote_date:
+    aliases:
+    - ngày báo giá của báo giá nhà cung cấp
+    - ngày báo giá
+  procurement.supplier_quotes.valid_until:
+    aliases:
+    - hiệu lực đến của báo giá nhà cung cấp
+    - hiệu lực đến
+  procurement.supplier_quotes.currency:
+    aliases:
+    - tiền tệ của báo giá nhà cung cấp
+    - đơn vị tiền của báo giá nhà cung cấp
+    - tiền tệ
+    - đơn vị tiền
+  procurement.supplier_quotes.total_amount:
+    aliases:
+    - tổng tiền của báo giá nhà cung cấp
+    - tổng giá trị của báo giá nhà cung cấp
+    - tổng tiền
+    - tổng giá trị
+  procurement.supplier_quotes.delivery_days:
+    aliases:
+    - số ngày giao hàng của báo giá nhà cung cấp
+    - số ngày giao hàng
+  procurement.supplier_quote_items.quote_id:
+    aliases:
+    - mã báo giá nhà cung cấp của chi tiết báo giá nhà cung cấp
+  procurement.supplier_quote_items.requisition_item_id:
+    aliases:
+    - mã chi tiết yêu cầu mua hàng của chi tiết báo giá nhà cung cấp
+  procurement.supplier_quote_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết báo giá nhà cung cấp
+  procurement.supplier_quote_items.quantity:
+    aliases:
+    - số lượng của chi tiết báo giá nhà cung cấp
+    - số lượng
+  procurement.supplier_quote_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết báo giá nhà cung cấp
+    - đơn giá
+  procurement.supplier_quote_items.discount_pct:
+    aliases:
+    - phần trăm chiết khấu của chi tiết báo giá nhà cung cấp
+    - phần trăm chiết khấu
+  procurement.supplier_quote_items.tax_pct:
+    aliases:
+    - thuế suất của chi tiết báo giá nhà cung cấp
+    - thuế suất
+  procurement.supplier_quote_items.total_amount:
+    aliases:
+    - tổng tiền của chi tiết báo giá nhà cung cấp
+    - tổng giá trị của chi tiết báo giá nhà cung cấp
+    - tổng tiền
+    - tổng giá trị
+  procurement.supplier_quote_items.delivery_days:
+    aliases:
+    - số ngày giao hàng của chi tiết báo giá nhà cung cấp
+    - số ngày giao hàng
+  procurement.purchase_orders.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của đơn mua hàng
+  procurement.purchase_orders.po_number:
+    aliases:
+    - số đơn mua hàng của đơn mua hàng
+    - số đơn mua hàng
+  procurement.purchase_orders.supplier_id:
+    aliases:
+    - mã nhà cung cấp của đơn mua hàng
+  procurement.purchase_orders.requisition_id:
+    aliases:
+    - mã yêu cầu mua hàng của đơn mua hàng
+  procurement.purchase_orders.order_date:
+    aliases:
+    - ngày đặt hàng của đơn mua hàng
+    - ngày đặt hàng
+  procurement.purchase_orders.expected_delivery_date:
+    aliases:
+    - ngày dự kiến giao hàng của đơn mua hàng
+    - ngày dự kiến giao hàng
+  procurement.purchase_orders.currency:
+    aliases:
+    - tiền tệ của đơn mua hàng
+    - đơn vị tiền của đơn mua hàng
+    - tiền tệ
+    - đơn vị tiền
+  procurement.purchase_orders.total_amount:
+    aliases:
+    - tổng tiền của đơn mua hàng
+    - tổng giá trị của đơn mua hàng
+    - tổng tiền
+    - tổng giá trị
+  procurement.purchase_orders.buyer_employee_id:
+    aliases:
+    - mã nhân viên của đơn mua hàng
+  procurement.purchase_order_items.purchase_order_id:
+    aliases:
+    - mã đơn mua hàng của chi tiết đơn mua hàng
+  procurement.purchase_order_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết đơn mua hàng
+  procurement.purchase_order_items.ordered_qty:
+    aliases:
+    - số lượng đã đặt của chi tiết đơn mua hàng
+    - số lượng đã đặt
+  procurement.purchase_order_items.received_qty:
+    aliases:
+    - số lượng đã nhận của chi tiết đơn mua hàng
+    - số lượng đã nhận
+  procurement.purchase_order_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết đơn mua hàng
+    - đơn giá
+  procurement.purchase_order_items.discount_pct:
+    aliases:
+    - phần trăm chiết khấu của chi tiết đơn mua hàng
+    - phần trăm chiết khấu
+  procurement.purchase_order_items.tax_pct:
+    aliases:
+    - thuế suất của chi tiết đơn mua hàng
+    - thuế suất
+  procurement.purchase_order_items.line_total:
+    aliases:
+    - thành tiền của chi tiết đơn mua hàng
+    - thành tiền
+  procurement.goods_receipts.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của phiếu nhập hàng
+  procurement.goods_receipts.receipt_no:
+    aliases:
+    - số phiếu nhập của phiếu nhập hàng
+    - số phiếu nhập
+  procurement.goods_receipts.purchase_order_id:
+    aliases:
+    - mã đơn mua hàng của phiếu nhập hàng
+  procurement.goods_receipts.warehouse_id:
+    aliases:
+    - mã kho hàng của phiếu nhập hàng
+  procurement.goods_receipts.supplier_id:
+    aliases:
+    - mã nhà cung cấp của phiếu nhập hàng
+  procurement.goods_receipts.receipt_date:
+    aliases:
+    - ngày nhập hàng của phiếu nhập hàng
+    - ngày nhập hàng
+  procurement.goods_receipts.received_by_employee_id:
+    aliases:
+    - mã nhân viên của phiếu nhập hàng
+  procurement.goods_receipts.delivery_note_no:
+    aliases:
+    - số phiếu giao hàng của phiếu nhập hàng
+    - số phiếu giao hàng
+  procurement.goods_receipt_items.receipt_id:
+    aliases:
+    - mã phiếu nhập hàng của chi tiết phiếu nhập hàng
+  procurement.goods_receipt_items.po_item_id:
+    aliases:
+    - mã chi tiết đơn mua hàng của chi tiết phiếu nhập hàng
+  procurement.goods_receipt_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết phiếu nhập hàng
+  procurement.goods_receipt_items.received_qty:
+    aliases:
+    - số lượng đã nhận của chi tiết phiếu nhập hàng
+    - số lượng đã nhận
+  procurement.goods_receipt_items.accepted_qty:
+    aliases:
+    - số lượng chấp nhận của chi tiết phiếu nhập hàng
+    - số lượng chấp nhận
+  procurement.goods_receipt_items.rejected_qty:
+    aliases:
+    - số lượng từ chối của chi tiết phiếu nhập hàng
+    - số lượng từ chối
+  procurement.goods_receipt_items.unit_cost:
+    aliases:
+    - giá vốn đơn vị của chi tiết phiếu nhập hàng
+    - giá vốn đơn vị
+  procurement.goods_receipt_items.lot_number:
+    aliases:
+    - số lô của chi tiết phiếu nhập hàng
+    - số lô
+  procurement.goods_receipt_items.quality_status:
+    aliases:
+    - tình trạng chất lượng của chi tiết phiếu nhập hàng
+    - tình trạng chất lượng
+  sales.sales_teams.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhóm bán hàng
+  sales.sales_teams.branch_id:
+    aliases:
+    - mã chi nhánh của nhóm bán hàng
+  sales.sales_teams.name:
+    aliases:
+    - tên nhóm bán hàng
+    - tên
+  sales.sales_teams.manager_employee_id:
+    aliases:
+    - mã nhân viên của nhóm bán hàng
+  sales.sales_reps.sales_team_id:
+    aliases:
+    - mã nhóm bán hàng của đại diện bán hàng
+  sales.sales_reps.employee_id:
+    aliases:
+    - mã nhân viên của đại diện bán hàng
+  sales.sales_reps.territory:
+    aliases:
+    - địa bàn bán hàng của đại diện bán hàng
+    - địa bàn bán hàng
+  sales.sales_reps.commission_rate:
+    aliases:
+    - tỷ lệ hoa hồng của đại diện bán hàng
+    - tỷ lệ hoa hồng
+  sales.sales_targets.sales_rep_id:
+    aliases:
+    - mã đại diện bán hàng của chỉ tiêu bán hàng
+  sales.sales_targets.target_month:
+    aliases:
+    - tháng chỉ tiêu của chỉ tiêu bán hàng
+    - tháng chỉ tiêu
+  sales.sales_targets.revenue_target:
+    aliases:
+    - chỉ tiêu doanh thu của chỉ tiêu bán hàng
+    - chỉ tiêu doanh thu
+  sales.sales_targets.order_target:
+    aliases:
+    - chỉ tiêu đơn hàng của chỉ tiêu bán hàng
+    - chỉ tiêu đơn hàng
+  sales.quotations.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của báo giá bán hàng
+  sales.quotations.quotation_no:
+    aliases:
+    - số báo giá bán của báo giá bán hàng
+    - số báo giá bán
+  sales.quotations.customer_id:
+    aliases:
+    - mã khách hàng của báo giá bán hàng
+  sales.quotations.sales_rep_id:
+    aliases:
+    - mã đại diện bán hàng của báo giá bán hàng
+  sales.quotations.quote_date:
+    aliases:
+    - ngày báo giá của báo giá bán hàng
+    - ngày báo giá
+  sales.quotations.valid_until:
+    aliases:
+    - hiệu lực đến của báo giá bán hàng
+    - hiệu lực đến
+  sales.quotations.currency:
+    aliases:
+    - tiền tệ của báo giá bán hàng
+    - đơn vị tiền của báo giá bán hàng
+    - tiền tệ
+    - đơn vị tiền
+  sales.quotations.total_amount:
+    aliases:
+    - tổng tiền của báo giá bán hàng
+    - tổng giá trị của báo giá bán hàng
+    - tổng tiền
+    - tổng giá trị
+  sales.quotation_items.quotation_id:
+    aliases:
+    - mã báo giá bán hàng của chi tiết báo giá bán hàng
+  sales.quotation_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết báo giá bán hàng
+  sales.quotation_items.quantity:
+    aliases:
+    - số lượng của chi tiết báo giá bán hàng
+    - số lượng
+  sales.quotation_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết báo giá bán hàng
+    - đơn giá
+  sales.quotation_items.discount_amount:
+    aliases:
+    - tiền chiết khấu của chi tiết báo giá bán hàng
+    - tiền chiết khấu
+  sales.quotation_items.line_total:
+    aliases:
+    - thành tiền của chi tiết báo giá bán hàng
+    - thành tiền
+  sales.orders.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của đơn hàng
+  sales.orders.order_no:
+    aliases:
+    - số đơn hàng của đơn hàng
+    - số đơn hàng
+  sales.orders.quotation_id:
+    aliases:
+    - mã báo giá bán hàng của đơn hàng
+  sales.orders.customer_id:
+    aliases:
+    - mã khách hàng của đơn hàng
+  sales.orders.sales_rep_id:
+    aliases:
+    - mã đại diện bán hàng của đơn hàng
+  sales.orders.branch_id:
+    aliases:
+    - mã chi nhánh của đơn hàng
+  sales.orders.order_date:
+    aliases:
+    - ngày đặt hàng của đơn hàng
+    - ngày đặt hàng
+    - ngày bán
+    - ngày mua
+    - ngày đặt đơn hàng
+    - ngày order
+  sales.orders.requested_delivery_date:
+    aliases:
+    - ngày yêu cầu giao hàng của đơn hàng
+    - ngày yêu cầu giao hàng
+  sales.orders.discount_amount:
+    aliases:
+    - tiền chiết khấu của đơn hàng
+    - tiền chiết khấu
+  sales.orders.total_amount:
+    aliases:
+    - tổng tiền của đơn hàng
+    - tổng giá trị của đơn hàng
+    - tổng tiền
+    - tổng giá trị
+    - doanh thu
+    - doanh số
+    - giá trị đơn hàng
+    - tổng giá trị đơn hàng
+    - tổng tiền đơn hàng
+    - revenue
+    - sales revenue
+  sales.order_items.order_id:
+    aliases:
+    - mã đơn hàng của chi tiết đơn hàng
+  sales.order_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết đơn hàng
+  sales.order_items.variant_id:
+    aliases:
+    - mã biến thể sản phẩm của chi tiết đơn hàng
+  sales.order_items.quantity:
+    aliases:
+    - số lượng của chi tiết đơn hàng
+    - số lượng
+    - số lượng bán
+    - số sản phẩm bán
+  sales.order_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết đơn hàng
+    - đơn giá
+  sales.order_items.discount_amount:
+    aliases:
+    - tiền chiết khấu của chi tiết đơn hàng
+    - tiền chiết khấu
+  sales.order_items.line_total:
+    aliases:
+    - thành tiền của chi tiết đơn hàng
+    - thành tiền
+  sales.invoices.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của hóa đơn bán hàng
+  sales.invoices.invoice_no:
+    aliases:
+    - số hóa đơn bán của hóa đơn bán hàng
+    - số hóa đơn bán
+  sales.invoices.order_id:
+    aliases:
+    - mã đơn hàng của hóa đơn bán hàng
+  sales.invoices.customer_id:
+    aliases:
+    - mã khách hàng của hóa đơn bán hàng
+  sales.invoices.branch_id:
+    aliases:
+    - mã chi nhánh của hóa đơn bán hàng
+  sales.invoices.invoice_date:
+    aliases:
+    - ngày hóa đơn của hóa đơn bán hàng
+    - ngày hóa đơn
+  sales.invoices.due_date:
+    aliases:
+    - ngày đến hạn của hóa đơn bán hàng
+    - ngày đến hạn
+  sales.invoices.currency:
+    aliases:
+    - tiền tệ của hóa đơn bán hàng
+    - đơn vị tiền của hóa đơn bán hàng
+    - tiền tệ
+    - đơn vị tiền
+  sales.invoices.total_amount:
+    aliases:
+    - tổng tiền của hóa đơn bán hàng
+    - tổng giá trị của hóa đơn bán hàng
+    - tổng tiền
+    - tổng giá trị
+  sales.invoice_items.invoice_id:
+    aliases:
+    - mã hóa đơn bán hàng của chi tiết hóa đơn bán hàng
+  sales.invoice_items.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết hóa đơn bán hàng
+  sales.invoice_items.quantity:
+    aliases:
+    - số lượng của chi tiết hóa đơn bán hàng
+    - số lượng
+  sales.invoice_items.unit_price:
+    aliases:
+    - đơn giá của chi tiết hóa đơn bán hàng
+    - đơn giá
+  sales.invoice_items.tax_amount:
+    aliases:
+    - tiền thuế của chi tiết hóa đơn bán hàng
+    - tiền thuế
+  sales.invoice_items.line_total:
+    aliases:
+    - thành tiền của chi tiết hóa đơn bán hàng
+    - thành tiền
+  sales.payments.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của thanh toán khách hàng
+  sales.payments.payment_no:
+    aliases:
+    - số thanh toán khách hàng của thanh toán khách hàng
+    - số thanh toán khách hàng
+  sales.payments.invoice_id:
+    aliases:
+    - mã hóa đơn bán hàng của thanh toán khách hàng
+  sales.payments.customer_id:
+    aliases:
+    - mã khách hàng của thanh toán khách hàng
+  sales.payments.payment_date:
+    aliases:
+    - ngày thanh toán của thanh toán khách hàng
+    - ngày thanh toán
+  sales.payments.amount:
+    aliases:
+    - số tiền của thanh toán khách hàng
+    - số tiền
+    - tiền khách hàng thanh toán
+    - tiền thu khách hàng
+  sales.payments.payment_method:
+    aliases:
+    - phương thức thanh toán của thanh toán khách hàng
+    - phương thức thanh toán
+  finance.chart_of_accounts.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của hệ thống tài khoản kế toán
+  finance.chart_of_accounts.parent_id:
+    aliases:
+    - mã hệ thống tài khoản kế toán của hệ thống tài khoản kế toán
+  finance.chart_of_accounts.account_code:
+    aliases:
+    - mã tài khoản kế toán của hệ thống tài khoản kế toán
+    - mã tài khoản kế toán
+  finance.chart_of_accounts.account_name:
+    aliases:
+    - tên tài khoản kế toán của hệ thống tài khoản kế toán
+    - tên tài khoản kế toán
+  finance.chart_of_accounts.account_type:
+    aliases:
+    - loại tài khoản kế toán của hệ thống tài khoản kế toán
+    - loại tài khoản kế toán
+  finance.chart_of_accounts.normal_balance:
+    aliases:
+    - số dư thông thường của hệ thống tài khoản kế toán
+    - số dư thông thường
+  finance.chart_of_accounts.currency:
+    aliases:
+    - tiền tệ của hệ thống tài khoản kế toán
+    - đơn vị tiền của hệ thống tài khoản kế toán
+    - tiền tệ
+    - đơn vị tiền
+  finance.fiscal_periods.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của kỳ kế toán
+  finance.fiscal_periods.fiscal_year:
+    aliases:
+    - năm tài chính của kỳ kế toán
+    - năm tài chính
+  finance.fiscal_periods.period_number:
+    aliases:
+    - số kỳ của kỳ kế toán
+    - số kỳ
+  finance.fiscal_periods.period_name:
+    aliases:
+    - tên kỳ của kỳ kế toán
+    - tên kỳ
+  finance.fiscal_periods.start_date:
+    aliases:
+    - ngày bắt đầu của kỳ kế toán
+    - ngày bắt đầu
+  finance.fiscal_periods.end_date:
+    aliases:
+    - ngày kết thúc của kỳ kế toán
+    - ngày kết thúc
+  finance.journal_entries.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của bút toán kế toán
+  finance.journal_entries.entry_number:
+    aliases:
+    - số bút toán của bút toán kế toán
+    - số bút toán
+  finance.journal_entries.period_id:
+    aliases:
+    - mã kỳ kế toán của bút toán kế toán
+  finance.journal_entries.entry_date:
+    aliases:
+    - ngày hạch toán của bút toán kế toán
+    - ngày hạch toán
+  finance.journal_entries.description:
+    aliases:
+    - mô tả của bút toán kế toán
+    - mô tả
+  finance.journal_entries.source_type:
+    aliases:
+    - loại nguồn của bút toán kế toán
+    - loại nguồn
+  finance.journal_entries.created_by_employee_id:
+    aliases:
+    - mã nhân viên của bút toán kế toán
+  finance.journal_entries.posted_at:
+    aliases:
+    - thời điểm ghi sổ của bút toán kế toán
+    - thời điểm ghi sổ
+  finance.journal_entry_lines.journal_entry_id:
+    aliases:
+    - mã bút toán kế toán của chi tiết bút toán
+  finance.journal_entry_lines.account_id:
+    aliases:
+    - mã hệ thống tài khoản kế toán của chi tiết bút toán
+  finance.journal_entry_lines.cost_center_id:
+    aliases:
+    - mã trung tâm chi phí của chi tiết bút toán
+  finance.journal_entry_lines.department_id:
+    aliases:
+    - mã phòng ban của chi tiết bút toán
+  finance.journal_entry_lines.debit_amount:
+    aliases:
+    - số tiền ghi nợ của chi tiết bút toán
+    - số tiền ghi nợ
+  finance.journal_entry_lines.credit_amount:
+    aliases:
+    - số tiền ghi có của chi tiết bút toán
+    - số tiền ghi có
+  finance.journal_entry_lines.currency:
+    aliases:
+    - tiền tệ của chi tiết bút toán
+    - đơn vị tiền của chi tiết bút toán
+    - tiền tệ
+    - đơn vị tiền
+  finance.journal_entry_lines.description:
+    aliases:
+    - mô tả của chi tiết bút toán
+    - mô tả
+  finance.journal_entry_lines.reference_no:
+    aliases:
+    - số tham chiếu của chi tiết bút toán
+    - số tham chiếu
+  finance.budgets.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của ngân sách
+  finance.budgets.fiscal_year:
+    aliases:
+    - năm tài chính của ngân sách
+    - năm tài chính
+  finance.budgets.department_id:
+    aliases:
+    - mã phòng ban của ngân sách
+  finance.budgets.cost_center_id:
+    aliases:
+    - mã trung tâm chi phí của ngân sách
+  finance.budgets.account_id:
+    aliases:
+    - mã hệ thống tài khoản kế toán của ngân sách
+  finance.budgets.budget_amount:
+    aliases:
+    - số tiền ngân sách của ngân sách
+    - số tiền ngân sách
+  finance.budgets.actual_amount:
+    aliases:
+    - số tiền thực tế của ngân sách
+    - số tiền thực tế
+  finance.budgets.committed_amount:
+    aliases:
+    - số tiền cam kết của ngân sách
+    - số tiền cam kết
+  finance.budgets.currency:
+    aliases:
+    - tiền tệ của ngân sách
+    - đơn vị tiền của ngân sách
+    - tiền tệ
+    - đơn vị tiền
+  finance.vendor_bills.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của hóa đơn nhà cung cấp
+  finance.vendor_bills.bill_number:
+    aliases:
+    - số hóa đơn mua của hóa đơn nhà cung cấp
+    - số hóa đơn mua
+  finance.vendor_bills.supplier_id:
+    aliases:
+    - mã nhà cung cấp của hóa đơn nhà cung cấp
+  finance.vendor_bills.purchase_order_id:
+    aliases:
+    - mã đơn mua hàng của hóa đơn nhà cung cấp
+  finance.vendor_bills.bill_date:
+    aliases:
+    - ngày hóa đơn mua của hóa đơn nhà cung cấp
+    - ngày hóa đơn mua
+  finance.vendor_bills.due_date:
+    aliases:
+    - ngày đến hạn của hóa đơn nhà cung cấp
+    - ngày đến hạn
+  finance.vendor_bills.currency:
+    aliases:
+    - tiền tệ của hóa đơn nhà cung cấp
+    - đơn vị tiền của hóa đơn nhà cung cấp
+    - tiền tệ
+    - đơn vị tiền
+  finance.vendor_bills.total_amount:
+    aliases:
+    - tổng tiền của hóa đơn nhà cung cấp
+    - tổng giá trị của hóa đơn nhà cung cấp
+    - tổng tiền
+    - tổng giá trị
+  finance.vendor_bill_lines.vendor_bill_id:
+    aliases:
+    - mã hóa đơn nhà cung cấp của chi tiết hóa đơn nhà cung cấp
+  finance.vendor_bill_lines.account_id:
+    aliases:
+    - mã hệ thống tài khoản kế toán của chi tiết hóa đơn nhà cung cấp
+  finance.vendor_bill_lines.product_id:
+    aliases:
+    - mã sản phẩm của chi tiết hóa đơn nhà cung cấp
+  finance.vendor_bill_lines.cost_center_id:
+    aliases:
+    - mã trung tâm chi phí của chi tiết hóa đơn nhà cung cấp
+  finance.vendor_bill_lines.description:
+    aliases:
+    - mô tả của chi tiết hóa đơn nhà cung cấp
+    - mô tả
+  finance.vendor_bill_lines.quantity:
+    aliases:
+    - số lượng của chi tiết hóa đơn nhà cung cấp
+    - số lượng
+  finance.vendor_bill_lines.unit_price:
+    aliases:
+    - đơn giá của chi tiết hóa đơn nhà cung cấp
+    - đơn giá
+  finance.vendor_bill_lines.tax_amount:
+    aliases:
+    - tiền thuế của chi tiết hóa đơn nhà cung cấp
+    - tiền thuế
+  finance.vendor_bill_lines.line_total:
+    aliases:
+    - thành tiền của chi tiết hóa đơn nhà cung cấp
+    - thành tiền
+  finance.vendor_payments.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của thanh toán nhà cung cấp
+  finance.vendor_payments.payment_number:
+    aliases:
+    - số thanh toán nhà cung cấp của thanh toán nhà cung cấp
+    - số thanh toán nhà cung cấp
+  finance.vendor_payments.vendor_bill_id:
+    aliases:
+    - mã hóa đơn nhà cung cấp của thanh toán nhà cung cấp
+  finance.vendor_payments.supplier_id:
+    aliases:
+    - mã nhà cung cấp của thanh toán nhà cung cấp
+  finance.vendor_payments.payment_date:
+    aliases:
+    - ngày thanh toán của thanh toán nhà cung cấp
+    - ngày thanh toán
+  finance.vendor_payments.amount:
+    aliases:
+    - số tiền của thanh toán nhà cung cấp
+    - số tiền
+    - tiền trả nhà cung cấp
+  finance.vendor_payments.payment_method:
+    aliases:
+    - phương thức thanh toán của thanh toán nhà cung cấp
+    - phương thức thanh toán
+  support.support_tickets.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của yêu cầu hỗ trợ
+  support.support_tickets.ticket_number:
+    aliases:
+    - số phiếu hỗ trợ của yêu cầu hỗ trợ
+    - số phiếu hỗ trợ
+  support.support_tickets.customer_id:
+    aliases:
+    - mã khách hàng của yêu cầu hỗ trợ
+  support.support_tickets.created_by_user_id:
+    aliases:
+    - mã người dùng của yêu cầu hỗ trợ
+  support.support_tickets.assigned_department_id:
+    aliases:
+    - mã phòng ban của yêu cầu hỗ trợ
+  support.support_tickets.subject:
+    aliases:
+    - tiêu đề yêu cầu của yêu cầu hỗ trợ
+    - tiêu đề yêu cầu
+    - tiêu đề ticket
+  support.support_tickets.description:
+    aliases:
+    - mô tả của yêu cầu hỗ trợ
+    - mô tả
+  support.support_tickets.priority:
+    aliases:
+    - mức ưu tiên của yêu cầu hỗ trợ
+    - mức ưu tiên
+  support.support_tickets.resolved_at:
+    aliases:
+    - thời điểm giải quyết của yêu cầu hỗ trợ
+    - thời điểm giải quyết
+  support.ticket_comments.ticket_id:
+    aliases:
+    - mã yêu cầu hỗ trợ của bình luận phiếu hỗ trợ
+  support.ticket_comments.author_type:
+    aliases:
+    - loại tác giả của bình luận phiếu hỗ trợ
+    - loại tác giả
+  support.ticket_comments.comment_text:
+    aliases:
+    - nội dung bình luận của bình luận phiếu hỗ trợ
+    - nội dung bình luận
+  support.ticket_comments.is_internal:
+    aliases:
+    - nội bộ của bình luận phiếu hỗ trợ
+    - nội bộ
+  support.ticket_comments.attachment_count:
+    aliases:
+    - số tệp đính kèm của bình luận phiếu hỗ trợ
+    - số tệp đính kèm
+  support.ticket_assignments.ticket_id:
+    aliases:
+    - mã yêu cầu hỗ trợ của phân công hỗ trợ
+  support.ticket_assignments.assigned_employee_id:
+    aliases:
+    - mã nhân viên của phân công hỗ trợ
+  support.ticket_assignments.assigned_team_id:
+    aliases:
+    - mã nhóm làm việc của phân công hỗ trợ
+  support.ticket_assignments.assigned_by_employee_id:
+    aliases:
+    - mã nhân viên của phân công hỗ trợ
+  support.ticket_assignments.assigned_at:
+    aliases:
+    - thời điểm phân công của phân công hỗ trợ
+    - thời điểm phân công
+  support.ticket_assignments.unassigned_at:
+    aliases:
+    - thời điểm bỏ phân công của phân công hỗ trợ
+    - thời điểm bỏ phân công
+  support.ticket_assignments.is_current:
+    aliases:
+    - hiện hành của phân công hỗ trợ
+    - hiện hành
+  support.ticket_status_history.ticket_id:
+    aliases:
+    - mã yêu cầu hỗ trợ của lịch sử trạng thái hỗ trợ
+  support.ticket_status_history.old_status:
+    aliases:
+    - trạng thái cũ của lịch sử trạng thái hỗ trợ
+    - trạng thái cũ
+  support.ticket_status_history.new_status:
+    aliases:
+    - trạng thái mới của lịch sử trạng thái hỗ trợ
+    - trạng thái mới
+  support.ticket_status_history.changed_by_employee_id:
+    aliases:
+    - mã nhân viên của lịch sử trạng thái hỗ trợ
+  support.ticket_status_history.changed_at:
+    aliases:
+    - thời điểm thay đổi của lịch sử trạng thái hỗ trợ
+    - thời điểm thay đổi
+  support.ticket_status_history.duration_minutes:
+    aliases:
+    - thời lượng phút của lịch sử trạng thái hỗ trợ
+    - thời lượng phút
+  support.ticket_status_history.reason:
+    aliases:
+    - lý do của lịch sử trạng thái hỗ trợ
+    - lý do
+  support.sla_policies.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của chính sách sla
+  support.sla_policies.policy_name:
+    aliases:
+    - tên chính sách của chính sách sla
+    - tên chính sách
+  support.sla_policies.customer_tier:
+    aliases:
+    - hạng khách hàng của chính sách sla
+    - hạng khách hàng
+  support.sla_policies.priority:
+    aliases:
+    - mức ưu tiên của chính sách sla
+    - mức ưu tiên
+  support.sla_policies.first_response_minutes:
+    aliases:
+    - thời gian phản hồi đầu tiên của chính sách sla
+    - thời gian phản hồi đầu tiên
+  support.sla_policies.resolution_minutes:
+    aliases:
+    - thời gian giải quyết của chính sách sla
+    - thời gian giải quyết
+  support.sla_policies.escalation_minutes:
+    aliases:
+    - thời gian chuyển cấp của chính sách sla
+    - thời gian chuyển cấp
+  support.sla_policies.business_hours_only:
+    aliases:
+    - chỉ giờ làm việc của chính sách sla
+    - chỉ giờ làm việc
+  support.ticket_sla_events.ticket_id:
+    aliases:
+    - mã yêu cầu hỗ trợ của sự kiện sla
+  support.ticket_sla_events.sla_policy_id:
+    aliases:
+    - mã chính sách sla của sự kiện sla
+  support.ticket_sla_events.event_type:
+    aliases:
+    - loại sự kiện của sự kiện sla
+    - loại sự kiện
+  support.ticket_sla_events.target_at:
+    aliases:
+    - thời hạn mục tiêu của sự kiện sla
+    - thời hạn mục tiêu
+  support.ticket_sla_events.actual_at:
+    aliases:
+    - thời điểm thực tế của sự kiện sla
+    - thời điểm thực tế
+  support.ticket_sla_events.elapsed_minutes:
+    aliases:
+    - số phút đã trôi qua của sự kiện sla
+    - số phút đã trôi qua
+  support.ticket_sla_events.breached:
+    aliases:
+    - vi phạm cam kết của sự kiện sla
+    - vi phạm cam kết
+  support.ticket_sla_events.breach_minutes:
+    aliases:
+    - số phút vi phạm của sự kiện sla
+    - số phút vi phạm
+  support.knowledge_articles.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của bài viết kiến thức
+  support.knowledge_articles.article_title:
+    aliases:
+    - tiêu đề bài viết của bài viết kiến thức
+    - tiêu đề bài viết
+  support.knowledge_articles.category:
+    aliases:
+    - chuyên mục của bài viết kiến thức
+    - chuyên mục
+  support.knowledge_articles.content:
+    aliases:
+    - nội dung của bài viết kiến thức
+    - nội dung
+  support.knowledge_articles.author_employee_id:
+    aliases:
+    - mã nhân viên của bài viết kiến thức
+  support.knowledge_articles.published_at:
+    aliases:
+    - thời điểm xuất bản của bài viết kiến thức
+    - thời điểm xuất bản
+  support.knowledge_articles.view_count:
+    aliases:
+    - lượt xem của bài viết kiến thức
+    - lượt xem
+  support.knowledge_articles.helpful_count:
+    aliases:
+    - lượt đánh giá hữu ích của bài viết kiến thức
+    - lượt đánh giá hữu ích
+  audit.api_logs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhật ký api
+  audit.api_logs.user_id:
+    aliases:
+    - mã người dùng của nhật ký api
+  audit.api_logs.method:
+    aliases:
+    - phương thức http của nhật ký api
+    - phương thức http
+  audit.api_logs.endpoint:
+    aliases:
+    - đường dẫn api của nhật ký api
+    - đường dẫn api
+  audit.api_logs.status_code:
+    aliases:
+    - mã phản hồi http của nhật ký api
+    - mã phản hồi http
+  audit.api_logs.latency_ms:
+    aliases:
+    - độ trễ mili giây của nhật ký api
+    - độ trễ mili giây
+  audit.api_logs.request_metadata:
+    aliases:
+    - siêu dữ liệu yêu cầu của nhật ký api
+    - siêu dữ liệu yêu cầu
+  audit.api_logs.response_metadata:
+    aliases:
+    - siêu dữ liệu phản hồi của nhật ký api
+    - siêu dữ liệu phản hồi
+  audit.audit_logs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhật ký kiểm toán
+  audit.audit_logs.user_id:
+    aliases:
+    - mã người dùng của nhật ký kiểm toán
+  audit.audit_logs.action:
+    aliases:
+    - hành động của nhật ký kiểm toán
+    - hành động
+  audit.audit_logs.resource_type:
+    aliases:
+    - loại tài nguyên của nhật ký kiểm toán
+    - loại tài nguyên
+  audit.audit_logs.resource_id:
+    aliases:
+    - mã tài nguyên của nhật ký kiểm toán
+    - mã tài nguyên
+  audit.audit_logs.changed_fields:
+    aliases:
+    - trường bị thay đổi của nhật ký kiểm toán
+    - trường bị thay đổi
+  audit.data_access_logs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhật ký truy cập dữ liệu
+  audit.data_access_logs.user_id:
+    aliases:
+    - mã người dùng của nhật ký truy cập dữ liệu
+  audit.data_access_logs.schema_name:
+    aliases:
+    - tên lược đồ của nhật ký truy cập dữ liệu
+    - tên lược đồ
+  audit.data_access_logs.table_name:
+    aliases:
+    - tên bảng của nhật ký truy cập dữ liệu
+    - tên bảng
+  audit.data_access_logs.record_id:
+    aliases:
+    - mã bản ghi của nhật ký truy cập dữ liệu
+    - mã bản ghi
+  audit.data_access_logs.access_type:
+    aliases:
+    - loại truy cập của nhật ký truy cập dữ liệu
+    - loại truy cập
+  audit.data_access_logs.accessed_columns:
+    aliases:
+    - cột đã truy cập của nhật ký truy cập dữ liệu
+    - cột đã truy cập
+  audit.data_access_logs.row_count:
+    aliases:
+    - số dòng của nhật ký truy cập dữ liệu
+    - số dòng
+  audit.error_logs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhật ký lỗi
+  audit.error_logs.user_id:
+    aliases:
+    - mã người dùng của nhật ký lỗi
+  audit.error_logs.error_code:
+    aliases:
+    - mã lỗi của nhật ký lỗi
+    - mã lỗi
+  audit.error_logs.message:
+    aliases:
+    - thông báo của nhật ký lỗi
+    - thông báo
+  audit.error_logs.stack_trace:
+    aliases:
+    - dấu vết lỗi của nhật ký lỗi
+    - dấu vết lỗi
+  audit.error_logs.endpoint:
+    aliases:
+    - đường dẫn api của nhật ký lỗi
+    - đường dẫn api
+  audit.job_runs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của lần chạy tác vụ
+  audit.job_runs.job_name:
+    aliases:
+    - tên tác vụ của lần chạy tác vụ
+    - tên tác vụ
+  audit.job_runs.started_at:
+    aliases:
+    - thời điểm bắt đầu của lần chạy tác vụ
+    - thời điểm bắt đầu
+  audit.job_runs.completed_at:
+    aliases:
+    - thời điểm hoàn thành của lần chạy tác vụ
+    - thời điểm hoàn thành
+  audit.job_runs.rows_processed:
+    aliases:
+    - số dòng đã xử lý của lần chạy tác vụ
+    - số dòng đã xử lý
+  audit.job_runs.error_message:
+    aliases:
+    - thông báo lỗi của lần chạy tác vụ
+    - thông báo lỗi
+  audit.system_events.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của sự kiện hệ thống
+  audit.system_events.event_type:
+    aliases:
+    - loại sự kiện của sự kiện hệ thống
+    - loại sự kiện
+  audit.system_events.actor_user_id:
+    aliases:
+    - mã người dùng của sự kiện hệ thống
+  audit.system_events.payload:
+    aliases:
+    - nội dung sự kiện của sự kiện hệ thống
+    - nội dung sự kiện
+  audit.text2sql_query_logs.tenant_id:
+    aliases:
+    - mã đơn vị thuê hệ thống của nhật ký truy vấn text2sql
+  audit.text2sql_query_logs.user_id:
+    aliases:
+    - mã người dùng của nhật ký truy vấn text2sql
+  audit.text2sql_query_logs.natural_language_query:
+    aliases:
+    - câu hỏi tự nhiên của nhật ký truy vấn text2sql
+    - câu hỏi tự nhiên
+  audit.text2sql_query_logs.routed_domain:
+    aliases:
+    - miền dữ liệu được chọn của nhật ký truy vấn text2sql
+    - miền dữ liệu được chọn
+  audit.text2sql_query_logs.linked_tables:
+    aliases:
+    - bảng được liên kết của nhật ký truy vấn text2sql
+    - bảng được liên kết
+  audit.text2sql_query_logs.generated_sql:
+    aliases:
+    - sql được sinh của nhật ký truy vấn text2sql
+    - sql được sinh
+  audit.text2sql_query_logs.authorized_sql:
+    aliases:
+    - sql được cấp quyền của nhật ký truy vấn text2sql
+    - sql được cấp quyền
+  audit.text2sql_query_logs.execution_status:
+    aliases:
+    - trạng thái thực thi của nhật ký truy vấn text2sql
+    - trạng thái thực thi
+  audit.text2sql_query_logs.result_row_count:
+    aliases:
+    - số dòng kết quả của nhật ký truy vấn text2sql
+    - số dòng kết quả
+  audit.text2sql_query_logs.latency_ms:
+    aliases:
+    - độ trễ mili giây của nhật ký truy vấn text2sql
+    - độ trễ mili giây
+  audit.text2sql_query_feedback.query_log_id:
+    aliases:
+    - mã nhật ký truy vấn text2sql của phản hồi truy vấn text2sql
+  audit.text2sql_query_feedback.user_id:
+    aliases:
+    - mã người dùng của phản hồi truy vấn text2sql
+  audit.text2sql_query_feedback.rating:
+    aliases:
+    - điểm đánh giá của phản hồi truy vấn text2sql
+    - điểm đánh giá
+  audit.text2sql_query_feedback.is_correct:
+    aliases:
+    - kết quả đúng của phản hồi truy vấn text2sql
+    - kết quả đúng
+  audit.text2sql_query_feedback.corrected_sql:
+    aliases:
+    - sql đã sửa của phản hồi truy vấn text2sql
+    - sql đã sửa
+  audit.text2sql_query_feedback.feedback_text:
+    aliases:
+    - nội dung phản hồi của phản hồi truy vấn text2sql
+    - nội dung phản hồi
+concepts:
+  best_sellers:
+    aliases:
+    - bán chạy
+    - sản phẩm bán chạy
+    - best selling
+    - best sellers
+    tables:
+    - product.products
+    - sales.order_items
+    - sales.orders
+    columns:
+    - sales.order_items.quantity
+  vip_customers:
+    aliases:
+    - vip
+    - khách hàng vip
+    - khách vip
+    tables:
+    - customer.customers
+    - customer.customer_groups
+    columns:
+    - customer.customers.vip_flag
+    - customer.customer_groups.name

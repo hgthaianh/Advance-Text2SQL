@@ -27,6 +27,8 @@ class SchemaColumn(BaseModel):
     nullable: bool = True
     primary_key: bool = False
     aliases: list[str] = Field(default_factory=list)
+    label: str | None = None
+    description: str | None = None
 
 
 class SchemaTable(BaseModel):
@@ -34,6 +36,34 @@ class SchemaTable(BaseModel):
     schema_name: str = "public"
     columns: list[SchemaColumn] = Field(default_factory=list)
     aliases: list[str] = Field(default_factory=list)
+    label: str | None = None
+    description: str | None = None
+
+
+class SchemaRelationship(BaseModel):
+    source: str
+    target: str
+
+
+class SchemaCandidate(BaseModel):
+    """Ranked evidence, not a resolved schema choice or a calibrated probability."""
+
+    name: str
+    candidate_type: Literal["table", "column", "concept"]
+    score: float = Field(ge=0, le=1)
+    matched_text: str
+    matched_alias: str
+    match_type: Literal["exact", "accent_insensitive", "token", "prefix", "fuzzy", "related_business_concept"]
+    alias_source: Literal["manual", "schema", "automatic"]
+    reason: str | None = None
+
+
+class SchemaLinkResult(BaseModel):
+    tables: list[SchemaCandidate] = Field(default_factory=list)
+    columns: list[SchemaCandidate] = Field(default_factory=list)
+    concepts: list[SchemaCandidate] = Field(default_factory=list)
+    unmatched_terms: list[str] = Field(default_factory=list)
+    ambiguous_terms: list[str] = Field(default_factory=list)
 
 
 class QueryResult(BaseModel):
