@@ -71,7 +71,7 @@ def test_related_permission_filter_is_not_dropped(planner):
     (dict(intent='COUNT',tables=['orders'],limit=0), MalformedQueryIRError),
     (dict(intent='COUNT',tables=['orders'],limit=True), MalformedQueryIRError),
     (dict(intent='COUNT',tables=['orders'],limit='10'), MalformedQueryIRError),
-    (dict(intent='COUNT',tables=['orders'],having=[]), MalformedQueryIRError),
+    (dict(intent='COUNT',tables=['orders'],window=[]), MalformedQueryIRError),
     (dict(intent='COUNT',tables=['orders'],order_by=[dict(column='status',direction='DESC; DROP TABLE orders')]), MalformedQueryIRError),
     (None, MalformedQueryIRError),
 ])

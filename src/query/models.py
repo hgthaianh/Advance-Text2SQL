@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.sql import Select
 
-from src.query.ir import QueryIR
+from src.query.ir import QueryIR, TimePeriod
 from src.shared.models import SchemaRelationship
 
 
@@ -26,3 +26,11 @@ class CompiledQuery:
     sql: str
     params: dict[str, Any]
     statement: Select
+
+
+@dataclass(frozen=True)
+class CompiledPeriodQuery:
+    """One comparison period and its independently bound aggregate statement."""
+
+    period: TimePeriod
+    query: CompiledQuery
