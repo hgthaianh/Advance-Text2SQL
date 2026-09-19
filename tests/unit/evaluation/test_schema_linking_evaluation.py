@@ -69,6 +69,8 @@ def test_top_five_vs_ten_and_macro_average(registry):
     report = evaluate(stub(registry, {'first': prediction(tables), 'second': prediction(['sales.orders'])}), cases)
     assert report['metrics']['table_recall_at_5'] == .25
     assert report['metrics']['table_recall_at_10'] == .75
+    assert report['metrics']['table_recall_at_1'] == .25
+    assert report['metrics']['table_recall_at_3'] == .25
     assert report['metrics']['top_1_table_accuracy'] == .5
     assert report['metric_case_counts']['column_recall_at_5'] == 1
 
@@ -133,6 +135,11 @@ def test_positive_false_ambiguity_is_reported(registry):
 def test_bad_gold_is_rejected(registry, bad):
     with pytest.raises(ValueError):
         validate_cases([bad], registry)
+
+
+def test_invalid_tier_is_rejected(registry):
+    with pytest.raises(ValueError, match='tier'):
+        validate_cases([case(tier='core')], registry)
 
 
 def test_invalid_alternative_reference_is_rejected(registry):

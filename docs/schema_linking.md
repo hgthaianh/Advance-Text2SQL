@@ -34,7 +34,34 @@ The index performs token-boundary exact and accent-insensitive phrase matches fi
 
 Table context and directly connected foreign-key neighbors raise scores within each match tier. Connectivity does not introduce arbitrary intermediate tables. `RelationshipGraph.find_path()` exposes deterministic graph paths for callers; the linker itself does not choose a join plan.
 
-Ambiguity is retained for generic `name`/`tên`, `phone`, `salary`, `amount`, date fields and repeated foreign-key roles. Near-tied alternatives are reported in `ambiguous_terms`; `unmatched_terms` contains accent-stripped tokens not explained by retained evidence. Dates, numbers and values such as HCM are not schema entities by themselves. Truncating `top_k` does not mean remaining alternatives were ruled out.
+Ambiguity is retained for generic `name`/`tên`, `phone`, `salary`, `amount`, date fields and repeated foreign-key roles. Near-tied alternatives are reported in `ambiguous_terms`; `unmatched_terms` contains accent-stripped tokens not explained by retained evidence. Dates and numbers are not schema entities by themselves. Truncating `top_k` does not mean remaining alternatives were ruled out.
+
+## T2-22 coverage tiers
+
+`schema/aliases.yaml` remains the only alias dictionary. Tier A covers the
+core business areas: branches, departments, employees, customers/customer
+groups, products/categories, warehouses/inventory balances/transactions,
+suppliers/purchase orders/goods receipts, orders/order items/invoices/payments/
+quotations, budgets and support tickets.
+Tier B relies primarily on the same validated schema metadata and conservative
+identifier aliases for the remaining tables.
+
+The linker compares accent-stripped normalized tokens, so aliases are authored
+once: `nhan vien` matches the `nhân viên` alias without duplicating it. Safe
+business abbreviations include `NV`, `KH`, `SP`, `NCC` and `PO`. `HCM` is a
+structured `ho_chi_minh` concept that links branches and the location-city
+column; it does not infer a filter value or generate SQL.
+
+Run the coverage report with:
+
+```powershell
+.\.venv\Scripts\python.exe evaluation/evaluate_schema_linking.py --cases evaluation/schema_nlp_coverage_cases.json
+```
+
+It reports Table/Column Recall@1, @3 and @5, top-1 accuracy, ambiguity rate
+and unsupported rate both overall and separately in `metrics_by_tier`. The
+coverage dataset is a deterministic development regression set, not an
+independent production benchmark.
 
 ## Tests and evaluation
 
