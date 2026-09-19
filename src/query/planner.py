@@ -7,7 +7,8 @@ from src.shared.exceptions import PermissionDeniedError
 from src.schema.relationship_graph import FKRelationshipGraph
 from src.query.join_resolver import FKJoinResolver
 
-from src.query.ir import QueryIR, SelectItem
+from src.config import get_settings
+from src.query.ir import OrderBy, QueryFilter, QueryIR, SelectItem
 from src.query.join_resolver import JoinResolver
 from src.query.models import QueryPlan
 from src.schema.registry import SchemaRegistry
@@ -17,7 +18,7 @@ from src.shared.exceptions import (
     MalformedQueryIRError, MissingAggregationColumnError, UnsupportedIntentError,
 )
 
-_LOOKUP = {Intent.LOOKUP, Intent.SELECT, Intent.LIST, Intent.DETAIL, Intent.FILTER}
+_LOOKUP = {Intent.LOOKUP, Intent.SELECT, Intent.LIST, Intent.DETAIL, Intent.FILTER, Intent.TOP_N}
 _AGGREGATES = {Intent.COUNT: Aggregation.COUNT, Intent.SUM: Aggregation.SUM,
                Intent.AVG: Aggregation.AVG, Intent.AVERAGE: Aggregation.AVG}
 _NUMERIC_TYPES = {'smallint', 'integer', 'int', 'bigint', 'numeric', 'decimal', 'real',
@@ -25,12 +26,37 @@ _NUMERIC_TYPES = {'smallint', 'integer', 'int', 'bigint', 'numeric', 'decimal', 
 
 
 class QueryPlanner:
-    def __init__(self, registry: SchemaRegistry, graph: RelationshipGraph | None = None) -> None:
+    def __init__(self, registry: SchemaRegistry, graph: RelationshipGraph | None = None, *, max_limit: int | None = None) -> None:
         self.registry = registry
+        self.max_limit = get_settings().query_max_limit if max_limit is None else max_limit
+        if type(self.max_limit) is not int or not 1 <= self.max_limit <= 1000:
+            raise MalformedQueryIRError('max_limit must be an integer between 1 and 1000')
         self.graph = graph if graph is not None else RelationshipGraph(registry)
         if self.graph.registry is not registry:
             raise MalformedQueryIRError('Planner and graph must use the same registry')
         self.join_resolver = JoinResolver()
+
+    def _validate_aggregate(self, column: str, aggregation: Aggregation) -> None:
+        if column == '*':
+            if aggregation != Aggregation.COUNT:
+                raise MissingAggregationColumnError('SUM/AVG require a column')
+            return
+        if aggregation in (Aggregation.SUM, Aggregation.AVG):
+            data_type = self.registry.columns[column].data_type.lower().split('(')[0].strip()
+            if data_type not in _NUMERIC_TYPES:
+                raise MalformedQueryIRError(f'Non-numeric aggregation column: {column}')
+
+    @staticmethod
+    def _validate_filter(condition: QueryFilter) -> None:
+        if condition.operator == FilterOperator.IN:
+            if not isinstance(condition.value, list) or any(v is None for v in condition.value):
+                raise MalformedQueryIRError('IN requires a list of non-null scalar values')
+        elif isinstance(condition.value, list):
+            raise MalformedQueryIRError('Only IN accepts a list value')
+        elif condition.value is None and condition.operator not in (FilterOperator.EQ, FilterOperator.NE):
+            raise MalformedQueryIRError('NULL is supported only with = or !=')
+        elif condition.operator == FilterOperator.LIKE and not isinstance(condition.value, str):
+            raise MalformedQueryIRError('LIKE requires a string')
 
     def plan(self, query: QueryIR | dict) -> QueryPlan:
         """Resolve identifiers, aggregate semantics, filters and unique FK paths.
@@ -86,10 +112,8 @@ class QueryPlanner:
                     raise MissingAggregationColumnError('SUM/AVG require a column')
                 else:
                     raise MalformedQueryIRError('Wildcard projection is supported only as COUNT(*)')
-            if item.aggregation in (Aggregation.SUM, Aggregation.AVG):
-                data_type = self.registry.columns[item.column].data_type.lower().split('(')[0].strip()
-                if data_type not in _NUMERIC_TYPES:
-                    raise MalformedQueryIRError(f'Non-numeric aggregation column: {item.column}')
+            if item.aggregation:
+                self._validate_aggregate(item.column, item.aggregation)
             selected.append(item)
         aggregate_query = any(s.aggregation for s in selected)
         if expected_aggregation and not aggregate_query:
@@ -101,26 +125,44 @@ class QueryPlanner:
         filters = []
         for original in validated.filters:
             condition = original.model_copy(update={'column': resolve(original.column)})
-            if condition.operator == FilterOperator.IN:
-                if not isinstance(condition.value, list) or any(v is None for v in condition.value):
-                    raise MalformedQueryIRError('IN requires a list of non-null scalar values')
-            elif isinstance(condition.value, list):
-                raise MalformedQueryIRError('Only IN accepts a list value')
-            elif condition.value is None and condition.operator not in (FilterOperator.EQ, FilterOperator.NE):
-                raise MalformedQueryIRError('NULL is supported only with = or !=')
-            elif condition.operator == FilterOperator.LIKE and not isinstance(condition.value, str):
-                raise MalformedQueryIRError('LIKE requires a string')
+            self._validate_filter(condition)
             filters.append(condition)
+        having = []
+        for original in validated.having:
+            if not aggregate_query or original.operator == FilterOperator.LIKE:
+                raise MalformedQueryIRError('HAVING requires aggregate comparisons without LIKE')
+            column = '*' if original.column == '*' else resolve(original.column)
+            self._validate_aggregate(column, original.aggregation)
+            condition = original.model_copy(update={'column': column})
+            self._validate_filter(condition)
+            having.append(condition)
         order = []
         for item in validated.order_by:
-            column = resolve(item.column)
-            if aggregate_query and column not in groups:
+            column = '*' if item.column == '*' and item.aggregation else resolve(item.column)
+            aggregation = item.aggregation
+            if aggregation:
+                if not aggregate_query:
+                    raise MalformedQueryIRError('Aggregate ordering requires an aggregate query')
+                self._validate_aggregate(column, aggregation)
+            elif aggregate_query and column not in groups:
                 matching = [s for s in selected if s.column == column and s.aggregation]
                 if len(matching) != 1:
                     raise MalformedQueryIRError('Aggregate ordering requires a group key or one aggregate projection')
-            order.append(item.model_copy(update={'column': column}))
+                aggregation = matching[0].aggregation
+            order.append(item.model_copy(update={'column': column, 'aggregation': aggregation}))
+        top_query = validated.top_k is not None or validated.intent == Intent.TOP_N
+        if top_query:
+            if not order or (aggregate_query and not groups):
+                raise MalformedQueryIRError('TOP-K requires ORDER BY and grouped or row results')
+            # All group keys break aggregate ties without inventing a business key.
+            ordered_groups = {o.column for o in order if o.aggregation is None}
+            order.extend(OrderBy(column=c) for c in groups if c not in ordered_groups)
+        if not aggregate_query or top_query:
+            effective_limit = validated.top_k if validated.top_k is not None else validated.limit
+            if effective_limit > self.max_limit:
+                raise MalformedQueryIRError(f'LIMIT exceeds configured maximum {self.max_limit}')
         normalized = validated.model_copy(update={
-            'tables': tables, 'select': selected, 'filters': filters,
+            'tables': tables, 'select': selected, 'filters': filters, 'having': having,
             'group_by': groups, 'order_by': order,
         })
         joins = self.join_resolver.resolve(tables, self.graph)
@@ -166,7 +208,7 @@ class FKQueryPlanner:
                 if table_name not in requested_tables:
                     requested_tables.append(table_name)
 
-        for qf in query.filters:
+        for qf in query.filters + query.having:
             if "." in qf.column:
                 table_name = qf.column.rsplit(".", 1)[0]
                 if table_name not in requested_tables:

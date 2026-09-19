@@ -9,9 +9,9 @@ from src.schema.relationship_graph import RelationshipGraph
 
 
 class BasicQueryHandler:
-    def __init__(self, registry: SchemaRegistry, graph: RelationshipGraph | None = None) -> None:
-        self.planner = QueryPlanner(registry, graph)
-        self.builder = SQLBuilder(registry, self.planner.graph)
+    def __init__(self, registry: SchemaRegistry, graph: RelationshipGraph | None = None, *, max_limit: int | None = None) -> None:
+        self.planner = QueryPlanner(registry, graph, max_limit=max_limit)
+        self.builder = SQLBuilder(registry, self.planner.graph, max_limit=self.planner.max_limit)
 
     def handle(self, query: QueryIR | dict) -> CompiledQuery:
         """Plan and compile IR, preserving all upstream-injected filters."""
