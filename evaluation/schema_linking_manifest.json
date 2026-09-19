@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "provenance": "Schema-guided synthetic cases authored by the same assistant that implemented the linker; not independently annotated or production data.",
+  "gold_status": "provisional_pending_human_review",
+  "split_policy": "Group-disjoint paraphrase families, stratified by namespace and expected behavior. No alias generation or prediction-based labeling.",
+  "frozen_before_prediction": true,
+  "splits": {
+    "dev": {
+      "file": "schema_linking_dev.json",
+      "sha256": "068ffdc99da92ffd2c15d671ad6f80db09a7718c80b5005937c563d696569442",
+      "cases": 100,
+      "groups": 60
+    },
+    "heldout": {
+      "file": "schema_linking_heldout.json",
+      "sha256": "f5409de02cb455c0584676b016cca3ec1d66a99c60cf5650edb70cbe202058fe",
+      "cases": 100,
+      "groups": 60
+    }
+  },
+  "baseline_sha256": {
+    "src/schema/linker.py": "ca050f3349ade63bce27944940e70ab4b67ddc65c993b633332b2cece16f5a5e",
+    "schema/aliases.yaml": "c3233519e8874d4ccbca22d384866183c3ae30122fba3cb95389cd47f1e25e1e",
+    "schema/schema_spec.yaml": "f0673bd3db432bb60587e0b29e2f14839441f4a0f4cb7303b25bba2e86fbf2e4"
+  }
+}

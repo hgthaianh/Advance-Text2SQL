@@ -1,0 +1,3060 @@
+[
+  {
+    "id": "coverage-table-001",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho toi xem don vi thue he thong",
+    "expected_tables": [
+      "org.tenants"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-001",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê tên đơn vị thuê hệ thống",
+    "expected_tables": [
+      "org.tenants"
+    ],
+    "expected_columns": [
+      "org.tenants.name"
+    ]
+  },
+  {
+    "id": "coverage-table-002",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho tôi xem địa điểm",
+    "expected_tables": [
+      "org.locations"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-002",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của địa điểm",
+    "expected_tables": [
+      "org.locations"
+    ],
+    "expected_columns": [
+      "org.locations.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-003",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho tôi xem chi nhánh",
+    "expected_tables": [
+      "org.branches"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-003",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của chi nhánh",
+    "expected_tables": [
+      "org.branches"
+    ],
+    "expected_columns": [
+      "org.branches.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-004",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho toi xem phong ban",
+    "expected_tables": [
+      "org.departments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-004",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của phòng ban",
+    "expected_tables": [
+      "org.departments"
+    ],
+    "expected_columns": [
+      "org.departments.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-005",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho tôi xem nhóm làm việc",
+    "expected_tables": [
+      "org.teams"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-005",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhóm làm việc",
+    "expected_tables": [
+      "org.teams"
+    ],
+    "expected_columns": [
+      "org.teams.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-006",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Cho tôi xem trung tâm chi phí",
+    "expected_tables": [
+      "org.cost_centers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-006",
+    "kind": "coverage",
+    "domain": "org",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của trung tâm chi phí",
+    "expected_tables": [
+      "org.cost_centers"
+    ],
+    "expected_columns": [
+      "org.cost_centers.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-007",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho toi xem chuc vu",
+    "expected_tables": [
+      "hr.positions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-007",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của chức vụ",
+    "expected_tables": [
+      "hr.positions"
+    ],
+    "expected_columns": [
+      "hr.positions.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-008",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem nhân viên",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-008",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhân viên",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.employees.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-009",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem lịch sử công tác",
+    "expected_tables": [
+      "hr.employee_job_history"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-009",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của lịch sử công tác",
+    "expected_tables": [
+      "hr.employee_job_history"
+    ],
+    "expected_columns": [
+      "hr.employee_job_history.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-010",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho toi xem hop dong lao dong",
+    "expected_tables": [
+      "hr.employment_contracts"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-010",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của hợp đồng lao động",
+    "expected_tables": [
+      "hr.employment_contracts"
+    ],
+    "expected_columns": [
+      "hr.employment_contracts.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-011",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem chấm công",
+    "expected_tables": [
+      "hr.attendance_records"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-011",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của chấm công",
+    "expected_tables": [
+      "hr.attendance_records"
+    ],
+    "expected_columns": [
+      "hr.attendance_records.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-012",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem loại nghỉ phép",
+    "expected_tables": [
+      "hr.leave_types"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-012",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của loại nghỉ phép",
+    "expected_tables": [
+      "hr.leave_types"
+    ],
+    "expected_columns": [
+      "hr.leave_types.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-013",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho toi xem so du nghi phep",
+    "expected_tables": [
+      "hr.leave_balances"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-013",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của số dư nghỉ phép",
+    "expected_tables": [
+      "hr.leave_balances"
+    ],
+    "expected_columns": [
+      "hr.leave_balances.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-014",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem đơn nghỉ phép",
+    "expected_tables": [
+      "hr.leave_requests"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-014",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của đơn nghỉ phép",
+    "expected_tables": [
+      "hr.leave_requests"
+    ],
+    "expected_columns": [
+      "hr.leave_requests.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-015",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem kỳ trả lương",
+    "expected_tables": [
+      "hr.payroll_runs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-015",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của kỳ trả lương",
+    "expected_tables": [
+      "hr.payroll_runs"
+    ],
+    "expected_columns": [
+      "hr.payroll_runs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-016",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho toi xem chi tiet bang luong",
+    "expected_tables": [
+      "hr.payroll_details"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-016",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã kỳ trả lương của chi tiết bảng lương",
+    "expected_tables": [
+      "hr.payroll_details"
+    ],
+    "expected_columns": [
+      "hr.payroll_details.payroll_run_id"
+    ]
+  },
+  {
+    "id": "coverage-table-017",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem đánh giá hiệu suất",
+    "expected_tables": [
+      "hr.performance_reviews"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-017",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của đánh giá hiệu suất",
+    "expected_tables": [
+      "hr.performance_reviews"
+    ],
+    "expected_columns": [
+      "hr.performance_reviews.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-018",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho tôi xem phúc lợi nhân viên",
+    "expected_tables": [
+      "hr.employee_benefits"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-018",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của phúc lợi nhân viên",
+    "expected_tables": [
+      "hr.employee_benefits"
+    ],
+    "expected_columns": [
+      "hr.employee_benefits.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-019",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Cho toi xem ho so dao tao",
+    "expected_tables": [
+      "hr.training_records"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-019",
+    "kind": "coverage",
+    "domain": "hr",
+    "question": "Liệt kê mã nhân viên của hồ sơ đào tạo",
+    "expected_tables": [
+      "hr.training_records"
+    ],
+    "expected_columns": [
+      "hr.training_records.employee_id"
+    ]
+  },
+  {
+    "id": "coverage-table-020",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem người dùng",
+    "expected_tables": [
+      "iam.users"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-020",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của người dùng",
+    "expected_tables": [
+      "iam.users"
+    ],
+    "expected_columns": [
+      "iam.users.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-021",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem vai trò",
+    "expected_tables": [
+      "iam.roles"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-021",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của vai trò",
+    "expected_tables": [
+      "iam.roles"
+    ],
+    "expected_columns": [
+      "iam.roles.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-022",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho toi xem quyen truy cap",
+    "expected_tables": [
+      "iam.permissions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-022",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê loại tài nguyên của quyền truy cập",
+    "expected_tables": [
+      "iam.permissions"
+    ],
+    "expected_columns": [
+      "iam.permissions.resource_type"
+    ]
+  },
+  {
+    "id": "coverage-table-023",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem vai trò người dùng",
+    "expected_tables": [
+      "iam.user_roles"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-023",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã người dùng của vai trò người dùng",
+    "expected_tables": [
+      "iam.user_roles"
+    ],
+    "expected_columns": [
+      "iam.user_roles.user_id"
+    ]
+  },
+  {
+    "id": "coverage-table-024",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem quyền của vai trò",
+    "expected_tables": [
+      "iam.role_permissions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-024",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã vai trò của quyền của vai trò",
+    "expected_tables": [
+      "iam.role_permissions"
+    ],
+    "expected_columns": [
+      "iam.role_permissions.role_id"
+    ]
+  },
+  {
+    "id": "coverage-table-025",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho toi xem pham vi nguoi dung",
+    "expected_tables": [
+      "iam.user_scopes"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-025",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã người dùng của phạm vi người dùng",
+    "expected_tables": [
+      "iam.user_scopes"
+    ],
+    "expected_columns": [
+      "iam.user_scopes.user_id"
+    ]
+  },
+  {
+    "id": "coverage-table-026",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem chính sách truy cập bảng",
+    "expected_tables": [
+      "iam.table_access_policies"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-026",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã vai trò của chính sách truy cập bảng",
+    "expected_tables": [
+      "iam.table_access_policies"
+    ],
+    "expected_columns": [
+      "iam.table_access_policies.role_id"
+    ]
+  },
+  {
+    "id": "coverage-table-027",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho tôi xem chính sách truy cập cột",
+    "expected_tables": [
+      "iam.column_access_policies"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-027",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã vai trò của chính sách truy cập cột",
+    "expected_tables": [
+      "iam.column_access_policies"
+    ],
+    "expected_columns": [
+      "iam.column_access_policies.role_id"
+    ]
+  },
+  {
+    "id": "coverage-table-028",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Cho toi xem phien dang nhap",
+    "expected_tables": [
+      "iam.login_sessions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-028",
+    "kind": "coverage",
+    "domain": "iam",
+    "question": "Liệt kê mã người dùng của phiên đăng nhập",
+    "expected_tables": [
+      "iam.login_sessions"
+    ],
+    "expected_columns": [
+      "iam.login_sessions.user_id"
+    ]
+  },
+  {
+    "id": "coverage-table-029",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem phân khúc khách hàng",
+    "expected_tables": [
+      "customer.customer_segments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-029",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của phân khúc khách hàng",
+    "expected_tables": [
+      "customer.customer_segments"
+    ],
+    "expected_columns": [
+      "customer.customer_segments.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-030",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem nhóm khách hàng",
+    "expected_tables": [
+      "customer.customer_groups"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-030",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhóm khách hàng",
+    "expected_tables": [
+      "customer.customer_groups"
+    ],
+    "expected_columns": [
+      "customer.customer_groups.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-031",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho toi xem khach hang",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-031",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của khách hàng",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-032",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem người liên hệ",
+    "expected_tables": [
+      "customer.contacts"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-032",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của người liên hệ",
+    "expected_tables": [
+      "customer.contacts"
+    ],
+    "expected_columns": [
+      "customer.contacts.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-033",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem địa chỉ",
+    "expected_tables": [
+      "customer.addresses"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-033",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của địa chỉ",
+    "expected_tables": [
+      "customer.addresses"
+    ],
+    "expected_columns": [
+      "customer.addresses.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-034",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho toi xem thanh vien nhom khach hang",
+    "expected_tables": [
+      "customer.customer_group_members"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-034",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã khách hàng của thành viên nhóm khách hàng",
+    "expected_tables": [
+      "customer.customer_group_members"
+    ],
+    "expected_columns": [
+      "customer.customer_group_members.customer_id"
+    ]
+  },
+  {
+    "id": "coverage-table-035",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem liên hệ khách hàng",
+    "expected_tables": [
+      "customer.customer_contacts"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-035",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã khách hàng của liên hệ khách hàng",
+    "expected_tables": [
+      "customer.customer_contacts"
+    ],
+    "expected_columns": [
+      "customer.customer_contacts.customer_id"
+    ]
+  },
+  {
+    "id": "coverage-table-036",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho tôi xem địa chỉ khách hàng",
+    "expected_tables": [
+      "customer.customer_addresses"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-036",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã khách hàng của địa chỉ khách hàng",
+    "expected_tables": [
+      "customer.customer_addresses"
+    ],
+    "expected_columns": [
+      "customer.customer_addresses.customer_id"
+    ]
+  },
+  {
+    "id": "coverage-table-037",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Cho toi xem nguoi phu trach khach hang",
+    "expected_tables": [
+      "customer.customer_owners"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-037",
+    "kind": "coverage",
+    "domain": "customer",
+    "question": "Liệt kê mã khách hàng của người phụ trách khách hàng",
+    "expected_tables": [
+      "customer.customer_owners"
+    ],
+    "expected_columns": [
+      "customer.customer_owners.customer_id"
+    ]
+  },
+  {
+    "id": "coverage-table-038",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem thương hiệu",
+    "expected_tables": [
+      "product.brands"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-038",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của thương hiệu",
+    "expected_tables": [
+      "product.brands"
+    ],
+    "expected_columns": [
+      "product.brands.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-039",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem danh mục sản phẩm",
+    "expected_tables": [
+      "product.categories"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-039",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của danh mục sản phẩm",
+    "expected_tables": [
+      "product.categories"
+    ],
+    "expected_columns": [
+      "product.categories.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-040",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho toi xem san pham",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-040",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của sản phẩm",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-041",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem phân loại sản phẩm",
+    "expected_tables": [
+      "product.product_categories"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-041",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã sản phẩm của phân loại sản phẩm",
+    "expected_tables": [
+      "product.product_categories"
+    ],
+    "expected_columns": [
+      "product.product_categories.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-042",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem biến thể sản phẩm",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-042",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã sản phẩm của biến thể sản phẩm",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-043",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho toi xem thuoc tinh san pham",
+    "expected_tables": [
+      "product.product_attributes"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-043",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của thuộc tính sản phẩm",
+    "expected_tables": [
+      "product.product_attributes"
+    ],
+    "expected_columns": [
+      "product.product_attributes.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-044",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem giá trị thuộc tính sản phẩm",
+    "expected_tables": [
+      "product.product_attribute_values"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-044",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã sản phẩm của giá trị thuộc tính sản phẩm",
+    "expected_tables": [
+      "product.product_attribute_values"
+    ],
+    "expected_columns": [
+      "product.product_attribute_values.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-045",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem bảng giá",
+    "expected_tables": [
+      "product.price_lists"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-045",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của bảng giá",
+    "expected_tables": [
+      "product.price_lists"
+    ],
+    "expected_columns": [
+      "product.price_lists.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-046",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho toi xem chi tiet bang gia",
+    "expected_tables": [
+      "product.price_list_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-046",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã bảng giá của chi tiết bảng giá",
+    "expected_tables": [
+      "product.price_list_items"
+    ],
+    "expected_columns": [
+      "product.price_list_items.price_list_id"
+    ]
+  },
+  {
+    "id": "coverage-table-047",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Cho tôi xem nhãn sản phẩm",
+    "expected_tables": [
+      "product.product_tags"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-047",
+    "kind": "coverage",
+    "domain": "product",
+    "question": "Liệt kê mã sản phẩm của nhãn sản phẩm",
+    "expected_tables": [
+      "product.product_tags"
+    ],
+    "expected_columns": [
+      "product.product_tags.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-048",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem kho hàng",
+    "expected_tables": [
+      "inventory.warehouses"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-048",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của kho hàng",
+    "expected_tables": [
+      "inventory.warehouses"
+    ],
+    "expected_columns": [
+      "inventory.warehouses.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-049",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho toi xem khu vuc kho",
+    "expected_tables": [
+      "inventory.warehouse_zones"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-049",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã kho hàng của khu vực kho",
+    "expected_tables": [
+      "inventory.warehouse_zones"
+    ],
+    "expected_columns": [
+      "inventory.warehouse_zones.warehouse_id"
+    ]
+  },
+  {
+    "id": "coverage-table-050",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem tồn kho",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-050",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã kho hàng của tồn kho",
+    "expected_tables": [
+      "inventory.inventory_balances"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.warehouse_id"
+    ]
+  },
+  {
+    "id": "coverage-table-051",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem giao dịch kho",
+    "expected_tables": [
+      "inventory.inventory_transactions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-051",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của giao dịch kho",
+    "expected_tables": [
+      "inventory.inventory_transactions"
+    ],
+    "expected_columns": [
+      "inventory.inventory_transactions.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-052",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho toi xem lo hang",
+    "expected_tables": [
+      "inventory.stock_lots"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-052",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã sản phẩm của lô hàng",
+    "expected_tables": [
+      "inventory.stock_lots"
+    ],
+    "expected_columns": [
+      "inventory.stock_lots.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-053",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem số sê ri hàng hóa",
+    "expected_tables": [
+      "inventory.stock_serials"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-053",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã sản phẩm của số sê ri hàng hóa",
+    "expected_tables": [
+      "inventory.stock_serials"
+    ],
+    "expected_columns": [
+      "inventory.stock_serials.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-054",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem giữ hàng",
+    "expected_tables": [
+      "inventory.stock_reservations"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-054",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã sản phẩm của giữ hàng",
+    "expected_tables": [
+      "inventory.stock_reservations"
+    ],
+    "expected_columns": [
+      "inventory.stock_reservations.product_id"
+    ]
+  },
+  {
+    "id": "coverage-table-055",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho toi xem dieu chinh ton kho",
+    "expected_tables": [
+      "inventory.stock_adjustments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-055",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã kho hàng của điều chỉnh tồn kho",
+    "expected_tables": [
+      "inventory.stock_adjustments"
+    ],
+    "expected_columns": [
+      "inventory.stock_adjustments.warehouse_id"
+    ]
+  },
+  {
+    "id": "coverage-table-056",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem phiếu chuyển kho",
+    "expected_tables": [
+      "inventory.stock_transfers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-056",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của phiếu chuyển kho",
+    "expected_tables": [
+      "inventory.stock_transfers"
+    ],
+    "expected_columns": [
+      "inventory.stock_transfers.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-057",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Cho tôi xem chi tiết chuyển kho",
+    "expected_tables": [
+      "inventory.stock_transfer_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-057",
+    "kind": "coverage",
+    "domain": "inventory",
+    "question": "Liệt kê mã phiếu chuyển kho của chi tiết chuyển kho",
+    "expected_tables": [
+      "inventory.stock_transfer_items"
+    ],
+    "expected_columns": [
+      "inventory.stock_transfer_items.transfer_id"
+    ]
+  },
+  {
+    "id": "coverage-table-058",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho toi xem nha cung cap",
+    "expected_tables": [
+      "procurement.suppliers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-058",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhà cung cấp",
+    "expected_tables": [
+      "procurement.suppliers"
+    ],
+    "expected_columns": [
+      "procurement.suppliers.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-059",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem yêu cầu mua hàng",
+    "expected_tables": [
+      "procurement.purchase_requisitions"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-059",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của yêu cầu mua hàng",
+    "expected_tables": [
+      "procurement.purchase_requisitions"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisitions.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-060",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem chi tiết yêu cầu mua hàng",
+    "expected_tables": [
+      "procurement.purchase_requisition_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-060",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã yêu cầu mua hàng của chi tiết yêu cầu mua hàng",
+    "expected_tables": [
+      "procurement.purchase_requisition_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_requisition_items.requisition_id"
+    ]
+  },
+  {
+    "id": "coverage-table-061",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho toi xem yeu cau bao gia mua",
+    "expected_tables": [
+      "procurement.rfqs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-061",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của yêu cầu báo giá mua",
+    "expected_tables": [
+      "procurement.rfqs"
+    ],
+    "expected_columns": [
+      "procurement.rfqs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-062",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem báo giá nhà cung cấp",
+    "expected_tables": [
+      "procurement.supplier_quotes"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-062",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã yêu cầu báo giá mua của báo giá nhà cung cấp",
+    "expected_tables": [
+      "procurement.supplier_quotes"
+    ],
+    "expected_columns": [
+      "procurement.supplier_quotes.rfq_id"
+    ]
+  },
+  {
+    "id": "coverage-table-063",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem chi tiết báo giá nhà cung cấp",
+    "expected_tables": [
+      "procurement.supplier_quote_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-063",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã báo giá nhà cung cấp của chi tiết báo giá nhà cung cấp",
+    "expected_tables": [
+      "procurement.supplier_quote_items"
+    ],
+    "expected_columns": [
+      "procurement.supplier_quote_items.quote_id"
+    ]
+  },
+  {
+    "id": "coverage-table-064",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho toi xem don mua hang",
+    "expected_tables": [
+      "procurement.purchase_orders"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-064",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của đơn mua hàng",
+    "expected_tables": [
+      "procurement.purchase_orders"
+    ],
+    "expected_columns": [
+      "procurement.purchase_orders.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-065",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem chi tiết đơn mua hàng",
+    "expected_tables": [
+      "procurement.purchase_order_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-065",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn mua hàng của chi tiết đơn mua hàng",
+    "expected_tables": [
+      "procurement.purchase_order_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_order_items.purchase_order_id"
+    ]
+  },
+  {
+    "id": "coverage-table-066",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho tôi xem phiếu nhập hàng",
+    "expected_tables": [
+      "procurement.goods_receipts"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-066",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của phiếu nhập hàng",
+    "expected_tables": [
+      "procurement.goods_receipts"
+    ],
+    "expected_columns": [
+      "procurement.goods_receipts.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-067",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Cho toi xem chi tiet phieu nhap hang",
+    "expected_tables": [
+      "procurement.goods_receipt_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-067",
+    "kind": "coverage",
+    "domain": "procurement",
+    "question": "Liệt kê mã phiếu nhập hàng của chi tiết phiếu nhập hàng",
+    "expected_tables": [
+      "procurement.goods_receipt_items"
+    ],
+    "expected_columns": [
+      "procurement.goods_receipt_items.receipt_id"
+    ]
+  },
+  {
+    "id": "coverage-table-068",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem nhóm bán hàng",
+    "expected_tables": [
+      "sales.sales_teams"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-068",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhóm bán hàng",
+    "expected_tables": [
+      "sales.sales_teams"
+    ],
+    "expected_columns": [
+      "sales.sales_teams.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-069",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem đại diện bán hàng",
+    "expected_tables": [
+      "sales.sales_reps"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-069",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã nhóm bán hàng của đại diện bán hàng",
+    "expected_tables": [
+      "sales.sales_reps"
+    ],
+    "expected_columns": [
+      "sales.sales_reps.sales_team_id"
+    ]
+  },
+  {
+    "id": "coverage-table-070",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho toi xem chi tieu ban hang",
+    "expected_tables": [
+      "sales.sales_targets"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-070",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đại diện bán hàng của chỉ tiêu bán hàng",
+    "expected_tables": [
+      "sales.sales_targets"
+    ],
+    "expected_columns": [
+      "sales.sales_targets.sales_rep_id"
+    ]
+  },
+  {
+    "id": "coverage-table-071",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem báo giá bán hàng",
+    "expected_tables": [
+      "sales.quotations"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-071",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của báo giá bán hàng",
+    "expected_tables": [
+      "sales.quotations"
+    ],
+    "expected_columns": [
+      "sales.quotations.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-072",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem chi tiết báo giá bán hàng",
+    "expected_tables": [
+      "sales.quotation_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-072",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã báo giá bán hàng của chi tiết báo giá bán hàng",
+    "expected_tables": [
+      "sales.quotation_items"
+    ],
+    "expected_columns": [
+      "sales.quotation_items.quotation_id"
+    ]
+  },
+  {
+    "id": "coverage-table-073",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho toi xem don hang",
+    "expected_tables": [
+      "sales.orders"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-073",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của đơn hàng",
+    "expected_tables": [
+      "sales.orders"
+    ],
+    "expected_columns": [
+      "sales.orders.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-074",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem chi tiết đơn hàng",
+    "expected_tables": [
+      "sales.order_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-074",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn hàng của chi tiết đơn hàng",
+    "expected_tables": [
+      "sales.order_items"
+    ],
+    "expected_columns": [
+      "sales.order_items.order_id"
+    ]
+  },
+  {
+    "id": "coverage-table-075",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem hóa đơn bán hàng",
+    "expected_tables": [
+      "sales.invoices"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-075",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của hóa đơn bán hàng",
+    "expected_tables": [
+      "sales.invoices"
+    ],
+    "expected_columns": [
+      "sales.invoices.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-076",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho toi xem chi tiet hoa don ban hang",
+    "expected_tables": [
+      "sales.invoice_items"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-076",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã hóa đơn bán hàng của chi tiết hóa đơn bán hàng",
+    "expected_tables": [
+      "sales.invoice_items"
+    ],
+    "expected_columns": [
+      "sales.invoice_items.invoice_id"
+    ]
+  },
+  {
+    "id": "coverage-table-077",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Cho tôi xem thanh toán khách hàng",
+    "expected_tables": [
+      "sales.payments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-077",
+    "kind": "coverage",
+    "domain": "sales",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của thanh toán khách hàng",
+    "expected_tables": [
+      "sales.payments"
+    ],
+    "expected_columns": [
+      "sales.payments.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-078",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho tôi xem hệ thống tài khoản kế toán",
+    "expected_tables": [
+      "finance.chart_of_accounts"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-078",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của hệ thống tài khoản kế toán",
+    "expected_tables": [
+      "finance.chart_of_accounts"
+    ],
+    "expected_columns": [
+      "finance.chart_of_accounts.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-079",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho toi xem ky ke toan",
+    "expected_tables": [
+      "finance.fiscal_periods"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-079",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của kỳ kế toán",
+    "expected_tables": [
+      "finance.fiscal_periods"
+    ],
+    "expected_columns": [
+      "finance.fiscal_periods.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-080",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho tôi xem bút toán kế toán",
+    "expected_tables": [
+      "finance.journal_entries"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-080",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của bút toán kế toán",
+    "expected_tables": [
+      "finance.journal_entries"
+    ],
+    "expected_columns": [
+      "finance.journal_entries.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-081",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho tôi xem chi tiết bút toán",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-081",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã bút toán kế toán của chi tiết bút toán",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.journal_entry_id"
+    ]
+  },
+  {
+    "id": "coverage-table-082",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho toi xem ngan sach",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-082",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của ngân sách",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-083",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho tôi xem hóa đơn nhà cung cấp",
+    "expected_tables": [
+      "finance.vendor_bills"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-083",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của hóa đơn nhà cung cấp",
+    "expected_tables": [
+      "finance.vendor_bills"
+    ],
+    "expected_columns": [
+      "finance.vendor_bills.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-084",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho tôi xem chi tiết hóa đơn nhà cung cấp",
+    "expected_tables": [
+      "finance.vendor_bill_lines"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-084",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã hóa đơn nhà cung cấp của chi tiết hóa đơn nhà cung cấp",
+    "expected_tables": [
+      "finance.vendor_bill_lines"
+    ],
+    "expected_columns": [
+      "finance.vendor_bill_lines.vendor_bill_id"
+    ]
+  },
+  {
+    "id": "coverage-table-085",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Cho toi xem thanh toan nha cung cap",
+    "expected_tables": [
+      "finance.vendor_payments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-085",
+    "kind": "coverage",
+    "domain": "finance",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của thanh toán nhà cung cấp",
+    "expected_tables": [
+      "finance.vendor_payments"
+    ],
+    "expected_columns": [
+      "finance.vendor_payments.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-086",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho tôi xem yêu cầu hỗ trợ",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-086",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của yêu cầu hỗ trợ",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-087",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho tôi xem bình luận phiếu hỗ trợ",
+    "expected_tables": [
+      "support.ticket_comments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-087",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã yêu cầu hỗ trợ của bình luận phiếu hỗ trợ",
+    "expected_tables": [
+      "support.ticket_comments"
+    ],
+    "expected_columns": [
+      "support.ticket_comments.ticket_id"
+    ]
+  },
+  {
+    "id": "coverage-table-088",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho toi xem phan cong ho tro",
+    "expected_tables": [
+      "support.ticket_assignments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-088",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã yêu cầu hỗ trợ của phân công hỗ trợ",
+    "expected_tables": [
+      "support.ticket_assignments"
+    ],
+    "expected_columns": [
+      "support.ticket_assignments.ticket_id"
+    ]
+  },
+  {
+    "id": "coverage-table-089",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho tôi xem lịch sử trạng thái hỗ trợ",
+    "expected_tables": [
+      "support.ticket_status_history"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-089",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã yêu cầu hỗ trợ của lịch sử trạng thái hỗ trợ",
+    "expected_tables": [
+      "support.ticket_status_history"
+    ],
+    "expected_columns": [
+      "support.ticket_status_history.ticket_id"
+    ]
+  },
+  {
+    "id": "coverage-table-090",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho tôi xem chính sách sla",
+    "expected_tables": [
+      "support.sla_policies"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-090",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của chính sách sla",
+    "expected_tables": [
+      "support.sla_policies"
+    ],
+    "expected_columns": [
+      "support.sla_policies.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-091",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho toi xem su kien sla",
+    "expected_tables": [
+      "support.ticket_sla_events"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-091",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã yêu cầu hỗ trợ của sự kiện sla",
+    "expected_tables": [
+      "support.ticket_sla_events"
+    ],
+    "expected_columns": [
+      "support.ticket_sla_events.ticket_id"
+    ]
+  },
+  {
+    "id": "coverage-table-092",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Cho tôi xem bài viết kiến thức",
+    "expected_tables": [
+      "support.knowledge_articles"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-092",
+    "kind": "coverage",
+    "domain": "support",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của bài viết kiến thức",
+    "expected_tables": [
+      "support.knowledge_articles"
+    ],
+    "expected_columns": [
+      "support.knowledge_articles.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-093",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho tôi xem nhật ký api",
+    "expected_tables": [
+      "audit.api_logs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-093",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhật ký api",
+    "expected_tables": [
+      "audit.api_logs"
+    ],
+    "expected_columns": [
+      "audit.api_logs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-094",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho toi xem nhat ky kiem toan",
+    "expected_tables": [
+      "audit.audit_logs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-094",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhật ký kiểm toán",
+    "expected_tables": [
+      "audit.audit_logs"
+    ],
+    "expected_columns": [
+      "audit.audit_logs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-095",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho tôi xem nhật ký truy cập dữ liệu",
+    "expected_tables": [
+      "audit.data_access_logs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-095",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhật ký truy cập dữ liệu",
+    "expected_tables": [
+      "audit.data_access_logs"
+    ],
+    "expected_columns": [
+      "audit.data_access_logs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-096",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho tôi xem nhật ký lỗi",
+    "expected_tables": [
+      "audit.error_logs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-096",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhật ký lỗi",
+    "expected_tables": [
+      "audit.error_logs"
+    ],
+    "expected_columns": [
+      "audit.error_logs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-097",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho toi xem lan chay tac vu",
+    "expected_tables": [
+      "audit.job_runs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-097",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của lần chạy tác vụ",
+    "expected_tables": [
+      "audit.job_runs"
+    ],
+    "expected_columns": [
+      "audit.job_runs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-098",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho tôi xem sự kiện hệ thống",
+    "expected_tables": [
+      "audit.system_events"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-098",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của sự kiện hệ thống",
+    "expected_tables": [
+      "audit.system_events"
+    ],
+    "expected_columns": [
+      "audit.system_events.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-099",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho tôi xem nhật ký truy vấn text2sql",
+    "expected_tables": [
+      "audit.text2sql_query_logs"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-099",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã đơn vị thuê hệ thống của nhật ký truy vấn text2sql",
+    "expected_tables": [
+      "audit.text2sql_query_logs"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_logs.tenant_id"
+    ]
+  },
+  {
+    "id": "coverage-table-100",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Cho toi xem phan hoi truy van text2sql",
+    "expected_tables": [
+      "audit.text2sql_query_feedback"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "coverage-column-100",
+    "kind": "coverage",
+    "domain": "audit",
+    "question": "Liệt kê mã nhật ký truy vấn text2sql của phản hồi truy vấn text2sql",
+    "expected_tables": [
+      "audit.text2sql_query_feedback"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_feedback.query_log_id"
+    ]
+  },
+  {
+    "id": "challenge-001",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "doanh thu khách hàng theo chi nhánh",
+    "expected_tables": [
+      "sales.orders",
+      "customer.customers",
+      "org.branches"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount"
+    ]
+  },
+  {
+    "id": "challenge-002",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "doanh thu chi nhanh HCM!!!",
+    "expected_tables": [
+      "sales.orders",
+      "org.branches"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount"
+    ]
+  },
+  {
+    "id": "challenge-003",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "khách hàng",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-004",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "nhân viên",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-005",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "employee salary",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.employees.base_salary"
+    ]
+  },
+  {
+    "id": "challenge-006",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "tên sản phẩm",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.name"
+    ]
+  },
+  {
+    "id": "challenge-007",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "tên khách hàng",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.name"
+    ]
+  },
+  {
+    "id": "challenge-008",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "số điện thoại khách hàng",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.phone"
+    ]
+  },
+  {
+    "id": "challenge-009",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "lương nhân viên tại chi nhánh hà nội",
+    "expected_tables": [
+      "hr.employees",
+      "org.branches"
+    ],
+    "expected_columns": [
+      "hr.employees.base_salary"
+    ]
+  },
+  {
+    "id": "challenge-010",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "top 5 sản phẩm bán chạy của khách hàng vip tại chi nhánh hcm tháng trước",
+    "expected_tables": [
+      "product.products",
+      "sales.order_items",
+      "sales.orders",
+      "customer.customers",
+      "customer.customer_groups",
+      "org.branches"
+    ],
+    "expected_columns": [
+      "sales.order_items.quantity",
+      "customer.customers.vip_flag"
+    ]
+  },
+  {
+    "id": "challenge-011",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "doanh thu tháng 8 năm 2026",
+    "expected_tables": [
+      "sales.orders"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount"
+    ]
+  },
+  {
+    "id": "challenge-012",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "tổng giá trị đơn hàng theo khách hàng",
+    "expected_tables": [
+      "sales.orders",
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "sales.orders.total_amount"
+    ]
+  },
+  {
+    "id": "challenge-013",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "đơn mua hàng của nhà cung cấp",
+    "expected_tables": [
+      "procurement.purchase_orders",
+      "procurement.suppliers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-014",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "báo giá nhà cung cấp còn hiệu lực",
+    "expected_tables": [
+      "procurement.supplier_quotes"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-015",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "chi tiet phieu nhap hang va so luong tu choi",
+    "expected_tables": [
+      "procurement.goods_receipt_items"
+    ],
+    "expected_columns": [
+      "procurement.goods_receipt_items.rejected_qty"
+    ]
+  },
+  {
+    "id": "challenge-016",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "nhà cung cấp có điểm đánh giá cao",
+    "expected_tables": [
+      "procurement.suppliers"
+    ],
+    "expected_columns": [
+      "procurement.suppliers.rating"
+    ]
+  },
+  {
+    "id": "challenge-017",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "yêu cầu mua hàng theo phòng ban",
+    "expected_tables": [
+      "procurement.purchase_requisitions",
+      "org.departments"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-018",
+    "kind": "challenge",
+    "domain": "procurement",
+    "question": "chi tiết đơn mua hàng có số lượng đã nhận",
+    "expected_tables": [
+      "procurement.purchase_order_items"
+    ],
+    "expected_columns": [
+      "procurement.purchase_order_items.received_qty"
+    ]
+  },
+  {
+    "id": "challenge-019",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "hợp đồng lao động theo ngày ký",
+    "expected_tables": [
+      "hr.employment_contracts"
+    ],
+    "expected_columns": [
+      "hr.employment_contracts.signed_date"
+    ]
+  },
+  {
+    "id": "challenge-020",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "chấm công nhân viên theo giờ tăng ca",
+    "expected_tables": [
+      "hr.attendance_records",
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.attendance_records.overtime_hours"
+    ]
+  },
+  {
+    "id": "challenge-021",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "phiếu lương gồm tiền thưởng và lương thực nhận",
+    "expected_tables": [
+      "hr.payroll_details"
+    ],
+    "expected_columns": [
+      "hr.payroll_details.bonus",
+      "hr.payroll_details.net_salary"
+    ]
+  },
+  {
+    "id": "challenge-022",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "don nghi phep theo ngay bat dau",
+    "expected_tables": [
+      "hr.leave_requests"
+    ],
+    "expected_columns": [
+      "hr.leave_requests.start_date"
+    ]
+  },
+  {
+    "id": "challenge-023",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "đánh giá nhân viên có điểm năng lực",
+    "expected_tables": [
+      "hr.performance_reviews"
+    ],
+    "expected_columns": [
+      "hr.performance_reviews.competency_score"
+    ]
+  },
+  {
+    "id": "challenge-024",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "kết quả đào tạo theo tên khóa học",
+    "expected_tables": [
+      "hr.training_records"
+    ],
+    "expected_columns": [
+      "hr.training_records.course_name"
+    ]
+  },
+  {
+    "id": "challenge-025",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "phúc lợi nhân viên theo loại phúc lợi",
+    "expected_tables": [
+      "hr.employee_benefits"
+    ],
+    "expected_columns": [
+      "hr.employee_benefits.benefit_type"
+    ]
+  },
+  {
+    "id": "challenge-026",
+    "kind": "challenge",
+    "domain": "org",
+    "question": "chi nhánh theo tên",
+    "expected_tables": [
+      "org.branches"
+    ],
+    "expected_columns": [
+      "org.branches.name"
+    ]
+  },
+  {
+    "id": "challenge-027",
+    "kind": "challenge",
+    "domain": "org",
+    "question": "phòng ban thuộc chi nhánh",
+    "expected_tables": [
+      "org.departments",
+      "org.branches"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-028",
+    "kind": "challenge",
+    "domain": "org",
+    "question": "trung tâm chi phí có ngân sách năm",
+    "expected_tables": [
+      "org.cost_centers"
+    ],
+    "expected_columns": [
+      "org.cost_centers.annual_budget"
+    ]
+  },
+  {
+    "id": "challenge-029",
+    "kind": "challenge",
+    "domain": "org",
+    "question": "dia diem tai thanh pho ho chi minh",
+    "expected_tables": [
+      "org.locations"
+    ],
+    "expected_columns": [
+      "org.locations.city"
+    ]
+  },
+  {
+    "id": "challenge-030",
+    "kind": "challenge",
+    "domain": "org",
+    "question": "đơn vị thuê hệ thống theo mã số thuế",
+    "expected_tables": [
+      "org.tenants"
+    ],
+    "expected_columns": [
+      "org.tenants.tax_code"
+    ]
+  },
+  {
+    "id": "challenge-031",
+    "kind": "challenge",
+    "domain": "iam",
+    "question": "vai trò của người dùng",
+    "expected_tables": [
+      "iam.roles",
+      "iam.users"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-032",
+    "kind": "challenge",
+    "domain": "iam",
+    "question": "phiên đăng nhập theo địa chỉ ip",
+    "expected_tables": [
+      "iam.login_sessions"
+    ],
+    "expected_columns": [
+      "iam.login_sessions.ip_address"
+    ]
+  },
+  {
+    "id": "challenge-033",
+    "kind": "challenge",
+    "domain": "iam",
+    "question": "chính sách truy cập cột có kiểu che dữ liệu",
+    "expected_tables": [
+      "iam.column_access_policies"
+    ],
+    "expected_columns": [
+      "iam.column_access_policies.mask_type"
+    ]
+  },
+  {
+    "id": "challenge-034",
+    "kind": "challenge",
+    "domain": "iam",
+    "question": "phạm vi dữ liệu người dùng theo loại phạm vi",
+    "expected_tables": [
+      "iam.user_scopes"
+    ],
+    "expected_columns": [
+      "iam.user_scopes.scope_type"
+    ]
+  },
+  {
+    "id": "challenge-035",
+    "kind": "challenge",
+    "domain": "iam",
+    "question": "quyền hệ thống theo hành động",
+    "expected_tables": [
+      "iam.permissions"
+    ],
+    "expected_columns": [
+      "iam.permissions.action"
+    ]
+  },
+  {
+    "id": "challenge-036",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "phan khuc khach hang va nhom khach hang",
+    "expected_tables": [
+      "customer.customer_segments",
+      "customer.customer_groups"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-037",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "người liên hệ có điện thoại",
+    "expected_tables": [
+      "customer.contacts"
+    ],
+    "expected_columns": [
+      "customer.contacts.phone"
+    ]
+  },
+  {
+    "id": "challenge-038",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "địa chỉ khách hàng theo loại địa chỉ",
+    "expected_tables": [
+      "customer.customer_addresses"
+    ],
+    "expected_columns": [
+      "customer.customer_addresses.address_type"
+    ]
+  },
+  {
+    "id": "challenge-039",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "người phụ trách khách hàng được phân công khi nào",
+    "expected_tables": [
+      "customer.customer_owners"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-040",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "biến thể sản phẩm theo giá bán",
+    "expected_tables": [
+      "product.product_variants"
+    ],
+    "expected_columns": [
+      "product.product_variants.selling_price"
+    ]
+  },
+  {
+    "id": "challenge-041",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "sản phẩm theo giá vốn tiêu chuẩn",
+    "expected_tables": [
+      "product.products"
+    ],
+    "expected_columns": [
+      "product.products.standard_cost"
+    ]
+  },
+  {
+    "id": "challenge-042",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "chi tiết bảng giá có đơn giá",
+    "expected_tables": [
+      "product.price_list_items"
+    ],
+    "expected_columns": [
+      "product.price_list_items.unit_price"
+    ]
+  },
+  {
+    "id": "challenge-043",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "thuong hieu va danh muc san pham",
+    "expected_tables": [
+      "product.brands",
+      "product.categories"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-044",
+    "kind": "challenge",
+    "domain": "product",
+    "question": "giá trị thuộc tính sản phẩm dạng số",
+    "expected_tables": [
+      "product.product_attribute_values"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-045",
+    "kind": "challenge",
+    "domain": "inventory",
+    "question": "số lượng tồn kho tại kho hàng",
+    "expected_tables": [
+      "inventory.inventory_balances",
+      "inventory.warehouses"
+    ],
+    "expected_columns": [
+      "inventory.inventory_balances.qty_on_hand"
+    ]
+  },
+  {
+    "id": "challenge-046",
+    "kind": "challenge",
+    "domain": "inventory",
+    "question": "lô hàng theo hạn sử dụng",
+    "expected_tables": [
+      "inventory.stock_lots"
+    ],
+    "expected_columns": [
+      "inventory.stock_lots.expiry_date"
+    ]
+  },
+  {
+    "id": "challenge-047",
+    "kind": "challenge",
+    "domain": "inventory",
+    "question": "khu vực kho có sức chứa cao",
+    "expected_tables": [
+      "inventory.warehouse_zones"
+    ],
+    "expected_columns": [
+      "inventory.warehouse_zones.capacity_qty"
+    ]
+  },
+  {
+    "id": "challenge-048",
+    "kind": "challenge",
+    "domain": "inventory",
+    "question": "điều chỉnh tồn kho theo số lượng chênh lệch",
+    "expected_tables": [
+      "inventory.stock_adjustments"
+    ],
+    "expected_columns": [
+      "inventory.stock_adjustments.variance_qty"
+    ]
+  },
+  {
+    "id": "challenge-049",
+    "kind": "challenge",
+    "domain": "inventory",
+    "question": "phiếu chuyển kho theo ngày chuyển kho",
+    "expected_tables": [
+      "inventory.stock_transfers"
+    ],
+    "expected_columns": [
+      "inventory.stock_transfers.transfer_date"
+    ]
+  },
+  {
+    "id": "challenge-050",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "chi tieu ban hang gom chi tieu doanh thu",
+    "expected_tables": [
+      "sales.sales_targets"
+    ],
+    "expected_columns": [
+      "sales.sales_targets.revenue_target"
+    ]
+  },
+  {
+    "id": "challenge-051",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "đại diện bán hàng theo tỷ lệ hoa hồng",
+    "expected_tables": [
+      "sales.sales_reps"
+    ],
+    "expected_columns": [
+      "sales.sales_reps.commission_rate"
+    ]
+  },
+  {
+    "id": "challenge-052",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "hóa đơn bán hàng theo ngày đến hạn",
+    "expected_tables": [
+      "sales.invoices"
+    ],
+    "expected_columns": [
+      "sales.invoices.due_date"
+    ]
+  },
+  {
+    "id": "challenge-053",
+    "kind": "challenge",
+    "domain": "sales",
+    "question": "thanh toán khách hàng theo phương thức thanh toán",
+    "expected_tables": [
+      "sales.payments"
+    ],
+    "expected_columns": [
+      "sales.payments.payment_method"
+    ]
+  },
+  {
+    "id": "challenge-054",
+    "kind": "challenge",
+    "domain": "finance",
+    "question": "ngân sách theo số tiền thực tế",
+    "expected_tables": [
+      "finance.budgets"
+    ],
+    "expected_columns": [
+      "finance.budgets.actual_amount"
+    ]
+  },
+  {
+    "id": "challenge-055",
+    "kind": "challenge",
+    "domain": "finance",
+    "question": "chi tiết bút toán theo số tiền ghi nợ",
+    "expected_tables": [
+      "finance.journal_entry_lines"
+    ],
+    "expected_columns": [
+      "finance.journal_entry_lines.debit_amount"
+    ]
+  },
+  {
+    "id": "challenge-056",
+    "kind": "challenge",
+    "domain": "finance",
+    "question": "bút toán kế toán theo ngày hạch toán",
+    "expected_tables": [
+      "finance.journal_entries"
+    ],
+    "expected_columns": [
+      "finance.journal_entries.entry_date"
+    ]
+  },
+  {
+    "id": "challenge-057",
+    "kind": "challenge",
+    "domain": "finance",
+    "question": "hoa don nha cung cap theo ngay den han",
+    "expected_tables": [
+      "finance.vendor_bills"
+    ],
+    "expected_columns": [
+      "finance.vendor_bills.due_date"
+    ]
+  },
+  {
+    "id": "challenge-058",
+    "kind": "challenge",
+    "domain": "finance",
+    "question": "kỳ kế toán theo năm tài chính",
+    "expected_tables": [
+      "finance.fiscal_periods"
+    ],
+    "expected_columns": [
+      "finance.fiscal_periods.fiscal_year"
+    ]
+  },
+  {
+    "id": "challenge-059",
+    "kind": "challenge",
+    "domain": "support",
+    "question": "yêu cầu hỗ trợ theo mức ưu tiên",
+    "expected_tables": [
+      "support.support_tickets"
+    ],
+    "expected_columns": [
+      "support.support_tickets.priority"
+    ]
+  },
+  {
+    "id": "challenge-060",
+    "kind": "challenge",
+    "domain": "support",
+    "question": "chính sách sla theo thời gian giải quyết",
+    "expected_tables": [
+      "support.sla_policies"
+    ],
+    "expected_columns": [
+      "support.sla_policies.resolution_minutes"
+    ]
+  },
+  {
+    "id": "challenge-061",
+    "kind": "challenge",
+    "domain": "support",
+    "question": "bài viết kiến thức nhiều lượt xem",
+    "expected_tables": [
+      "support.knowledge_articles"
+    ],
+    "expected_columns": [
+      "support.knowledge_articles.view_count"
+    ]
+  },
+  {
+    "id": "challenge-062",
+    "kind": "challenge",
+    "domain": "support",
+    "question": "phân công hỗ trợ hiện hành",
+    "expected_tables": [
+      "support.ticket_assignments"
+    ],
+    "expected_columns": [
+      "support.ticket_assignments.is_current"
+    ]
+  },
+  {
+    "id": "challenge-063",
+    "kind": "challenge",
+    "domain": "audit",
+    "question": "nhật ký api theo độ trễ mili giây",
+    "expected_tables": [
+      "audit.api_logs"
+    ],
+    "expected_columns": [
+      "audit.api_logs.latency_ms"
+    ]
+  },
+  {
+    "id": "challenge-064",
+    "kind": "challenge",
+    "domain": "audit",
+    "question": "nhat ky loi theo ma loi",
+    "expected_tables": [
+      "audit.error_logs"
+    ],
+    "expected_columns": [
+      "audit.error_logs.error_code"
+    ]
+  },
+  {
+    "id": "challenge-065",
+    "kind": "challenge",
+    "domain": "audit",
+    "question": "lần chạy tác vụ theo số dòng đã xử lý",
+    "expected_tables": [
+      "audit.job_runs"
+    ],
+    "expected_columns": [
+      "audit.job_runs.rows_processed"
+    ]
+  },
+  {
+    "id": "challenge-066",
+    "kind": "challenge",
+    "domain": "audit",
+    "question": "nhật ký truy vấn text2sql có trạng thái thực thi",
+    "expected_tables": [
+      "audit.text2sql_query_logs"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_logs.execution_status"
+    ]
+  },
+  {
+    "id": "challenge-067",
+    "kind": "challenge",
+    "domain": "audit",
+    "question": "phản hồi truy vấn text2sql theo điểm đánh giá",
+    "expected_tables": [
+      "audit.text2sql_query_feedback"
+    ],
+    "expected_columns": [
+      "audit.text2sql_query_feedback.rating"
+    ]
+  },
+  {
+    "id": "challenge-068",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "name customers",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.name"
+    ]
+  },
+  {
+    "id": "challenge-069",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "salary employee",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": [
+      "hr.employees.base_salary"
+    ]
+  },
+  {
+    "id": "challenge-070",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "custmoer",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-071",
+    "kind": "challenge",
+    "domain": "hr",
+    "question": "nhan vienn",
+    "expected_tables": [
+      "hr.employees"
+    ],
+    "expected_columns": []
+  },
+  {
+    "id": "challenge-072",
+    "kind": "challenge",
+    "domain": "customer",
+    "question": "so dien thoai khach hang",
+    "expected_tables": [
+      "customer.customers"
+    ],
+    "expected_columns": [
+      "customer.customers.phone"
+    ]
+  }
+]
