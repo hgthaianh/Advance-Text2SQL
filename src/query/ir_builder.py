@@ -1,9 +1,11 @@
 """Deterministically turn observed NLP and schema evidence into validated QueryIR."""
 
 from datetime import date
+from decimal import Decimal
+import re
 
 from src.nlp.entity_extractor import ExtractedEntity
-from src.query.ir import OrderBy, QueryFilter, QueryIR, SelectItem
+from src.query.ir import HavingCondition, OrderBy, QueryFilter, QueryIR, SelectItem
 from src.schema.registry import SchemaRegistry
 from src.shared.enums import Aggregation, FilterOperator, Intent, SortDirection
 from src.shared.exceptions import AmbiguousQueryError, MissingEntityError, UnsupportedQueryError
@@ -25,6 +27,13 @@ class QueryIRBuilder:
               entities: list[ExtractedEntity]) -> QueryIR:
         intent = _AGGREGATE_INTENTS.get(preprocessed.intent_result.intent, preprocessed.intent_result.intent)
         tables = self._tables(schema_links)
+        if intent == Intent.TOP_N:
+            # The linker marks transactional tables implied by "best-selling"
+            # as related business concepts. They are necessary to aggregate a
+            # product dimension, but remain below direct mention confidence.
+            tables = list(dict.fromkeys(tables + [
+                candidate.name.rsplit('.', 1)[0] for candidate in schema_links.columns if candidate.score >= 0.80
+            ]))
         if intent in {Intent.UNKNOWN, Intent.DETAIL, Intent.LIST, Intent.SELECT, Intent.FILTER}:
             if not tables:
                 raise UnsupportedQueryError('No supported schema concept was found')
@@ -75,8 +84,11 @@ class QueryIRBuilder:
             assert isinstance(value_column, SelectItem)
             order_by = [OrderBy(column=value_column.column, aggregation=aggregate, direction=SortDirection.DESC)]
 
+        having_column = next((item.column for item in select if isinstance(item, SelectItem)), None)
+        having = self._having(preprocessed, having_column,
+                              aggregate or (Aggregation.SUM if intent == Intent.TOP_N else None), group_by)
         return QueryIR(intent=intent, tables=tables, select=select, filters=filters,
-                       group_by=group_by, order_by=order_by, top_k=top_k)
+                       having=having, group_by=group_by, order_by=order_by, top_k=top_k)
 
     def _tables(self, links: SchemaLinkResult) -> list[str]:
         # Only strong semantic table evidence establishes the query context.
@@ -138,7 +150,11 @@ class QueryIRBuilder:
         targets = {
             'customer_type': 'customer.customers.customer_type',
             'department_name': 'org.departments.name',
+            'department_code': 'org.departments.code',
             'branch_name': 'org.branches.name',
+            'branch_code': 'org.branches.code',
+            'product_code': 'product.products.code',
+            'customer_code': 'customer.customers.code',
         }
         for entity in entities:
             target = targets.get(entity.entity_type)
@@ -154,6 +170,27 @@ class QueryIRBuilder:
                 all_tables.append(owner)
             filters.append(QueryFilter(column=target, operator=FilterOperator.EQ, value=entity.normalized_value))
         return filters, all_tables
+
+    @staticmethod
+    def _having(preprocessed: PreprocessedQuery, value_column: str | None,
+                aggregation: Aggregation | None, group_by: list[str]) -> list[HavingCondition]:
+        """Build one explicit aggregate threshold, only after a GROUP BY exists."""
+        if not group_by or not value_column or not aggregation:
+            return []
+        text = preprocessed.accent_stripped_text
+        match = re.search(r'\b(tren|lon hon|it nhat|tu|duoi|nho hon)\s+(\d+(?:[.,]\d+)?)\b', text)
+        if not match:
+            return []
+        phrase, literal = match.groups()
+        value = next((number.value for number in preprocessed.numbers if number.raw_text == literal), None)
+        if value is None:
+            value = Decimal(literal.replace(',', '.'))
+        operator = {
+            'tren': FilterOperator.GT, 'lon hon': FilterOperator.GT,
+            'it nhat': FilterOperator.GTE, 'tu': FilterOperator.GTE,
+            'duoi': FilterOperator.LT, 'nho hon': FilterOperator.LT,
+        }[phrase]
+        return [HavingCondition(column=value_column, aggregation=aggregation, operator=operator, value=value)]
 
     @staticmethod
     def _top_k(preprocessed: PreprocessedQuery) -> int:

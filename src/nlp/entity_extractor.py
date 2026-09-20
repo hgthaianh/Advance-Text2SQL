@@ -1,4 +1,4 @@
-"""Small deterministic business-value extractor used by the production bridge."""
+"""Deterministic catalog and code extraction for the production pipeline."""
 
 from abc import ABC, abstractmethod
 import re
@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from src.nlp.entity_catalog import EntityCatalog
 from src.nlp.normalizer import Normalizer, strip_accents
 
 
@@ -37,40 +38,33 @@ class EntityExtractor(ABC):
 
 
 class DeterministicEntityExtractor(EntityExtractor):
-    """Recognize a conservative set of common Vietnamese business values."""
+    """Extract exact catalog values and explicitly labelled business codes."""
 
-    _VALUES: tuple[tuple[str, str, str], ...] = (
-        ('vip', 'VIP', 'customer_type'),
-        ('da hoan thanh', 'COMPLETED', 'status'),
-        ('hoan thanh', 'COMPLETED', 'status'),
-        ('cho xu ly', 'PENDING', 'status'),
-        ('dang xu ly', 'PENDING', 'status'),
-        ('huy', 'CANCELLED', 'status'),
-        ('hcm', 'Hồ Chí Minh', 'branch_name'),
-        ('ho chi minh', 'Hồ Chí Minh', 'branch_name'),
-        ('ha noi', 'Hà Nội', 'branch_name'),
+    _CODE_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+        ('branch_code', re.compile(r'\b(?:ma\s+chi\s+nhanh|branch\s+code|cn)\b\s*[:#-]?\s*([a-z][a-z0-9_-]*)\b')),
+        ('department_code', re.compile(r'\b(?:ma\s+(?:phong\s+ban|bo\s+phan)|department\s+code|pb)\b\s*[:#-]?\s*([a-z][a-z0-9_-]*)\b')),
+        ('product_code', re.compile(r'\b(?:ma\s+san\s+pham|product\s+code|sp)\b\s*[:#-]?\s*([a-z][a-z0-9_-]*)\b')),
+        ('customer_code', re.compile(r'\b(?:ma\s+khach\s+hang|customer\s+code|kh)\b\s*[:#-]?\s*([a-z][a-z0-9_-]*)\b')),
     )
-    _DEPARTMENT = re.compile(r'\b(?:phong|bo phan)\s+([\w\s]{2,40}?)(?=\s+(?:tai|theo|va|thang|nam)\b|$)')
 
-    def __init__(self, normalizer: Normalizer | None = None) -> None:
+    def __init__(self, normalizer: Normalizer | None = None, catalog: EntityCatalog | None = None) -> None:
         self.normalizer = normalizer or Normalizer()
+        self.catalog = catalog or EntityCatalog.default()
 
     def extract(self, text: str) -> list[ExtractedEntity]:
         normalized = self.normalizer.normalize(text).normalized_text
         folded = strip_accents(normalized)
         entities: list[ExtractedEntity] = []
-        for surface, value, entity_type in self._VALUES:
-            match = re.search(rf'(?<!\w){re.escape(surface)}(?!\w)', folded)
-            if match:
+        for match in self.catalog.match(normalized):
+            entities.append(ExtractedEntity(
+                text=normalized[match.start:match.end], normalized_value=match.value,
+                entity_type=match.entity_type, start=match.start, end=match.end, confidence=1.0,
+            ))
+        for entity_type, pattern in self._CODE_PATTERNS:
+            for match in pattern.finditer(folded):
+                start, end = match.span(1)
                 entities.append(ExtractedEntity(
-                    text=normalized[match.start():match.end()], normalized_value=value,
-                    entity_type=entity_type, start=match.start(), end=match.end(), confidence=1.0,
+                    text=normalized[start:end], normalized_value=match.group(1).upper(),
+                    entity_type=entity_type, start=start, end=end, confidence=1.0,
                 ))
-        for match in self._DEPARTMENT.finditer(folded):
-            value = match.group(1).strip()
-            if value:
-                entities.append(ExtractedEntity(
-                    text=normalized[match.start(1):match.end(1)], normalized_value=value.title(),
-                    entity_type='department_name', start=match.start(1), end=match.end(1), confidence=0.9,
-                ))
-        return entities
+        return sorted(entities, key=lambda item: (item.start or 0, item.end or 0, item.entity_type))

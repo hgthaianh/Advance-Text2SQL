@@ -1,6 +1,9 @@
 """Thin production orchestration of existing deterministic pipeline stages."""
 
 from datetime import date
+import logging
+from time import perf_counter
+from uuid import uuid4
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
@@ -12,6 +15,7 @@ from src.nlp.robustness import NLPRobustnessProcessor
 from src.permission.column_policy import DefaultColumnPolicy
 from src.permission.resolver import DefaultPermissionResolver, PermissionResolver
 from src.permission.row_policy import ScopedRowPolicy
+from src.pipeline.observability import LoggingPipelineObserver, PipelineEvent, PipelineObserver, elapsed_ms
 from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
@@ -32,7 +36,8 @@ class Text2SQLPipeline:
                  nlp: NLPRobustnessProcessor | None = None, linker: SchemaLinker | None = None,
                  entity_extractor: EntityExtractor | None = None, ir_builder: QueryIRBuilder | None = None,
                  permission_resolver: PermissionResolver | None = None,
-                 validator: SQLValidator | None = None, executor: ReadOnlyExecutor | None = None) -> None:
+                 validator: SQLValidator | None = None, executor: ReadOnlyExecutor | None = None,
+                 observer: PipelineObserver | None = None) -> None:
         self.registry = registry or SchemaRegistry()
         self.nlp = nlp or NLPRobustnessProcessor()
         self.linker = linker or SchemaLinker(self.registry)
@@ -49,26 +54,50 @@ class Text2SQLPipeline:
             engine = engine or create_engine(get_settings().database_url, pool_pre_ping=True)
             executor = ReadOnlyExecutor(engine, timeout_ms=get_settings().query_timeout_ms)
         self.executor = executor
+        self.observer = observer or LoggingPipelineObserver()
 
     def execute(self, question: str, user_context: UserContext, *, reference_date: date | None = None) -> QueryResult:
         """Return data or a controlled public failure; never expose a traceback."""
+        query_id = uuid4().hex
+        started_at = perf_counter()
+        stage = 'preprocess'
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
+            stage = 'schema_linking'
             links = self.linker.link(preprocessed)
+            stage = 'entity_extraction'
             entities = self.entity_extractor.extract(question)
+            stage = 'ir_construction'
             query = self.ir_builder.build(preprocessed, links, entities)
+            stage = 'permission_resolution'
             permissions = self.permission_resolver.resolve(user_context)
             query = self.row_policy.apply(query, permissions)
             # First planning discovers bridge tables; scope filters are then
             # expanded across every tenant-owned table in that validated path.
             preliminary_plan = self.handler.planner.plan(query)
             query = self.row_policy.apply(query, permissions, tables=preliminary_plan.tables)
+            stage = 'sql_compilation'
             self.column_policy.validate(query, permissions)
             compiled = self.handler.handle(query)
+            stage = 'sql_validation'
             self.validator.validate(compiled.statement, permissions)
-            return self.executor.execute(compiled)
+            stage = 'execution'
+            result = self.executor.execute(compiled).model_copy(update={'query_id': query_id})
+            self._record(PipelineEvent(query_id=query_id, outcome='success', stage=stage,
+                                       duration_ms=elapsed_ms(started_at)))
+            return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
-            return QueryResult(success=False, error_code=self._error_code(exc), message=self._message(exc))
+            error_code = self._error_code(exc)
+            self._record(PipelineEvent(query_id=query_id, outcome='failure', stage=stage,
+                                       duration_ms=elapsed_ms(started_at), error_code=error_code))
+            return QueryResult(success=False, query_id=query_id, error_code=error_code, message=self._message(exc))
+
+    def _record(self, event: PipelineEvent) -> None:
+        """Observability must not change a completed query's public outcome."""
+        try:
+            self.observer.record(event)
+        except Exception:
+            logging.getLogger('text2sql.pipeline').exception('pipeline observer failed')
 
     @staticmethod
     def _error_code(exc: Exception) -> str:

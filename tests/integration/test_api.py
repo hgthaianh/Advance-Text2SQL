@@ -17,18 +17,24 @@ def test_health():
 
 def test_query_uses_real_pipeline_not_mock():
     with TestClient(app) as client:
-        response = client.post("/query", json={
-            "question": "List employees", "user": {"user_id": "demo", "role": "viewer"},
+        response = client.post("/query", json={"question": "List employees"}, headers={
+            'X-User-Id': 'demo', 'X-Role': 'viewer', 'X-Tenant-Id': 'T1',
         })
-    assert response.status_code == 200
-    result = QueryResult.model_validate(response.json())
-    assert result.is_mock is False
-    assert result.error_code is not None
+    assert response.status_code in {422, 503}
+    assert response.json()['error_code'] in {'UNSUPPORTED_QUERY', 'SQL_EXECUTION_ERROR'}
 
 
 def test_query_rejects_blank_question():
     with TestClient(app) as client:
-        response = client.post("/query", json={
-            "question": "   ", "user": {"user_id": "demo", "role": "viewer"},
+        response = client.post("/query", json={"question": "   "}, headers={
+            'X-User-Id': 'demo', 'X-Role': 'viewer', 'X-Tenant-Id': 'T1',
         })
     assert response.status_code == 422
+
+
+def test_query_rejects_request_body_identity_and_requires_auth_context():
+    with TestClient(app) as client:
+        response = client.post('/query', json={
+            'question': 'List employees', 'user': {'user_id': 'attacker', 'role': 'admin', 'tenant_id': 'T2'},
+        })
+    assert response.status_code == 401

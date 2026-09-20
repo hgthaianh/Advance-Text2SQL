@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.shared.enums import Intent
 
@@ -73,6 +73,7 @@ class SchemaRelationship(BaseModel):
 
 class QueryResult(BaseModel):
     success: bool = True
+    query_id: str | None = None
     columns: list[str] = Field(default_factory=list)
     rows: list[dict[str, Any]] = Field(default_factory=list)
     row_count: int = Field(default=0, ge=0)
@@ -85,8 +86,17 @@ class QueryResult(BaseModel):
 
 
 class QueryRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
     question: str = Field(min_length=1, max_length=2000, pattern=r"\S")
-    user: UserContext
+
+
+class ErrorResponse(BaseModel):
+    """Stable public error response; it never includes SQL or parameter values."""
+
+    query_id: str | None = None
+    error_code: str
+    message: str
 
 
 class DateRange(BaseModel):

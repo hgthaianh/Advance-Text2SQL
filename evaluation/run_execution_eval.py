@@ -3,6 +3,7 @@
 import argparse
 import json
 from datetime import date
+from datetime import datetime, timezone
 from pathlib import Path
 
 from sqlalchemy import create_engine
@@ -28,7 +29,24 @@ def run(cases_path: Path, database_url: str) -> dict:
             results.append({'id': case['id'], 'passed': passed, 'expected': expected, 'actual': result.model_dump(mode='json')})
     finally:
         engine.dispose()
-    return {'total_cases': len(results), 'passed': sum(row['passed'] for row in results), 'failed': sum(not row['passed'] for row in results), 'cases': results}
+    passed = sum(row['passed'] for row in results)
+    total = len(results)
+    return {
+        'total_cases': total, 'passed': passed, 'failed': total - passed,
+        'metrics': {'execution_pass_rate': passed / total if total else 0.0}, 'cases': results,
+    }
+
+
+def append_history(history_path: Path, report: dict) -> None:
+    """Append a metric-only evaluation sample; no question, identity or row data."""
+    sample = {
+        'recorded_at': datetime.now(timezone.utc).isoformat(),
+        'execution_pass_rate': report['metrics']['execution_pass_rate'],
+        'execution_total_cases': report['total_cases'],
+    }
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with history_path.open('a', encoding='utf-8') as handle:
+        handle.write(json.dumps(sample) + '\n')
 
 
 def main() -> None:
@@ -36,10 +54,12 @@ def main() -> None:
     parser.add_argument('--database-url', required=True)
     parser.add_argument('--cases', type=Path, default=ROOT / 'evaluation/execution_cases.json')
     parser.add_argument('--output', type=Path, default=ROOT / 'evaluation/results/execution_eval.json')
+    parser.add_argument('--history', type=Path, default=ROOT / 'evaluation/results/regression_history.jsonl')
     args = parser.parse_args()
     report = run(args.cases, args.database_url)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    append_history(args.history, report)
     print(json.dumps({key: report[key] for key in ('total_cases', 'passed', 'failed')}, indent=2))
 
 

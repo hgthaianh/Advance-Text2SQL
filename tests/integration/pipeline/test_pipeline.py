@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
 from src.pipeline.orchestrator import Text2SQLPipeline
+from src.pipeline.observability import PipelineEvent, PipelineObserver
 from src.shared.models import UserContext
 
 
@@ -105,6 +106,44 @@ def test_grouped_revenue_join_executes(pipeline: Text2SQLPipeline):
 
 
 def test_unsupported_question_is_controlled(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'thoi tiet hom nay the nao', UserContext(user_id='admin', role='admin', tenant_id='T1'))
+
+    assert not result.success
+    assert result.error_code == 'UNSUPPORTED_QUERY'
+
+
+class _CaptureObserver(PipelineObserver):
+    def __init__(self) -> None:
+        self.events: list[PipelineEvent] = []
+
+    def record(self, event: PipelineEvent) -> None:
+        self.events.append(event)
+
+
+def test_pipeline_observability_excludes_question_identity_and_values(pipeline: Text2SQLPipeline):
+    observer = _CaptureObserver()
+    pipeline.observer = observer
+    question = 'thoi tiet cua alice@example.com la gi'
+    result = _run(pipeline, question, UserContext(user_id='private-user', role='admin', tenant_id='T1'))
+
+    assert not result.success
+    assert len(observer.events) == 1
+    assert observer.events[0].query_id == result.query_id
+    assert observer.events[0].outcome == 'failure'
+    assert observer.events[0].stage == 'ir_construction'
+    assert observer.events[0].error_code == 'UNSUPPORTED_QUERY'
+    serialized = observer.events[0].model_dump_json()
+    assert question not in serialized
+    assert 'private-user' not in serialized
+    assert 'alice@example.com' not in serialized
+
+
+def test_observer_failure_does_not_change_controlled_pipeline_failure(pipeline: Text2SQLPipeline):
+    class BrokenObserver(PipelineObserver):
+        def record(self, event: PipelineEvent) -> None:
+            raise RuntimeError('collector unavailable')
+
+    pipeline.observer = BrokenObserver()
     result = _run(pipeline, 'thoi tiet hom nay the nao', UserContext(user_id='admin', role='admin', tenant_id='T1'))
 
     assert not result.success
