@@ -44,3 +44,23 @@ class AmbiguousJoinPathError(QueryValidationError):
 
 class MalformedQueryIRError(QueryValidationError):
     pass
+
+
+class UnsupportedQueryError(QueryValidationError):
+    """The deterministic pipeline cannot support the requested semantics."""
+
+
+class MissingEntityError(QueryValidationError):
+    """A query requires a value that was not present in the question."""
+
+
+class AmbiguousQueryError(QueryValidationError):
+    """Several schema interpretations remain equally plausible."""
+
+
+class SQLValidationError(QueryValidationError):
+    """A compiled statement is not safe for the read-only execution boundary."""
+
+
+class QueryExecutionError(Text2SQLError):
+    """Database execution failed without exposing internal connection details."""

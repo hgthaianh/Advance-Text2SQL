@@ -7,7 +7,7 @@ from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir import QueryFilter, QueryIR, SelectItem
 from src.schema.registry import SchemaRegistry
 from src.shared.enums import Aggregation, FilterOperator, Intent, PermissionScope
-from src.shared.models import SchemaColumn, SchemaTable, UserContext
+from src.shared.models import SchemaColumn, SchemaRelationship, SchemaTable, UserContext
 
 
 @pytest.fixture
@@ -100,3 +100,59 @@ def test_row_policy_branch_team_self_scopes():
     filters_s = ScopedRowPolicy.create_scope_filters(user_self, PermissionScope.SELF)
     assert filters_s[0].column == "employee_id"
     assert filters_s[0].value == "u3"
+
+
+def test_registry_aware_self_scope_uses_employee_primary_key():
+    registry = SchemaRegistry(tables=[SchemaTable(
+        name='employees', schema_name='hr',
+        columns=[SchemaColumn(name='id', data_type='text', primary_key=True)],
+    )])
+    resolver = DefaultPermissionResolver(registry)
+
+    permissions = resolver.resolve(UserContext(user_id='login-1', employee_id='E1', role='employee'))
+
+    assert permissions.row_filters[0].column == 'hr.employees.id'
+    assert permissions.row_filters[0].value == 'E1'
+    assert permissions.row_filters[0].source == 'permission'
+
+
+def test_department_scope_reaches_related_employee_table_and_tenant_filters_path():
+    registry = SchemaRegistry(
+        tables=[
+            SchemaTable(name='orders', schema_name='sales', columns=[
+                SchemaColumn(name='id', data_type='integer', primary_key=True),
+                SchemaColumn(name='tenant_id', data_type='text'),
+                SchemaColumn(name='sales_rep_id', data_type='integer'),
+            ]),
+            SchemaTable(name='sales_reps', schema_name='sales', columns=[
+                SchemaColumn(name='id', data_type='integer', primary_key=True),
+                SchemaColumn(name='tenant_id', data_type='text'),
+                SchemaColumn(name='employee_id', data_type='integer'),
+            ]),
+            SchemaTable(name='employees', schema_name='hr', columns=[
+                SchemaColumn(name='id', data_type='integer', primary_key=True),
+                SchemaColumn(name='tenant_id', data_type='text'),
+                SchemaColumn(name='department_id', data_type='text'),
+            ]),
+        ],
+        relationships=[
+            SchemaRelationship(source='sales.orders.sales_rep_id', target='sales.sales_reps.id'),
+            SchemaRelationship(source='sales.sales_reps.employee_id', target='hr.employees.id'),
+        ],
+    )
+    resolver = DefaultPermissionResolver(registry, require_tenant=True)
+    policy = ScopedRowPolicy(registry)
+    query = QueryIR(intent=Intent.COUNT, tables=['sales.orders'])
+    permissions = resolver.resolve(UserContext(
+        user_id='manager', role='department_manager', department_id='D1', tenant_id='T1',
+    ))
+
+    first = policy.apply(query, permissions)
+    assert {item.column for item in first.filters} == {'hr.employees.department_id', 'sales.orders.tenant_id'}
+
+    plan = BasicQueryHandler(registry).planner.plan(first)
+    final = policy.apply(first, permissions, tables=plan.tables)
+    assert {item.column for item in final.filters} == {
+        'hr.employees.department_id', 'sales.orders.tenant_id',
+        'sales.sales_reps.tenant_id', 'hr.employees.tenant_id',
+    }

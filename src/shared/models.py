@@ -16,6 +16,8 @@ class IntentResult(BaseModel):
 class UserContext(BaseModel):
     user_id: str = Field(min_length=1)
     role: str = Field(min_length=1)
+    tenant_id: str | None = None
+    employee_id: str | None = None
     department_id: str | None = None
     branch_id: str | None = None
     team_id: str | None = None
@@ -70,11 +72,15 @@ class SchemaRelationship(BaseModel):
 
 
 class QueryResult(BaseModel):
+    success: bool = True
     columns: list[str] = Field(default_factory=list)
     rows: list[dict[str, Any]] = Field(default_factory=list)
     row_count: int = Field(default=0, ge=0)
+    scalar: Any | None = None
     sql: str | None = None
+    params: dict[str, Any] = Field(default_factory=dict)
     is_mock: bool = False
+    error_code: str | None = None
     message: str | None = None
 
 

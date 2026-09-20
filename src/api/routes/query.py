@@ -1,18 +1,12 @@
 from fastapi import APIRouter
 
+from src.pipeline.orchestrator import Text2SQLPipeline
 from src.shared.models import QueryRequest, QueryResult
 
 router = APIRouter(tags=["query"])
+pipeline = Text2SQLPipeline()
 
 
 @router.post("/query", response_model=QueryResult)
 def query(request: QueryRequest) -> QueryResult:
-    # TODO: authenticate -> NLP -> schema linking -> IR -> permissions
-    # -> planning -> SQL validation -> execution -> formatting.
-    return QueryResult(
-        columns=["question"],
-        rows=[{"question": request.question}],
-        row_count=1,
-        is_mock=True,
-        message="Mock response; NLP and SQL execution are not implemented.",
-    )
+    return pipeline.execute(request.question, request.user)

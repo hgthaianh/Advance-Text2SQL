@@ -15,16 +15,15 @@ def test_health():
     assert response.json() == {"status": "ok"}
 
 
-def test_query_returns_mock():
+def test_query_uses_real_pipeline_not_mock():
     with TestClient(app) as client:
         response = client.post("/query", json={
             "question": "List employees", "user": {"user_id": "demo", "role": "viewer"},
         })
     assert response.status_code == 200
     result = QueryResult.model_validate(response.json())
-    assert result.is_mock is True
-    assert result.row_count == len(result.rows) == 1
-    assert result.sql is None
+    assert result.is_mock is False
+    assert result.error_code is not None
 
 
 def test_query_rejects_blank_question():

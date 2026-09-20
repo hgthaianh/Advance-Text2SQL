@@ -112,7 +112,10 @@ class DefaultColumnPolicy(ColumnPolicy):
                 columns.append(self._parse_col(col_str))
 
         for qf in query.filters:
-            if qf.column:
+            # Trusted permission constraints are schema-validated by the
+            # planner but are not user projections and need not appear in a
+            # user's display-column allowlist.
+            if qf.column and qf.source != 'permission':
                 columns.append(self._parse_col(qf.column))
 
         for gb in query.group_by:

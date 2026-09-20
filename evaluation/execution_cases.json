@@ -1,0 +1,41 @@
+{
+  "reference_date": "2026-09-20",
+  "cases": [
+    {
+      "id": "EXEC-001",
+      "question": "co bao nhieu nhan vien",
+      "user_context": {"user_id": "admin-t1", "role": "admin", "tenant_id": "T1"},
+      "expected": {"scalar": 3}
+    },
+    {
+      "id": "EXEC-002",
+      "question": "co bao nhieu nhan vien",
+      "user_context": {"user_id": "manager-t1", "role": "department_manager", "tenant_id": "T1", "department_id": "D1"},
+      "expected": {"scalar": 2}
+    },
+    {
+      "id": "EXEC-003",
+      "question": "co bao nhieu nhan vien",
+      "user_context": {"user_id": "admin-t2", "role": "admin", "tenant_id": "T2"},
+      "expected": {"scalar": 1}
+    },
+    {
+      "id": "EXEC-004",
+      "question": "thong tin nhan vien",
+      "user_context": {"user_id": "login-1", "employee_id": "E1", "role": "employee", "tenant_id": "T1"},
+      "expected": {"rows": [{"id": "E1"}]}
+    },
+    {
+      "id": "EXEC-005",
+      "question": "tong doanh thu khach hang vip thang 8 nam 2026",
+      "user_context": {"user_id": "admin-t1", "role": "admin", "tenant_id": "T1"},
+      "expected": {"scalar": 300}
+    },
+    {
+      "id": "EXEC-006",
+      "question": "luong nhan vien",
+      "user_context": {"user_id": "viewer-t1", "role": "viewer", "tenant_id": "T1"},
+      "expected": {"error_code": "PERMISSION_DENIED"}
+    }
+  ]
+}

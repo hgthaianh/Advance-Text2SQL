@@ -12,4 +12,5 @@ class PermissionContext(BaseModel):
     denied_columns: list[str] = Field(default_factory=list)
     row_filters: list[QueryFilter] = Field(default_factory=list)
     scope: PermissionScope = PermissionScope.GLOBAL
+    tenant_id: str | None = None
 
