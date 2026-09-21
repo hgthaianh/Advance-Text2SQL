@@ -1,5 +1,6 @@
 from src.nlp.entity_catalog import CatalogEntry, EntityCatalog
 from src.nlp.entity_extractor import DeterministicEntityExtractor
+import pytest
 
 
 def test_catalog_extracts_exact_business_values_and_labelled_codes():
@@ -38,3 +39,11 @@ def test_finance_context_does_not_turn_accounting_into_a_department_filter():
     values = DeterministicEntityExtractor().extract('he thong tai khoan ke toan')
 
     assert 'department_name' not in {item.entity_type for item in values}
+
+
+def test_catalog_rejects_alias_shared_by_different_business_values():
+    with pytest.raises(ValueError, match='Ambiguous catalog alias'):
+        EntityCatalog((
+            CatalogEntry('branch_name', 'North', ('north',)),
+            CatalogEntry('department_name', 'North', ('north',)),
+        ))

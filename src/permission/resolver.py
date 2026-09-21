@@ -49,17 +49,32 @@ class DefaultPermissionResolver(PermissionResolver):
                 tenant_id=user.tenant_id,
             )
 
-        # Determine scope from role or user context hierarchy
-        if role in ("branch_manager", "branch_admin") or (user.branch_id and not user.department_id):
+        # Scope comes from a recognized role, never optional request context.
+        # A missing scoped identity must deny rather than widening to tenant data.
+        if role in ("branch_manager", "branch_admin"):
             scope = PermissionScope.BRANCH
-        elif role in ("department_manager", "hr_manager", "hr") or user.department_id:
+            required_identity = user.branch_id
+            identity_name = 'branch'
+        elif role in ("department_manager", "hr_manager", "hr"):
             scope = PermissionScope.DEPARTMENT
-        elif role in ("team_lead", "supervisor") or user.team_id:
+            required_identity = user.department_id
+            identity_name = 'department'
+        elif role in ("team_lead", "supervisor"):
             scope = PermissionScope.TEAM
+            required_identity = user.team_id
+            identity_name = 'team'
         elif role in ("employee", "self"):
             scope = PermissionScope.SELF
-        else:
+            required_identity = user.employee_id
+            identity_name = 'employee'
+        elif role in ('viewer', 'analyst', 'read_only', 'payroll_admin'):
             scope = PermissionScope.GLOBAL
+            required_identity = True
+            identity_name = ''
+        else:
+            raise PermissionDeniedError('Unrecognized role')
+        if not required_identity:
+            raise PermissionDeniedError(f'{identity_name.capitalize()} identity is required for {scope.value} scope')
 
         scope_filters = ScopedRowPolicy.create_scope_filters(
             user, scope, self_column=self._self_scope_column() if scope == PermissionScope.SELF else 'employee_id',

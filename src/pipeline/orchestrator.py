@@ -22,7 +22,7 @@ from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
 from src.shared.exceptions import (
-    AmbiguousJoinPathError, AmbiguousQueryError, MissingEntityError,
+    AmbiguousJoinPathError, AmbiguousQueryError, InvalidTableError, MissingEntityError,
     PermissionDeniedError, QueryExecutionError, QueryValidationError,
     SQLValidationError, UnsupportedQueryError,
 )
@@ -76,7 +76,7 @@ class Text2SQLPipeline:
             stage = 'schema_linking'
             links = self.linker.link(preprocessed)
             stage = 'entity_extraction'
-            entities = self.entity_extractor.extract(question)
+            entities = self.entity_extractor.extract(preprocessed.normalized_text)
             stage = 'ir_construction'
             query = self.ir_builder.build(preprocessed, links, entities)
             stage = 'permission_resolution'
@@ -85,6 +85,7 @@ class Text2SQLPipeline:
             # First planning discovers bridge tables; scope filters are then
             # expanded across every tenant-owned table in that validated path.
             preliminary_plan = self.handler.planner.plan(query)
+            self._validate_table_access(preliminary_plan.tables, permissions.allowed_tables)
             query = self.row_policy.apply(query, permissions, tables=preliminary_plan.tables)
             stage = 'sql_compilation'
             self.column_policy.validate(query, permissions)
@@ -108,6 +109,20 @@ class Text2SQLPipeline:
             self.observer.record(event)
         except Exception:
             logging.getLogger('text2sql.pipeline').exception('pipeline observer failed')
+
+    def _validate_table_access(self, tables: list[str], allowed_tables: list[str]) -> None:
+        """Fail closed for requested and planner-added bridge tables."""
+        if '*' in allowed_tables:
+            return
+        if not allowed_tables:
+            raise PermissionDeniedError('Empty allowlist denies table access')
+        try:
+            allowed = {self.registry.resolve_table(table) for table in allowed_tables}
+        except InvalidTableError as exc:
+            raise PermissionDeniedError('Permission policy contains an unknown table') from exc
+        denied = sorted(set(tables) - allowed)
+        if denied:
+            raise PermissionDeniedError(f"Access denied to table '{denied[0]}'")
 
     @staticmethod
     def _error_code(exc: Exception) -> str:

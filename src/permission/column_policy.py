@@ -96,11 +96,6 @@ class DefaultColumnPolicy(ColumnPolicy):
             if "*" in allowed_list or col in allowed_list or f"{table}.{col}" in allowed_list:
                 return True
 
-        # Search by unqualified match across tables
-        for t, allowed_list in allowed_cols_map.items():
-            if t != "*" and ("*" in allowed_list or col in allowed_list):
-                return True
-
         return False
 
     def _extract_referenced_columns(self, query: QueryIR) -> list[tuple[str, str]]:

@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from src.api.dependencies import get_authenticated_user
 from src.main import app
 from src.shared.models import QueryResult
 
@@ -38,3 +39,10 @@ def test_query_rejects_request_body_identity_and_requires_auth_context():
             'question': 'List employees', 'user': {'user_id': 'attacker', 'role': 'admin', 'tenant_id': 'T2'},
         })
     assert response.status_code == 401
+
+
+def test_auth_dependency_preserves_team_identity():
+    user = get_authenticated_user(
+        x_user_id='team-lead', x_role='team_lead', x_tenant_id='T1', x_team_id='TEAM-1',
+    )
+    assert user.team_id == 'TEAM-1'

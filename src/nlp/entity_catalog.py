@@ -37,6 +37,8 @@ class EntityCatalog:
     def __init__(self, entries: Iterable[CatalogEntry] = ()) -> None:
         self.entries = tuple(entries)
         seen: set[tuple[str, str]] = set()
+        alias_targets: dict[str, tuple[str, str]] = {}
+        normalizer = Normalizer()
         for entry in self.entries:
             if not entry.aliases:
                 raise ValueError(f'Catalog entry {entry.entity_type}:{entry.value} has no aliases')
@@ -44,7 +46,13 @@ class EntityCatalog:
             if key in seen:
                 raise ValueError(f'Duplicate catalog value: {entry.entity_type}:{entry.value}')
             seen.add(key)
-        normalizer = Normalizer()
+            for alias in entry.aliases:
+                surface = strip_accents(normalizer.normalize(alias).normalized_text)
+                if not surface:
+                    raise ValueError(f'Empty catalog alias: {entry.entity_type}:{entry.value}')
+                previous = alias_targets.setdefault(surface, key)
+                if previous != key:
+                    raise ValueError(f'Ambiguous catalog alias: {alias}')
         self._surfaces = tuple(
             (entry.entity_type, entry.value, strip_accents(normalizer.normalize(alias).normalized_text))
             for entry in self.entries for alias in entry.aliases

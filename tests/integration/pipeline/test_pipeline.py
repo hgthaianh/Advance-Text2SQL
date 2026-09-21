@@ -7,6 +7,7 @@ from sqlalchemy.pool import StaticPool
 from src.pipeline.orchestrator import Text2SQLPipeline
 from src.pipeline.observability import PipelineEvent, PipelineObserver
 from src.nlp.scope_router import ScopeRouter
+from src.permission.models import PermissionContext
 from src.shared.models import UserContext
 
 
@@ -85,6 +86,22 @@ def test_self_scope_uses_employee_identity_and_real_primary_key(pipeline: Text2S
 
 def test_unauthorized_salary_is_controlled_denial(pipeline: Text2SQLPipeline):
     result = _run(pipeline, 'luong nhan vien', UserContext(user_id='viewer', role='viewer', tenant_id='T1'))
+
+    assert not result.success
+    assert result.error_code == 'PERMISSION_DENIED'
+
+
+def test_table_allowlist_denies_planner_added_join_table(pipeline: Text2SQLPipeline):
+    class OrdersOnlyResolver:
+        def resolve(self, _user):
+            return PermissionContext(
+                allowed_tables=['sales.orders'], allowed_columns={'*': ['*']}, tenant_id='T1',
+            )
+
+    pipeline.permission_resolver = OrdersOnlyResolver()
+    result = _run(pipeline, 'doanh thu theo chi nhanh', UserContext(
+        user_id='viewer', role='viewer', tenant_id='T1',
+    ))
 
     assert not result.success
     assert result.error_code == 'PERMISSION_DENIED'

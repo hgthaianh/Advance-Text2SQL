@@ -94,3 +94,16 @@ def test_wildcard_allowed_columns_passes():
     )
 
     policy.validate(query, permissions)
+
+
+def test_table_specific_column_allowlist_cannot_authorize_another_table():
+    policy = DefaultColumnPolicy()
+    permissions = PermissionContext(
+        allowed_tables=['*'], allowed_columns={'hr.employees': ['email']},
+    )
+    query = QueryIR(
+        intent=Intent.LOOKUP, tables=['customer.customers'], select=['customer.customers.email'],
+    )
+
+    with pytest.raises(PermissionDeniedError, match="customer.customers"):
+        policy.validate(query, permissions)

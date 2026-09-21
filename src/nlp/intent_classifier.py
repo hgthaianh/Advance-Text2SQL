@@ -157,9 +157,9 @@ class RuleBasedIntentClassifier(IntentClassifier):
             )
 
         except Exception as exc:
-            logger.error(f"Error during intent classification for query '{text}': {exc}", exc_info=True)
+            logger.error("Intent classification failed: %s", type(exc).__name__, exc_info=True)
             return IntentResult(
                 intent=Intent.UNKNOWN,
                 confidence=0.0,
-                reason=f"Classification error: {str(exc)}",
+                reason="Intent classification failed.",
             )
