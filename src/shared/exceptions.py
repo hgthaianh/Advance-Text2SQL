@@ -10,6 +10,11 @@ class PermissionDeniedError(Text2SQLError):
     pass
 
 
+class AuthenticationError(Text2SQLError):
+    """Caller authentication failed or identity could not be verified."""
+
+
+
 class UnsupportedIntentError(QueryValidationError):
     pass
 
