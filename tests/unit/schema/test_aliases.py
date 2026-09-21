@@ -192,3 +192,31 @@ def test_metrics_use_actual_predictions(registry):
     assert len(report['failures_at_10']) == 1
     with pytest.raises(ValueError, match='Duplicate case'):
         evaluate(linker, cases * 2)
+
+
+@pytest.mark.parametrize('question, expected_column', [
+    ('Choo xem số ngày nghỉ còn lại trong số dư nghỉ phép.', 'hr.leave_balances.remaining_days'),
+    ('Cho xem ngày học xong ghi trong kết quả đào tạo.', 'hr.training_records.completion_date'),
+    ('Các khách mua hàng đang hoạt động trong lĩnh vực nào?', 'customer.customers.industry'),
+    ('Mặt hàng chạm mức tồn nào thì phải đặt mua lại?', 'product.products.reorder_level'),
+    ('Nhiệt độ nhỏ nhất và lớn nhất được phép ở từng khu vực kho là bao nhiêu?', 'inventory.warehouse_zones.temperature_max'),
+    ('Mỗi lần xuất nhập kho có bao nhiêu đơn vị hàng?', 'inventory.inventory_transactions.quantity'),
+    ('Bộ phận yêu cầu mua hàng cần nhận hàng vào ngày nào?', 'procurement.purchase_requisitions.required_date'),
+    ('Khi nào hết thời gian nhận chào giá mua?', 'procurement.rfqs.closing_date'),
+    ('Cho xem hạn đóng của các yêu cầu báo giá mua.', 'procurement.rfqs.closing_date'),
+    ('Cho xem lượng hàng thực nhận trên chi tiết đơn mua hàng.', 'procurement.purchase_order_items.received_qty'),
+    ('Mỗi nhân viên bán hàng được giao doanh số mục tiêu bao nhiêu?', 'sales.sales_targets.revenue_target'),
+    ('Người mua đã trả tiền bằng hình thức nào?', 'sales.payments.payment_method'),
+    ('Lấy phương thức dùng để thanh toán khách hàng.', 'sales.payments.payment_method'),
+    ('Các tài khoản kế toán thuộc những loại nào?', 'finance.chart_of_accounts.account_type'),
+    ('Yêu cầu hỗ trợ được xử lý xong lúc nào?', 'support.support_tickets.resolved_at'),
+    ('Các sự kiện SLA chậm cam kết bao nhiêu phút?', 'support.ticket_sla_events.breach_minutes'),
+    ('Theo chính sách dịch vụ thì phải trả lời lần đầu trong bao lâu?', 'support.sla_policies.first_response_minutes'),
+    ('Phòng ban nào trực thuộc phòng ban nào?', 'org.departments.parent_department_id'),
+])
+def test_critical_business_column_aliases(registry, question, expected_column):
+    linker = SchemaLinker(registry)
+    result = linker.link(question, column_top_k=10)
+    candidate_cols = [col.name for col in result.columns]
+    assert expected_column in candidate_cols
+
