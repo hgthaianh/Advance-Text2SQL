@@ -65,6 +65,14 @@ class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=1, description="Valid refresh token")
 
 
+class LogoutRequest(BaseModel):
+    """Payload for POST /auth/logout."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    refresh_token: str = Field(min_length=1, description="Refresh token for the current session")
+
+
 class TokenResponse(BaseModel):
     """Token response returned upon successful login or token refresh."""
 

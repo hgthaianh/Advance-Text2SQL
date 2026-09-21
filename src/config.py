@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
@@ -17,10 +17,19 @@ class Settings(BaseSettings):
     postgres_db: str = "text2sql"
     postgres_user: str = "text2sql"
     postgres_password: SecretStr = SecretStr("text2sql")
-    auth_secret_key: SecretStr = SecretStr("change-me-in-production-text2sql-auth-secret-key-32b")
+    auth_secret_key: SecretStr
     auth_algorithm: str = "HS256"
     auth_access_token_expire_minutes: int = Field(default=30, ge=1)
     auth_refresh_token_expire_minutes: int = Field(default=60 * 24 * 7, ge=1)
+    cors_allowed_origins: str = ""
+
+    @field_validator("auth_secret_key")
+    @classmethod
+    def validate_auth_secret(cls, value: SecretStr) -> SecretStr:
+        secret = value.get_secret_value()
+        if len(secret) < 32 or secret.startswith("replace-with-"):
+            raise ValueError("AUTH_SECRET_KEY must be a unique secret of at least 32 characters")
+        return value
 
     @property
     def database_url(self) -> URL:
@@ -33,6 +42,10 @@ class Settings(BaseSettings):
             database=self.postgres_db,
             query={"connect_timeout": str(self.database_connect_timeout_s)},
         )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
 
 
 @lru_cache

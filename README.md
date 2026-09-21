@@ -13,7 +13,7 @@ cp .env.example .env
 # Windows PowerShell: Copy-Item .env.example .env
 ```
 
-Update PostgreSQL credentials in `.env` if needed.
+Update PostgreSQL credentials and set a unique `AUTH_SECRET_KEY` of at least 32 characters in `.env`.
 
 ## Run with Docker
 
@@ -31,6 +31,8 @@ python -m uvicorn src.main:app --reload
 
 API: http://localhost:8000. Swagger: http://localhost:8000/docs.
 `GET /health` checks liveness. `POST /query` runs the deterministic pipeline.
+Authentication uses `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, and `GET /auth/me`.
+The default provider verifies active users and password hashes from the IAM schema; it does not ship demo credentials.
 
 ## Test
 
