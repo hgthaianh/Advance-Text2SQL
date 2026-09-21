@@ -12,9 +12,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 
-from src.main import app
+from src.api.dependencies import get_authentication_provider
 from src.api.routes import query as query_module
+from src.auth.models import AuthenticatedIdentity
+from src.auth.provider import MockAuthenticationProvider
+from src.main import app
 from src.pipeline.orchestrator import Text2SQLPipeline
+from src.shared.exceptions import AuthenticationError
 from src.shared.models import UserContext
 
 
@@ -71,10 +75,44 @@ def sqlite_test_db():
 
 @pytest.fixture
 def test_client(sqlite_test_db: Text2SQLPipeline, monkeypatch: pytest.MonkeyPatch):
-    """Provide TestClient wired directly to the real API route with the test pipeline."""
+    """Provide TestClient wired directly to the real API route with the test pipeline and test auth provider."""
     monkeypatch.setattr(query_module, "pipeline", sqlite_test_db)
-    with TestClient(app) as client:
-        yield client
+
+    def test_authenticator(request):
+        user_id = request.headers.get("X-User-Id")
+        if user_id == "hr_mgr_user":
+            return AuthenticatedIdentity(
+                user_id="hr_mgr_user",
+                role="department_manager",
+                tenant_id="T1",
+                department_id="D2",
+            )
+        elif user_id == "sales_mgr_user":
+            return AuthenticatedIdentity(
+                user_id="sales_mgr_user",
+                role="department_manager",
+                tenant_id="T1",
+                department_id="D1",
+            )
+        elif user_id:
+            return AuthenticatedIdentity(
+                user_id=user_id,
+                role=request.headers.get("X-Role", "viewer"),
+                tenant_id=request.headers.get("X-Tenant-Id", "T1"),
+                department_id=request.headers.get("X-Department-Id"),
+                branch_id=request.headers.get("X-Branch-Id"),
+                team_id=request.headers.get("X-Team-Id"),
+                employee_id=request.headers.get("X-Employee-Id"),
+            )
+        raise AuthenticationError("Authentication required.")
+
+    app.dependency_overrides[get_authentication_provider] = lambda: MockAuthenticationProvider(test_authenticator)
+    try:
+        with TestClient(app) as client:
+            yield client
+    finally:
+        app.dependency_overrides.pop(get_authentication_provider, None)
+
 
 
 # Headers representing authorized user contexts
