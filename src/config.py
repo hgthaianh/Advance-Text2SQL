@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     postgres_db: str = "text2sql"
     postgres_user: str = "text2sql"
     postgres_password: SecretStr = SecretStr("text2sql")
+    auth_secret_key: SecretStr = SecretStr("change-me-in-production-text2sql-auth-secret-key-32b")
+    auth_algorithm: str = "HS256"
+    auth_access_token_expire_minutes: int = Field(default=30, ge=1)
+    auth_refresh_token_expire_minutes: int = Field(default=60 * 24 * 7, ge=1)
 
     @property
     def database_url(self) -> URL:

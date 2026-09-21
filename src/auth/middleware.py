@@ -10,7 +10,14 @@ from src.auth.provider import AuthenticationProvider, DefaultAuthenticationProvi
 from src.shared.exceptions import AuthenticationError
 
 
-PUBLIC_PATHS = frozenset({"/health", "/openapi.json", "/docs", "/redoc"})
+PUBLIC_PATHS = frozenset({
+    "/health",
+    "/openapi.json",
+    "/docs",
+    "/redoc",
+    "/auth/login",
+    "/auth/refresh",
+})
 
 
 class AuthenticationMiddleware(BaseHTTPMiddleware):
