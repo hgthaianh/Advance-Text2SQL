@@ -1114,7 +1114,6 @@ columns:
   iam.roles.description:
     aliases:
     - mô tả của vai trò
-    - mô tả
   iam.roles.is_active:
     aliases:
     - còn được kích hoạt
@@ -1144,7 +1143,6 @@ columns:
   iam.permissions.description:
     aliases:
     - mô tả của quyền truy cập
-    - mô tả
   iam.user_roles.user_id:
     aliases:
     - mã người dùng của vai trò người dùng
@@ -1271,7 +1269,6 @@ columns:
   customer.customer_segments.description:
     aliases:
     - mô tả của phân khúc khách hàng
-    - mô tả
   customer.customer_groups.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của nhóm khách hàng
@@ -1282,7 +1279,6 @@ columns:
   customer.customer_groups.description:
     aliases:
     - mô tả của nhóm khách hàng
-    - mô tả
   customer.customers.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của khách hàng
@@ -1463,7 +1459,6 @@ columns:
   product.categories.description:
     aliases:
     - mô tả của danh mục sản phẩm
-    - mô tả
   product.products.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của sản phẩm
@@ -1478,7 +1473,6 @@ columns:
   product.products.description:
     aliases:
     - mô tả của sản phẩm
-    - mô tả
   product.products.uom:
     aliases:
     - đơn vị tính của sản phẩm
@@ -1597,7 +1591,6 @@ columns:
   product.price_list_items.unit_price:
     aliases:
     - đơn giá của chi tiết bảng giá
-    - đơn giá
     - niêm yết bao nhiêu
   product.product_tags.product_id:
     aliases:
@@ -1708,7 +1701,6 @@ columns:
   inventory.inventory_transactions.quantity:
     aliases:
     - số lượng của giao dịch kho
-    - số lượng
     - đơn vị hàng
     - bao nhiêu đơn vị hàng
   inventory.inventory_transactions.unit_cost:
@@ -1782,7 +1774,6 @@ columns:
   inventory.stock_reservations.quantity:
     aliases:
     - số lượng của giữ hàng
-    - số lượng
   inventory.stock_reservations.reserved_for_type:
     aliases:
     - loại đối tượng giữ hàng của giữ hàng
@@ -1940,7 +1931,6 @@ columns:
   procurement.purchase_requisition_items.description:
     aliases:
     - mô tả của chi tiết yêu cầu mua hàng
-    - mô tả
   procurement.purchase_requisition_items.requested_qty:
     aliases:
     - số lượng yêu cầu của chi tiết yêu cầu mua hàng
@@ -2040,11 +2030,9 @@ columns:
   procurement.supplier_quote_items.quantity:
     aliases:
     - số lượng của chi tiết báo giá nhà cung cấp
-    - số lượng
   procurement.supplier_quote_items.unit_price:
     aliases:
     - đơn giá của chi tiết báo giá nhà cung cấp
-    - đơn giá
   procurement.supplier_quote_items.discount_pct:
     aliases:
     - phần trăm chiết khấu của chi tiết báo giá nhà cung cấp
@@ -2119,7 +2107,6 @@ columns:
   procurement.purchase_order_items.unit_price:
     aliases:
     - đơn giá của chi tiết đơn mua hàng
-    - đơn giá
   procurement.purchase_order_items.discount_pct:
     aliases:
     - phần trăm chiết khấu của chi tiết đơn mua hàng
@@ -2278,11 +2265,9 @@ columns:
   sales.quotation_items.quantity:
     aliases:
     - số lượng của chi tiết báo giá bán hàng
-    - số lượng
   sales.quotation_items.unit_price:
     aliases:
     - đơn giá của chi tiết báo giá bán hàng
-    - đơn giá
   sales.quotation_items.discount_amount:
     aliases:
     - tiền chiết khấu của chi tiết báo giá bán hàng
@@ -2356,7 +2341,6 @@ columns:
   sales.order_items.quantity:
     aliases:
     - số lượng của chi tiết đơn hàng
-    - số lượng
     - số lượng bán
     - số sản phẩm bán
     - sold quantity
@@ -2365,7 +2349,6 @@ columns:
   sales.order_items.unit_price:
     aliases:
     - đơn giá của chi tiết đơn hàng
-    - đơn giá
   sales.order_items.discount_amount:
     aliases:
     - tiền chiết khấu của chi tiết đơn hàng
@@ -2419,11 +2402,9 @@ columns:
   sales.invoice_items.quantity:
     aliases:
     - số lượng của chi tiết hóa đơn bán hàng
-    - số lượng
   sales.invoice_items.unit_price:
     aliases:
     - đơn giá của chi tiết hóa đơn bán hàng
-    - đơn giá
   sales.invoice_items.tax_amount:
     aliases:
     - tiền thuế của chi tiết hóa đơn bán hàng
@@ -2536,7 +2517,6 @@ columns:
   finance.journal_entries.description:
     aliases:
     - mô tả của bút toán kế toán
-    - mô tả
   finance.journal_entries.source_type:
     aliases:
     - loại nguồn của bút toán kế toán
@@ -2580,7 +2560,6 @@ columns:
   finance.journal_entry_lines.description:
     aliases:
     - mô tả của chi tiết bút toán
-    - mô tả
   finance.journal_entry_lines.reference_no:
     aliases:
     - số tham chiếu của chi tiết bút toán
@@ -2672,15 +2651,12 @@ columns:
   finance.vendor_bill_lines.description:
     aliases:
     - mô tả của chi tiết hóa đơn nhà cung cấp
-    - mô tả
   finance.vendor_bill_lines.quantity:
     aliases:
     - số lượng của chi tiết hóa đơn nhà cung cấp
-    - số lượng
   finance.vendor_bill_lines.unit_price:
     aliases:
     - đơn giá của chi tiết hóa đơn nhà cung cấp
-    - đơn giá
   finance.vendor_bill_lines.tax_amount:
     aliases:
     - tiền thuế của chi tiết hóa đơn nhà cung cấp
@@ -2740,7 +2716,6 @@ columns:
   support.support_tickets.description:
     aliases:
     - mô tả của yêu cầu hỗ trợ
-    - mô tả
   support.support_tickets.priority:
     aliases:
     - mức ưu tiên của yêu cầu hỗ trợ
@@ -3215,3 +3190,102 @@ concepts:
     join_hints:
     - [iam.user_roles.role_id, iam.roles.id]
     - [iam.user_roles.user_id, iam.users.id]
+  unspecified_unit_price:
+    aliases:
+    - đơn giá
+    - unit price
+    ambiguous: true
+    tables:
+    - sales.order_items
+    - sales.quotation_items
+    - sales.invoice_items
+    - procurement.purchase_order_items
+    - procurement.supplier_quote_items
+    - product.price_list_items
+    - finance.vendor_bill_lines
+    columns:
+    - sales.order_items.unit_price
+    - sales.quotation_items.unit_price
+    - sales.invoice_items.unit_price
+    - procurement.purchase_order_items.unit_price
+    - procurement.supplier_quote_items.unit_price
+    - product.price_list_items.unit_price
+    - finance.vendor_bill_lines.unit_price
+  unspecified_quantity:
+    aliases:
+    - số lượng
+    - quantity
+    ambiguous: true
+    tables:
+    - sales.order_items
+    - sales.quotation_items
+    - sales.invoice_items
+    - inventory.inventory_transactions
+    - inventory.stock_reservations
+    - procurement.supplier_quote_items
+    - finance.vendor_bill_lines
+    columns:
+    - sales.order_items.quantity
+    - sales.quotation_items.quantity
+    - sales.invoice_items.quantity
+    - inventory.inventory_transactions.quantity
+    - inventory.stock_reservations.quantity
+    - procurement.supplier_quote_items.quantity
+    - finance.vendor_bill_lines.quantity
+  unspecified_description:
+    aliases:
+    - mô tả
+    - description
+    ambiguous: true
+    tables:
+    - product.products
+    - support.support_tickets
+    - iam.roles
+    columns:
+    - product.products.description
+    - support.support_tickets.description
+    - iam.roles.description
+  idiom_kho_bau:
+    aliases:
+    - kho báu
+    out_of_scope: true
+  idiom_khach_sao:
+    aliases:
+    - khách sáo
+    out_of_scope: true
+  idiom_chinh_ta:
+    aliases:
+    - chính tả
+    out_of_scope: true
+  idiom_luong_tam:
+    aliases:
+    - lương tâm
+    out_of_scope: true
+  idiom_chi_nhanh_cay:
+    aliases:
+    - chi nhánh cây
+    out_of_scope: true
+  idiom_tuong_tuong:
+    aliases:
+    - trí tưởng tượng
+    - tưởng tượng
+    out_of_scope: true
+  idiom_vai_tro_anh_nang:
+    aliases:
+    - vai trò của
+    out_of_scope: true
+  idiom_quan_ma:
+    aliases:
+    - quân mã
+    out_of_scope: true
+  idiom_ngay_mai:
+    aliases:
+    - ngày mai
+    out_of_scope: true
+  idiom_thanh_than:
+    aliases:
+    - thanh thản
+    - lương tâm thanh thản
+    out_of_scope: true
+
+
