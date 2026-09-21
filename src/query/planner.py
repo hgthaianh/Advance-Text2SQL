@@ -236,8 +236,8 @@ class FKQueryPlanner:
 
     def __init__(
         self,
-        graph: RelationshipGraph | None = None,
-        resolver: JoinResolver | None = None,
+        graph: RelationshipGraph | FKRelationshipGraph | None = None,
+        resolver: JoinResolver | FKJoinResolver | None = None,
     ) -> None:
         self.graph = graph or FKRelationshipGraph()
         self.resolver = resolver or FKJoinResolver()
