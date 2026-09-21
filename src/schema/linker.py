@@ -1,4 +1,4 @@
-﻿"""Deterministic alias-driven linking, independent of intent, permissions and SQL."""
+"""Deterministic alias-driven linking, independent of intent, permissions and SQL."""
 
 import re
 from math import ceil
@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 from pathlib import Path
+from collections.abc import Iterable
 from typing import Literal
 
 from src.nlp.normalizer import Normalizer, strip_accents
@@ -96,7 +97,7 @@ def validate_aliases(data: dict, registry: SchemaRegistry) -> dict:
         if not isinstance(entries, dict):
             raise ValueError(f"{section} must be a mapping")
         for name, entry in entries.items():
-            allowed = {"aliases", "tables", "columns", "join_hints", "ambiguous"} if section == "concepts" else {"aliases"}
+            allowed = {"aliases", "tables", "columns", "join_hints", "ambiguous", "out_of_scope"} if section == "concepts" else {"aliases"}
             if not isinstance(entry, dict) or set(entry) - allowed:
                 raise ValueError(f"Invalid alias entry: {name}")
             aliases = entry.get("aliases")
@@ -116,10 +117,12 @@ def validate_aliases(data: dict, registry: SchemaRegistry) -> dict:
                 for key in ("tables", "columns"):
                     if not isinstance(entry.get(key, []), list):
                         raise ValueError(f"Concept {key} must be a list: {name}")
-                if not entry.get("tables") and not entry.get("columns"):
+                if not entry.get("tables") and not entry.get("columns") and not entry.get("out_of_scope"):
                     raise ValueError(f"Concept has no schema targets: {name}")
                 if "ambiguous" in entry and not isinstance(entry["ambiguous"], bool):
                     raise ValueError(f"Concept ambiguous must be a boolean: {name}")
+                if "out_of_scope" in entry and not isinstance(entry["out_of_scope"], bool):
+                    raise ValueError(f"Concept out_of_scope must be a boolean: {name}")
                 raw_hints = entry.get("join_hints", [])
                 if not isinstance(raw_hints, list):
                     raise ValueError(f"Concept join_hints must be a list: {name}")
@@ -128,7 +131,7 @@ def validate_aliases(data: dict, registry: SchemaRegistry) -> dict:
                 for hint in raw_hints:
                     if not isinstance(hint, (list, tuple)) or len(hint) != 2 or not all(isinstance(column, str) for column in hint):
                         raise ValueError(f"Concept join hint must be a column pair: {name}")
-                    pair = tuple(registry.resolve_column(column) for column in hint)
+                    pair: tuple[str, str] = (registry.resolve_column(hint[0]), registry.resolve_column(hint[1]))
                     if frozenset(pair) not in relationships:
                         raise ValueError(f"Concept join hint is not a relationship: {name}")
                     hints.append(pair)
@@ -157,13 +160,17 @@ def alias_coverage(registry: SchemaRegistry, aliases: dict) -> dict[str, int | f
     }
 
 
+_AliasKind = Literal["table", "column", "concept"]
+_AliasSource = Literal["manual", "schema", "automatic"]
+
+
 @dataclass(frozen=True)
 class _Alias:
     name: str
-    kind: Literal["table", "column", "concept"]
+    kind: _AliasKind
     text: str
     surface: str
-    source: Literal["manual", "schema", "automatic"]
+    source: _AliasSource
 
 
 @dataclass
@@ -198,7 +205,10 @@ class SchemaLinker:
         self.index: dict[str, list[_Alias]] = defaultdict(list)
         self.token_index: dict[str, set[str]] = defaultdict(set)
         self.trigram_index: dict[str, set[str]] = defaultdict(set)
-        for section, kind in (("tables", "table"), ("columns", "column"), ("concepts", "concept")):
+        section_kinds: tuple[tuple[str, _AliasKind], ...] = (
+            ("tables", "table"), ("columns", "column"), ("concepts", "concept")
+        )
+        for section, kind in section_kinds:
             for name, entry in self.aliases[section].items():
                 self._add(name, kind, entry["aliases"], "manual")
         for name, table in self.registry.tables.items():
@@ -212,16 +222,16 @@ class SchemaLinker:
                     # A bare table mention does not implicitly ask for its primary key.
                     automatic = [alias for alias in automatic if alias.split()[-1] == "id"]
                 self._add(key, "column", automatic, "automatic")
-        self.max_tokens = max(len(key.split()) for key in self.index)
+        self.max_tokens = max((len(key.split()) for key in self.index), default=1)
         for key in self.index:
             for token in set(key.split()) - STOP_WORDS:
                 self.token_index[token].add(key)
             for trigram in _trigrams(key):
                 self.trigram_index[trigram].add(key)
 
-    def _add(self, name: str, kind: str, aliases: list[str | None], source: str) -> None:
+    def _add(self, name: str, kind: _AliasKind, aliases: Iterable[str | None], source: _AliasSource) -> None:
         for alias in aliases:
-            if not alias:
+            if not alias or not isinstance(alias, str):
                 continue
             surface = _phrase(alias)
             key = strip_accents(surface)
@@ -238,9 +248,12 @@ class SchemaLinker:
         folded = [strip_accents(word) for word in surfaces]
         hits: list[_Hit] = []
 
-        def add(key: str, start: int, end: int, mode: str, cap: float) -> None:
+        MatchType = Literal["exact", "accent_insensitive", "token", "prefix", "fuzzy", "related_business_concept"]
+
+        def add(key: str, start: int, end: int, mode: MatchType, cap: float) -> None:
             for entry in self.index[key]:
-                match_type, maximum = mode, cap
+                match_type: MatchType = mode
+                maximum = cap
                 if mode == "exact" and " ".join(surfaces[start:end]) != entry.surface:
                     match_type, maximum = "accent_insensitive", self.config.accent_score
                 penalty = {"manual": 0, "schema": self.config.schema_penalty, "automatic": self.config.automatic_penalty}[entry.source]
@@ -285,8 +298,8 @@ class SchemaLinker:
                     {
                         key for key in self.token_index.get(folded[start], ())
                         if len(key) >= self.config.min_fuzzy_chars
-                        and (key.startswith(window) or window.startswith(key)
-                             or key.endswith(window) or window.endswith(key))
+                        and len(key.split()) == (end - start)
+                        and (key.startswith(window) or window.startswith(key))
                     }
                     if len(window) >= self.config.min_fuzzy_chars else set()
                 )
@@ -377,7 +390,7 @@ class SchemaLinker:
             elif c.candidate_type == "concept":
                 entry = self.aliases["concepts"][c.name]
                 relationship_hints.extend(entry.get("join_hints", []))
-                for kind, names in (("table", entry["tables"]), ("column", entry["columns"])):
+                for kind, names in (("table", entry.get("tables", [])), ("column", entry.get("columns", []))):
                     for name in names:
                         candidates.append(c.model_copy(update={
                             "name": name, "candidate_type": kind,

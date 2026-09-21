@@ -220,3 +220,32 @@ def test_critical_business_column_aliases(registry, question, expected_column):
     candidate_cols = [col.name for col in result.columns]
     assert expected_column in candidate_cols
 
+
+@pytest.mark.parametrize('bare_query, contextual_query, expected_column', [
+    ('Cho xem đơn giá.', 'Cho xem đơn giá của chi tiết đơn hàng.', 'sales.order_items.unit_price'),
+    ('Số lượng là bao nhiêu?', 'Số lượng tồn kho là bao nhiêu?', 'inventory.inventory_balances.qty_on_hand'),
+])
+def test_contextual_phrase_disambiguation(registry, bare_query, contextual_query, expected_column):
+    linker = SchemaLinker(registry)
+    bare_res = linker.link(bare_query)
+    assert len(bare_res.ambiguous_terms) > 0
+
+    ctx_res = linker.link(contextual_query)
+    candidate_cols = [col.name for col in ctx_res.columns]
+    assert expected_column in candidate_cols
+
+
+@pytest.mark.parametrize('idiom_query', [
+    'Kể một câu chuyện về kho báu dưới biển.',
+    'Từ khách sáo dùng trong giao tiếp nghĩa là gì?',
+    'Tôi mắc lỗi chính tả trong bài văn, chỉ cách tự kiểm tra.',
+    'Giải thích thành ngữ lương tâm thanh thản.',
+    'Chi nhánh cây trong bức tranh này bị gãy, sửa câu cho tự nhiên.',
+])
+def test_no_match_idiom_rejection(registry, idiom_query):
+    linker = SchemaLinker(registry)
+    res = linker.link(idiom_query)
+    assert len(res.tables) == 0
+    assert len(res.columns) == 0
+
+
