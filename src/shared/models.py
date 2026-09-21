@@ -88,6 +88,7 @@ class QueryResult(BaseModel):
     columns: list[str] = Field(default_factory=list)
     rows: list[dict[str, Any]] = Field(default_factory=list)
     row_count: int = Field(default=0, ge=0)
+    truncated: bool = False
     scalar: Any | None = None
     sql: str | None = None
     params: dict[str, Any] = Field(default_factory=dict)

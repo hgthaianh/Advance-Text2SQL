@@ -77,4 +77,5 @@ def test_classifier_exception_safety(monkeypatch, classifier):
     result = classifier.classify("Doanh thu tháng 8")
     assert result.intent == Intent.UNKNOWN
     assert result.confidence == 0.0
-    assert "Classification error" in result.reason
+    assert result.reason == "Intent classification failed."
+    assert "Simulated normalization error" not in result.reason

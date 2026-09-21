@@ -18,6 +18,7 @@ def get_authenticated_user(
     x_employee_id: Annotated[str | None, Header()] = None,
     x_department_id: Annotated[str | None, Header()] = None,
     x_branch_id: Annotated[str | None, Header()] = None,
+    x_team_id: Annotated[str | None, Header()] = None,
 ) -> UserContext:
     """Build identity from trusted auth middleware headers, never request JSON.
 
@@ -33,6 +34,7 @@ def get_authenticated_user(
     return UserContext(
         user_id=x_user_id, role=x_role, tenant_id=x_tenant_id,
         employee_id=x_employee_id, department_id=x_department_id, branch_id=x_branch_id,
+        team_id=x_team_id,
     )
 
 

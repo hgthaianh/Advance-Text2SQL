@@ -30,7 +30,7 @@ python -m uvicorn src.main:app --reload
 ```
 
 API: http://localhost:8000. Swagger: http://localhost:8000/docs.
-`GET /health` checks liveness. `POST /query` currently returns mock data.
+`GET /health` checks liveness. `POST /query` runs the deterministic pipeline.
 
 ## Test
 

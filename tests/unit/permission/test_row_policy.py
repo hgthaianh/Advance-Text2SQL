@@ -7,6 +7,7 @@ from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir import QueryFilter, QueryIR, SelectItem
 from src.schema.registry import SchemaRegistry
 from src.shared.enums import Aggregation, FilterOperator, Intent, PermissionScope
+from src.shared.exceptions import PermissionDeniedError
 from src.shared.models import SchemaColumn, SchemaRelationship, SchemaTable, UserContext
 
 
@@ -114,6 +115,20 @@ def test_registry_aware_self_scope_uses_employee_primary_key():
     assert permissions.row_filters[0].column == 'hr.employees.id'
     assert permissions.row_filters[0].value == 'E1'
     assert permissions.row_filters[0].source == 'permission'
+
+
+@pytest.mark.parametrize('role, identity', [
+    ('branch_manager', {}),
+    ('department_manager', {}),
+    ('team_lead', {}),
+    ('employee', {}),
+    ('unknown_role', {}),
+])
+def test_resolver_denies_missing_scoped_identity_and_unknown_roles(role, identity):
+    resolver = DefaultPermissionResolver(SchemaRegistry(), require_tenant=True)
+
+    with pytest.raises(PermissionDeniedError):
+        resolver.resolve(UserContext(user_id='u1', role=role, tenant_id='T1', **identity))
 
 
 def test_department_scope_reaches_related_employee_table_and_tenant_filters_path():

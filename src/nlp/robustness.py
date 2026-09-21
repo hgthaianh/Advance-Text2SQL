@@ -115,22 +115,20 @@ class NLPRobustnessProcessor:
     def process_query(self, text: str, reference_date: date) -> PreprocessedQuery:
         """Preprocess a natural language query with accent normalization, typo correction, date parsing, and intent classification."""
         corrected_text = self.correct_typos_and_abbreviations(text)
-        norm = self.normalizer.normalize(text)
+        # Downstream routing, linking and extraction must see the same canonical
+        # text as intent/date parsing. ``original_text`` below preserves input
+        # for callers that need it without letting a known abbreviation bypass
+        # the scope gate.
+        norm = self.normalizer.normalize(corrected_text)
 
         # Parse date range using DateParser
-        date_range = self.date_parser.parse(text, reference_date)
-        if date_range is None and text != corrected_text:
-            date_range = self.date_parser.parse(corrected_text, reference_date)
+        date_range = self.date_parser.parse(corrected_text, reference_date)
 
         # Classify intent
-        intent_result = self.intent_classifier.classify(text)
-        if intent_result.intent.value == "unknown" and text != corrected_text:
-            intent_result = self.intent_classifier.classify(corrected_text)
+        intent_result = self.intent_classifier.classify(corrected_text)
 
         # Parse numbers
-        numbers = self.number_parser.parse(text)
-        if not numbers and text != corrected_text:
-            numbers = self.number_parser.parse(corrected_text)
+        numbers = self.number_parser.parse(corrected_text)
 
         return PreprocessedQuery(
             original_text=text,

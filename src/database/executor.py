@@ -37,9 +37,12 @@ class ReadOnlyExecutor:
                     # Integer configuration is validated in __init__, never user input.
                     connection.exec_driver_sql(f'SET LOCAL statement_timeout = {self.timeout_ms}')
                 result = connection.execute(query.statement, query.params)
-                rows = [dict(row) for row in result.mappings().fetchmany(self.max_rows)]
+                fetched = result.mappings().fetchmany(self.max_rows + 1)
+                truncated = len(fetched) > self.max_rows
+                rows = [dict(row) for row in fetched[:self.max_rows]]
                 columns = list(result.keys())
         except SQLAlchemyError as exc:
             raise QueryExecutionError('Read-only query execution failed') from exc
         scalar: Any | None = rows[0][columns[0]] if len(rows) == 1 and len(columns) == 1 else None
-        return QueryResult(success=True, columns=columns, rows=rows, row_count=len(rows), scalar=scalar)
+        return QueryResult(success=True, columns=columns, rows=rows, row_count=len(rows), scalar=scalar,
+                           truncated=truncated)
