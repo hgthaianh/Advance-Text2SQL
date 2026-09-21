@@ -599,6 +599,8 @@ columns:
     - mã phòng ban của phòng ban
     - phòng ban cấp trên
     - mã phòng ban cấp trên
+    - phòng ban trực thuộc
+    - trực thuộc phòng ban
   org.departments.name:
     aliases:
     - tên phòng ban
@@ -879,6 +881,8 @@ columns:
     - ngày phép còn lại
     - còn bao nhiêu ngày phép
     - ngày phép chưa dùng
+    - số ngày nghỉ còn lại
+    - ngày nghỉ còn lại
   hr.leave_requests.employee_id:
     aliases:
     - mã nhân viên của đơn nghỉ phép
@@ -1057,6 +1061,8 @@ columns:
     aliases:
     - ngày hoàn thành của hồ sơ đào tạo
     - ngày hoàn thành
+    - ngày học xong
+    - học xong
   hr.training_records.score:
     aliases:
     - điểm số của hồ sơ đào tạo
@@ -1299,6 +1305,8 @@ columns:
     aliases:
     - ngành nghề của khách hàng
     - ngành nghề
+    - lĩnh vực
+    - lĩnh vực hoạt động
   customer.customers.tax_id:
     aliases:
     - mã số thuế của khách hàng
@@ -1491,6 +1499,9 @@ columns:
     - ngưỡng đặt lại hàng
     - chạm mức tồn để đặt lại
     - ngưỡng tái đặt hàng
+    - mức tồn đặt mua lại
+    - mức tồn phải đặt mua lại
+    - chạm mức tồn
   product.product_categories.product_id:
     aliases:
     - mã sản phẩm của phân loại sản phẩm
@@ -1641,6 +1652,8 @@ columns:
     - nhiệt độ tối đa
     - nhiệt độ lớn nhất
     - giới hạn nhiệt độ
+    - lớn nhất
+    - nhiệt độ lớn nhất được phép
   inventory.inventory_balances.warehouse_id:
     aliases:
     - mã kho hàng của tồn kho
@@ -1696,6 +1709,8 @@ columns:
     aliases:
     - số lượng của giao dịch kho
     - số lượng
+    - đơn vị hàng
+    - bao nhiêu đơn vị hàng
   inventory.inventory_transactions.unit_cost:
     aliases:
     - giá vốn đơn vị của giao dịch kho
@@ -1906,6 +1921,8 @@ columns:
     aliases:
     - ngày cần hàng của yêu cầu mua hàng
     - ngày cần hàng
+    - ngày nhận hàng
+    - cần nhận hàng vào ngày
   procurement.purchase_requisitions.purpose:
     aliases:
     - mục đích của yêu cầu mua hàng
@@ -1965,6 +1982,8 @@ columns:
     aliases:
     - ngày đóng thầu của yêu cầu báo giá mua
     - ngày đóng thầu
+    - hạn đóng
+    - hết thời gian nhận chào giá
   procurement.rfqs.currency:
     aliases:
     - tiền tệ của yêu cầu báo giá mua
@@ -2095,6 +2114,8 @@ columns:
     aliases:
     - số lượng đã nhận của chi tiết đơn mua hàng
     - số lượng đã nhận
+    - lượng hàng thực nhận
+    - thực nhận
   procurement.purchase_order_items.unit_price:
     aliases:
     - đơn giá của chi tiết đơn mua hàng
@@ -2209,6 +2230,8 @@ columns:
     aliases:
     - chỉ tiêu doanh thu của chỉ tiêu bán hàng
     - chỉ tiêu doanh thu
+    - doanh số mục tiêu
+    - mục tiêu doanh số
   sales.sales_targets.order_target:
     aliases:
     - chỉ tiêu đơn hàng của chỉ tiêu bán hàng
@@ -2323,6 +2346,10 @@ columns:
   sales.order_items.product_id:
     aliases:
     - mã sản phẩm của chi tiết đơn hàng
+    - mã sản phẩm từ chi tiết đơn hàng
+    - mã sản phẩm đơn hàng
+    - mặt hàng bán
+    - mặt hàng trong dòng đơn bán
   sales.order_items.variant_id:
     aliases:
     - mã biến thể sản phẩm của chi tiết đơn hàng
@@ -2333,6 +2360,8 @@ columns:
     - số lượng bán
     - số sản phẩm bán
     - sold quantity
+    - bao nhiêu đơn vị
+    - đơn vị bán
   sales.order_items.unit_price:
     aliases:
     - đơn giá của chi tiết đơn hàng
@@ -2431,6 +2460,9 @@ columns:
     aliases:
     - phương thức thanh toán của thanh toán khách hàng
     - phương thức thanh toán
+    - hình thức trả tiền
+    - hình thức thanh toán
+    - phương thức dùng để thanh toán
   finance.chart_of_accounts.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của hệ thống tài khoản kế toán
@@ -2450,6 +2482,10 @@ columns:
     - loại tài khoản
     - loại tài khoản kế toán của hệ thống tài khoản kế toán
     - loại tài khoản kế toán
+    - thuộc loại tài khoản nào
+    - loại của tài khoản kế toán
+    - thuộc những loại nào
+    - tài khoản thuộc loại nào
   finance.chart_of_accounts.normal_balance:
     aliases:
     - số dư thông thường của hệ thống tài khoản kế toán
@@ -2713,6 +2749,9 @@ columns:
     aliases:
     - thời điểm giải quyết của yêu cầu hỗ trợ
     - thời điểm giải quyết
+    - xử lý xong
+    - xử lý xong lúc nào
+    - thời điểm xử lý xong
   support.ticket_comments.ticket_id:
     aliases:
     - mã yêu cầu hỗ trợ của bình luận phiếu hỗ trợ
@@ -2802,6 +2841,8 @@ columns:
     - thời gian phản hồi đầu tiên của chính sách sla
     - thời gian phản hồi đầu tiên
     - số phút phản hồi đầu tiên
+    - trả lời lần đầu
+    - trả lời lần đầu trong bao lâu
   support.sla_policies.resolution_minutes:
     aliases:
     - thời gian giải quyết của chính sách sla
@@ -2844,6 +2885,9 @@ columns:
     aliases:
     - số phút vi phạm của sự kiện sla
     - số phút vi phạm
+    - chậm cam kết bao nhiêu phút
+    - chậm cam kết
+    - số phút chậm cam kết
   support.knowledge_articles.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của bài viết kiến thức
