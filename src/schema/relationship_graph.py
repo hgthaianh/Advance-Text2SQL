@@ -38,7 +38,8 @@ class RelationshipGraph:
                 self._edges[a].append(edge)
                 self._edges[a].sort(key=lambda e: (e.target, e.source))
 
-    def find_relationship_path(self, source: str, target: str) -> list[SchemaRelationship]:
+    def find_relationship_path(self, source: str, target: str,
+                               preferred_edges: set[frozenset[str]] | None = None) -> list[SchemaRelationship]:
         """Return the unique shortest FK path, oriented from source to target.
 
         Parallel foreign keys are distinct paths. Equal-length alternatives fail
@@ -48,8 +49,11 @@ class RelationshipGraph:
             source, target = self.registry.resolve_table(source), self.registry.resolve_table(target)
         if source not in self.adjacency or target not in self.adjacency:
             raise JoinPathNotFoundError(f'No FK path between {source} and {target}')
-        distance, counts = {source: 0}, {source: 1}
-        parents: dict[str, SchemaRelationship] = {}
+        # Find the shortest-path DAG first. A hint can then select a unique
+        # best path within the same distance without ever preferring a longer
+        # route or falling back to traversal order.
+        distance = {source: 0}
+        predecessors: dict[str, list[SchemaRelationship]] = defaultdict(list)
         queue = deque([source])
         while queue:
             current = queue.popleft()
@@ -58,13 +62,30 @@ class RelationshipGraph:
                 next_distance = distance[current] + 1
                 if neighbor not in distance:
                     distance[neighbor] = next_distance
-                    counts[neighbor] = counts[current]
-                    parents[neighbor] = edge
                     queue.append(neighbor)
-                elif distance[neighbor] == next_distance:
-                    counts[neighbor] = min(2, counts[neighbor] + counts[current])
+                if distance.get(neighbor) == next_distance:
+                    predecessors[neighbor].append(edge)
         if target not in distance:
             raise JoinPathNotFoundError(f'No FK path between {source} and {target}')
+        hints = preferred_edges or set()
+        best_score = {source: 0}
+        counts = {source: 1}
+        parents: dict[str, SchemaRelationship] = {}
+        for node, _ in sorted(distance.items(), key=lambda item: (item[1], item[0])):
+            if node == source:
+                continue
+            score, count, parent = -1, 0, None
+            for edge in predecessors[node]:
+                previous = edge.source.rsplit('.', 1)[0]
+                edge_key = frozenset((edge.source, edge.target))
+                candidate_score = best_score[previous] + int(edge_key in hints)
+                if candidate_score > score:
+                    score, count, parent = candidate_score, counts[previous], edge
+                elif candidate_score == score:
+                    count = min(2, count + counts[previous])
+            best_score[node], counts[node] = score, count
+            if parent is not None:
+                parents[node] = parent
         if counts[target] > 1:
             raise AmbiguousJoinPathError(f'Multiple shortest FK paths between {source} and {target}')
         path = []

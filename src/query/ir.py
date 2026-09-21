@@ -96,6 +96,10 @@ class QueryIR(BaseModel):
     top_k: int | None = Field(default=None, ge=1, le=1000, strict=True)
 
     joins: list[tuple[str, str]] = Field(default_factory=list)
+    # Metadata FK endpoint pairs selected from explicit business-role evidence.
+    # They narrow an otherwise ambiguous shortest path; they never permit a
+    # caller to supply arbitrary SQL join conditions.
+    join_hints: list[tuple[str, str]] = Field(default_factory=list)
 
     @field_validator('intent', mode='before')
     @classmethod

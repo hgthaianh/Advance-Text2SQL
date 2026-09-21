@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     app_name: str = "Vietnamese Text2SQL"
     query_max_limit: int = Field(default=1000, ge=1, le=1000)
+    query_timeout_ms: int = Field(default=5000, ge=100, le=60000)
+    database_connect_timeout_s: int = Field(default=3, ge=1, le=30)
     postgres_host: str = "localhost"
     postgres_port: int = Field(default=5432, ge=1, le=65535)
     postgres_db: str = "text2sql"
@@ -25,6 +27,7 @@ class Settings(BaseSettings):
             host=self.postgres_host,
             port=self.postgres_port,
             database=self.postgres_db,
+            query={"connect_timeout": str(self.database_connect_timeout_s)},
         )
 
 

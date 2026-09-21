@@ -67,6 +67,15 @@ def test_long_query_concepts(linker):
     assert 'sản phẩm bán chạy' not in result.ambiguous_terms
 
 
+def test_relationship_concept_exposes_only_validated_join_hints(linker):
+    result = linker.link('vai trò của người dùng')
+    assert {candidate.name for candidate in result.tables} >= {'iam.roles', 'iam.users'}
+    assert result.relationship_hints == [
+        ('iam.user_roles.role_id', 'iam.roles.id'),
+        ('iam.user_roles.user_id', 'iam.users.id'),
+    ]
+
+
 def test_longest_phrase_wins(linker):
     result = linker.link('chi tiết đơn mua hàng')
     assert result.tables[0].name == 'procurement.purchase_order_items'
@@ -79,6 +88,41 @@ def test_ambiguity_is_retained(linker):
     assert {'customer.customers.name', 'product.products.name', 'org.branches.name'} <= {c.name for c in result.columns}
     assert 'name' in result.ambiguous_terms
     assert len({c.score for c in result.columns}) == 1
+
+
+@pytest.mark.parametrize('query, tables, columns', [
+    ('mã', {'customer.customers', 'product.products'}, {'customer.customers.code', 'product.products.code'}),
+    ('ai quản lý', {'org.branches', 'inventory.warehouses'}, {'org.branches.manager_employee_id', 'inventory.warehouses.manager_employee_id'}),
+    ('liệt kê tài khoản', {'iam.users', 'finance.chart_of_accounts'}, {'iam.users.username', 'finance.chart_of_accounts.account_code'}),
+    ('cho xem điểm', {'hr.training_records', 'hr.performance_reviews'}, {'hr.training_records.score', 'hr.performance_reviews.performance_score'}),
+])
+def test_underspecified_business_terms_return_data_driven_ambiguity(linker, query, tables, columns):
+    result = linker.link(query, table_top_k=100, column_top_k=100)
+    assert tables <= {candidate.name for candidate in result.tables}
+    assert columns <= {candidate.name for candidate in result.columns}
+    assert result.ambiguous_terms
+    assert result.ambiguous_concepts
+
+
+def test_audit_aliases_cover_business_wording(linker):
+    result = linker.link('nhật ký đọc dữ liệu ghi nhận đã xem những cột nào')
+    assert result.tables[0].name == 'audit.data_access_logs'
+    assert result.columns[0].name == 'audit.data_access_logs.accessed_columns'
+    assert linker.link_columns('trạng thái chạy trong nhật ký truy vấn text2sql')[0].name == 'audit.text2sql_query_logs.execution_status'
+
+
+@pytest.mark.parametrize('query, column', [
+    ('nhóm quyền nào hiện còn được kích hoạt', 'iam.roles.is_active'),
+    ('cách làm mờ giá trị được cấu hình cho quyền đọc cột', 'iam.column_access_policies.mask_type'),
+    ('việc gán vai trò cho tài khoản có hiệu lực đến lúc nào', 'iam.user_roles.valid_to'),
+    ('ngân sách đã cam kết chi bao nhiêu tiền', 'finance.budgets.committed_amount'),
+    ('mỗi dòng định khoản ghi có bao nhiêu', 'finance.journal_entry_lines.credit_amount'),
+    ('hóa đơn đầu vào phải trả trước ngày nào', 'finance.vendor_bills.due_date'),
+    ('nội dung báo lỗi được lưu ở nhật ký lỗi là gì', 'audit.error_logs.message'),
+    ('các câu hỏi text2sql đã thực thi thành công hay thất bại', 'audit.text2sql_query_logs.execution_status'),
+])
+def test_business_aliases_cover_finance_audit_and_iam(linker, query, column):
+    assert linker.link_columns(query)[0].name == column
 
 
 def test_explicit_table_context_reranks_without_filtering(linker):
@@ -105,6 +149,13 @@ def test_fuzzy_fallback(linker, query, table, match_type):
     assert candidates[0].name == table
     assert candidates[0].match_type == match_type
     assert candidates[0].score < linker.link_tables('customer')[0].score
+
+
+def test_ranking_config_rejects_nonpositive_fuzzy_candidate_limit():
+    from src.schema.linker import RankingConfig
+
+    with pytest.raises(ValueError, match='max_fuzzy_candidates'):
+        RankingConfig(max_fuzzy_candidates=0)
 
 
 def test_prefix_fallback(linker):

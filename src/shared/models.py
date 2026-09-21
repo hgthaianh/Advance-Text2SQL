@@ -2,9 +2,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
-from src.shared.enums import Intent
+from src.shared.enums import Intent, ScopeDecision
 
 
 class IntentResult(BaseModel):
@@ -13,9 +13,20 @@ class IntentResult(BaseModel):
     reason: str | None = None
 
 
+class ScopeRoutingResult(BaseModel):
+    """Stable, diagnostic-only result of deterministic request routing."""
+
+    decision: ScopeDecision
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    reasons: list[str] = Field(default_factory=list)
+    matched_signals: list[str] = Field(default_factory=list)
+
+
 class UserContext(BaseModel):
     user_id: str = Field(min_length=1)
     role: str = Field(min_length=1)
+    tenant_id: str | None = None
+    employee_id: str | None = None
     department_id: str | None = None
     branch_id: str | None = None
     team_id: str | None = None
@@ -58,6 +69,8 @@ class SchemaLinkResult(BaseModel):
     tables: list[SchemaCandidate] = Field(default_factory=list)
     columns: list[SchemaCandidate] = Field(default_factory=list)
     concepts: list[SchemaCandidate] = Field(default_factory=list)
+    relationship_hints: list[tuple[str, str]] = Field(default_factory=list)
+    ambiguous_concepts: list[str] = Field(default_factory=list)
     unmatched_terms: list[str] = Field(default_factory=list)
     ambiguous_terms: list[str] = Field(default_factory=list)
 
@@ -70,17 +83,31 @@ class SchemaRelationship(BaseModel):
 
 
 class QueryResult(BaseModel):
+    success: bool = True
+    query_id: str | None = None
     columns: list[str] = Field(default_factory=list)
     rows: list[dict[str, Any]] = Field(default_factory=list)
     row_count: int = Field(default=0, ge=0)
+    scalar: Any | None = None
     sql: str | None = None
+    params: dict[str, Any] = Field(default_factory=dict)
     is_mock: bool = False
+    error_code: str | None = None
     message: str | None = None
 
 
 class QueryRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
     question: str = Field(min_length=1, max_length=2000, pattern=r"\S")
-    user: UserContext
+
+
+class ErrorResponse(BaseModel):
+    """Stable public error response; it never includes SQL or parameter values."""
+
+    query_id: str | None = None
+    error_code: str
+    message: str
 
 
 class DateRange(BaseModel):

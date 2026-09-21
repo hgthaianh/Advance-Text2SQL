@@ -1,6 +1,7 @@
 ﻿"""Deterministic alias-driven linking, independent of intent, permissions and SQL."""
 
 import re
+from math import ceil
 from collections import defaultdict
 from dataclasses import dataclass
 from difflib import SequenceMatcher
@@ -37,12 +38,14 @@ class RankingConfig:
     ambiguity_margin: float = 0.015
     minimum_score: float = 0.60
     min_fuzzy_chars: int = 5
+    trigram_match_ratio: float = 0.60
+    max_fuzzy_candidates: int = 32
 
     def __post_init__(self) -> None:
         scores = (self.exact_score, self.accent_score, self.token_score, self.prefix_score, self.fuzzy_score)
         if not all(0 <= score <= 1 for score in scores) or list(scores) != sorted(scores, reverse=True):
             raise ValueError("Match scores must descend from exact to fuzzy within [0, 1]")
-        for name in ("token_match_min", "fuzzy_match_min", "minimum_score"):
+        for name in ("token_match_min", "fuzzy_match_min", "minimum_score", "trigram_match_ratio"):
             if not 0 < getattr(self, name) <= 1:
                 raise ValueError(f"{name} must be in (0, 1]")
         for name in ("context_boost", "relationship_boost", "context_reserve", "schema_penalty", "automatic_penalty", "inferred_penalty", "concept_penalty", "ambiguity_margin"):
@@ -50,6 +53,8 @@ class RankingConfig:
                 raise ValueError(f"{name} must be in [0, 1]")
         if self.min_fuzzy_chars < 1:
             raise ValueError("min_fuzzy_chars must be positive")
+        if self.max_fuzzy_candidates < 1:
+            raise ValueError("max_fuzzy_candidates must be positive")
 
 
 def _phrase(text: str) -> str:
@@ -91,7 +96,8 @@ def validate_aliases(data: dict, registry: SchemaRegistry) -> dict:
         if not isinstance(entries, dict):
             raise ValueError(f"{section} must be a mapping")
         for name, entry in entries.items():
-            if not isinstance(entry, dict) or set(entry) - ({"aliases", "tables", "columns"} if section == "concepts" else {"aliases"}):
+            allowed = {"aliases", "tables", "columns", "join_hints", "ambiguous"} if section == "concepts" else {"aliases"}
+            if not isinstance(entry, dict) or set(entry) - allowed:
                 raise ValueError(f"Invalid alias entry: {name}")
             aliases = entry.get("aliases")
             if not isinstance(aliases, list) or not aliases or any(not isinstance(a, str) or not _fold(a) for a in aliases):
@@ -112,9 +118,24 @@ def validate_aliases(data: dict, registry: SchemaRegistry) -> dict:
                         raise ValueError(f"Concept {key} must be a list: {name}")
                 if not entry.get("tables") and not entry.get("columns"):
                     raise ValueError(f"Concept has no schema targets: {name}")
+                if "ambiguous" in entry and not isinstance(entry["ambiguous"], bool):
+                    raise ValueError(f"Concept ambiguous must be a boolean: {name}")
+                raw_hints = entry.get("join_hints", [])
+                if not isinstance(raw_hints, list):
+                    raise ValueError(f"Concept join_hints must be a list: {name}")
+                hints: list[tuple[str, str]] = []
+                relationships = {frozenset((relation.source, relation.target)) for relation in registry.relationships}
+                for hint in raw_hints:
+                    if not isinstance(hint, (list, tuple)) or len(hint) != 2 or not all(isinstance(column, str) for column in hint):
+                        raise ValueError(f"Concept join hint must be a column pair: {name}")
+                    pair = tuple(registry.resolve_column(column) for column in hint)
+                    if frozenset(pair) not in relationships:
+                        raise ValueError(f"Concept join hint is not a relationship: {name}")
+                    hints.append(pair)
                 entry = dict(entry,
                              tables=[registry.resolve_table(t) for t in entry.get("tables", [])],
-                             columns=[registry.resolve_column(c) for c in entry.get("columns", [])])
+                             columns=[registry.resolve_column(c) for c in entry.get("columns", [])],
+                             join_hints=list(dict.fromkeys(hints)))
             if canonical in result[section]:
                 raise ValueError(f"Duplicate canonical reference: {canonical}")
             result[section][canonical] = entry
@@ -253,24 +274,56 @@ class SchemaLinker:
                     continue
                 window = " ".join(folded[start:end])
                 words = set(folded[start:end]) - STOP_WORDS
-                choices: set[str] = set()
-                for word in words:
-                    choices.update(self.token_index.get(word, ()))
-                if len(window) >= self.config.min_fuzzy_chars:
+                token_choices: set[str] = set()
+                # A one-word token inside a longer alias is weak evidence and
+                # makes common words scan much of the index. Exact aliases and
+                # bounded typo matching still cover useful one-word requests.
+                if len(words) > 1:
+                    for word in words:
+                        token_choices.update(self.token_index.get(word, ()))
+                prefix_choices = (
+                    {
+                        key for key in self.token_index.get(folded[start], ())
+                        if len(key) >= self.config.min_fuzzy_chars
+                        and (key.startswith(window) or window.startswith(key)
+                             or key.endswith(window) or window.endswith(key))
+                    }
+                    if len(window) >= self.config.min_fuzzy_chars else set()
+                )
+                fuzzy_choices: set[str] = set()
+                # Long phrases already have exact and token-overlap matching.
+                # Restrict character similarity to short terms to bound worst
+                # case latency across the full schema index.
+                # ponytail: long typo matching needs a bounded phrase index if
+                # production evidence shows exact/token matching is insufficient.
+                if end - start <= 2 and len(window) >= self.config.min_fuzzy_chars:
                     counts: dict[str, int] = defaultdict(int)
                     grams = _trigrams(window)
                     for gram in grams:
                         for key in self.trigram_index.get(gram, ()):
                             counts[key] += 1
-                    choices.update(key for key, count in counts.items() if count >= max(1, len(grams) // 3))
-                for key in sorted(choices):
+                    # Keep one-word typo recovery (for example “custmoer”)
+                    # while avoiding a broad fuzzy scan for every long phrase.
+                    minimum_trigram_matches = (
+                        max(1, len(grams) // 3) if end - start == 1
+                        else max(1, ceil(len(grams) * self.config.trigram_match_ratio))
+                    )
+                    fuzzy_keys = sorted(
+                        (key for key, count in counts.items() if count >= minimum_trigram_matches),
+                        key=lambda key: (-counts[key], key),
+                    )
+                    fuzzy_choices = set(fuzzy_keys[:self.config.max_fuzzy_candidates])
+                for key in sorted(token_choices | prefix_choices | fuzzy_choices):
                     if abs(len(key.split()) - (end - start)) > 1:
+                        continue
+                    if key in prefix_choices:
+                        add(key, start, end, "prefix", self.config.prefix_score)
                         continue
                     target_words = set(key.split()) - STOP_WORDS
                     overlap = len(words & target_words) / max(1, len(words | target_words))
                     if len(words) > 1 and len(target_words) > 1 and overlap >= self.config.token_match_min:
                         add(key, start, end, "token", self.config.token_score)
-                    elif len(window) >= self.config.min_fuzzy_chars and len(key) >= self.config.min_fuzzy_chars:
+                    elif key in fuzzy_choices and len(window) >= self.config.min_fuzzy_chars and len(key) >= self.config.min_fuzzy_chars:
                         similarity = SequenceMatcher(None, window, key, autojunk=False).ratio()
                         if similarity < self.config.fuzzy_match_min:
                             continue
@@ -301,6 +354,7 @@ class SchemaLinker:
                     context.add(c.name.rsplit(".", 1)[0])
         candidates: list[SchemaCandidate] = []
         matched: set[int] = set()
+        relationship_hints: list[tuple[str, str]] = []
         for hit in hits:
             c = hit.candidate.model_copy()
             table = c.name.rsplit(".", 1)[0] if c.candidate_type == "column" else c.name
@@ -322,6 +376,7 @@ class SchemaLinker:
                 }))
             elif c.candidate_type == "concept":
                 entry = self.aliases["concepts"][c.name]
+                relationship_hints.extend(entry.get("join_hints", []))
                 for kind, names in (("table", entry["tables"]), ("column", entry["columns"])):
                     for name in names:
                         candidates.append(c.model_copy(update={
@@ -331,6 +386,11 @@ class SchemaLinker:
                         }))
         grouped = {kind: self._best([c for c in candidates if c.candidate_type == kind and c.score >= self.config.minimum_score]) for kind in ("table", "column", "concept")}
         ambiguous = set()
+        ambiguous_concepts = set()
+        for hit in hits:
+            if hit.candidate.candidate_type == "concept" and self.aliases["concepts"][hit.candidate.name].get("ambiguous"):
+                ambiguous.add(hit.candidate.matched_text)
+                ambiguous_concepts.add(hit.candidate.name)
         for kind in ("table", "column"):
             by_text: dict[str, list[SchemaCandidate]] = defaultdict(list)
             for c in grouped[kind]:
@@ -341,6 +401,8 @@ class SchemaLinker:
                     ambiguous.add(phrase)
         return SchemaLinkResult(
             tables=grouped["table"], columns=grouped["column"], concepts=grouped["concept"],
+            relationship_hints=list(dict.fromkeys(relationship_hints)),
+            ambiguous_concepts=sorted(ambiguous_concepts),
             unmatched_terms=list(dict.fromkeys(w for i, w in enumerate(words) if i not in matched and w not in STOP_WORDS and not w.isdigit())),
             ambiguous_terms=sorted(ambiguous),
         )

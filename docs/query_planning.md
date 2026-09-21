@@ -105,6 +105,12 @@ Values are bind parameters, including each IN element, strings containing SQL, d
 
 Path search lives only in `src/schema/relationship_graph.py`. `find_relationship_path()` performs BFS and rejects equal-length alternatives, including two distinct FKs between the same pair of tables. `find_path()` preserves the table-pair interface while sharing that search. Missing paths and ambiguous paths raise distinct domain exceptions.
 
+The internal `join_hints` IR field may contain only registered FK endpoint
+pairs. The IR builder emits one when an explicit entity role proves it, for
+example `employee.department_id -> departments.id` for “mã phòng ban D1”.
+Hints rank only equally short paths; they cannot select a longer path or
+invent a join condition. Without that evidence ambiguity still fails closed.
+
 `JoinResolver` merges unique shortest paths from the first requested table to every other required table, preserving intermediate tables and deduplicating shared edges. This is a rooted shortest-path tree, not a global minimum-cost join optimizer. All generated joins are INNER JOINs on metadata FK columns.
 
 The initial relationship contract represents single-column foreign keys. Self-joins with multiple table roles, composite foreign keys, explicit path disambiguation and outer joins require additional IR/metadata contracts and are not implemented. COUNT(*) counts joined rows; COUNT(column) excludes nulls. There is no automatic DISTINCT, fan-out correction or preaggregation, so upstream query construction must choose the intended relational semantics.
@@ -114,7 +120,11 @@ three rows after `customers -> orders -> order_items`. `COUNT(customers.id)` is
 therefore **3, not 1**. This is deliberate v1 SQL row semantics, not a count of
 unique customers. SUM and AVG can also be affected by one-to-many join fan-out.
 Future support for `COUNT(DISTINCT column)` must be explicit in the IR and SQL
-builder; it is not implemented or inferred today.
+builder; it is not implemented or inferred today. To avoid silently incorrect
+money and average results, the planner now rejects `SUM` or `AVG` when any
+selected FK child can fan out the aggregate table, including through an
+otherwise safe many-to-one hop. The caller must pre-aggregate until the IR has
+an explicit safe aggregate shape.
 
 Ambiguous joins always raise `AmbiguousJoinPathError`. Metadata insertion order,
 edge traversal order and query direction must never select an arbitrary first
