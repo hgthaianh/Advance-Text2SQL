@@ -16,3 +16,8 @@ def test_database_config_loads_from_environment(monkeypatch):
     assert url.database == "example"
     assert url.username == "tester"
     assert url.password == values["POSTGRES_PASSWORD"]
+
+
+def test_cors_origins_are_split_from_environment(monkeypatch):
+    monkeypatch.setenv("CORS_ALLOWED_ORIGINS", "https://app.example, http://localhost:3000")
+    assert Settings(_env_file=None).cors_origins == ["https://app.example", "http://localhost:3000"]

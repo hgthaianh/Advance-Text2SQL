@@ -7,8 +7,6 @@ from fastapi.testclient import TestClient
 from src.api.dependencies import get_authentication_provider
 from src.auth.models import AuthenticatedIdentity
 from src.auth.provider import (
-    DEFAULT_USERS,
-    DefaultAuthenticationProvider,
     MockAuthenticationProvider,
 )
 from src.auth.tokens import (
@@ -25,7 +23,13 @@ from src.shared.models import UserContext
 def cleanup_overrides_and_revocations():
     """Ensure clean test environment before and after each test."""
     clear_revoked_tokens()
-    app.dependency_overrides.pop(get_authentication_provider, None)
+    credentials = {
+        "admin": ("test-admin-password", AuthenticatedIdentity(user_id="admin", role="admin", tenant_id="1")),
+        "user0001": ("test-viewer-password", AuthenticatedIdentity(
+            user_id="user0001", role="viewer", tenant_id="1", employee_id="1", department_id="1", branch_id="1", team_id="1",
+        )),
+    }
+    app.dependency_overrides[get_authentication_provider] = lambda: MockAuthenticationProvider(credentials=credentials)
     yield
     clear_revoked_tokens()
     app.dependency_overrides.pop(get_authentication_provider, None)
@@ -33,18 +37,12 @@ def cleanup_overrides_and_revocations():
 
 @pytest.fixture
 def admin_credentials() -> tuple[str, str]:
-    """Retrieve seed credentials for admin from the default auth catalog."""
-    username = "admin"
-    password, _ = DEFAULT_USERS[username]
-    return username, password
+    return "admin", "test-admin-password"
 
 
 @pytest.fixture
 def viewer_credentials() -> tuple[str, str]:
-    """Retrieve seed credentials for user0001 from the default auth catalog."""
-    username = "user0001"
-    password, _ = DEFAULT_USERS[username]
-    return username, password
+    return "user0001", "test-viewer-password"
 
 
 # -----------------------------------------------------------------------------
@@ -185,6 +183,24 @@ def test_refresh_rejects_revoked_token():
     assert response.status_code == 401
     data = response.json()
     assert data["error_code"] == "INVALID_REFRESH_TOKEN"
+
+
+def test_refresh_token_cannot_be_replayed(admin_credentials):
+    username, password = admin_credentials
+    with TestClient(app) as client:
+        token = client.post("/auth/login", json={"username": username, "password": password}).json()["refresh_token"]
+        assert client.post("/auth/refresh", json={"refresh_token": token}).status_code == 200
+        assert client.post("/auth/refresh", json={"refresh_token": token}).status_code == 401
+
+
+def test_logout_revokes_the_current_refresh_token(admin_credentials):
+    username, password = admin_credentials
+    with TestClient(app) as client:
+        tokens = client.post("/auth/login", json={"username": username, "password": password}).json()
+        response = client.post("/auth/logout", json={"refresh_token": tokens["refresh_token"]},
+                               headers={"Authorization": f"Bearer {tokens['access_token']}"})
+        assert response.status_code == 204
+        assert client.post("/auth/refresh", json={"refresh_token": tokens["refresh_token"]}).status_code == 401
 
 
 def test_refresh_preserves_immutable_identity(viewer_credentials):
@@ -455,3 +471,5 @@ def test_openapi_schema_contains_auth_endpoints():
     assert "post" in paths["/auth/refresh"]
     assert "/auth/me" in paths
     assert "get" in paths["/auth/me"]
+    assert "/auth/logout" in paths
+    assert "post" in paths["/auth/logout"]

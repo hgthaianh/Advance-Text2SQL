@@ -3,13 +3,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from src.api.dependencies import get_authentication_provider
 from src.auth.models import (
     AuthenticatedIdentity,
     IdentityResponse,
     LoginRequest,
+    LogoutRequest,
     RefreshRequest,
     TokenResponse,
 )
@@ -78,6 +79,32 @@ def refresh(
                 "message": "Invalid, expired, or revoked refresh token.",
             },
         )
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    responses={status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse}},
+    summary="Revoke the current refresh-token session",
+)
+def logout(
+    payload: LogoutRequest,
+    request: Request,
+    provider: Annotated[AuthenticationProvider, Depends(get_authentication_provider)],
+) -> Response | JSONResponse:
+    identity = getattr(request.state, "identity", None)
+    if not isinstance(identity, AuthenticatedIdentity):
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={
+            "query_id": None, "error_code": "AUTHENTICATION_REQUIRED", "message": "Authentication is required.",
+        })
+    try:
+        provider.logout(identity, payload)
+    except AuthenticationError:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={
+            "query_id": None, "error_code": "INVALID_REFRESH_TOKEN", "message": "Invalid refresh token.",
+        })
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get(

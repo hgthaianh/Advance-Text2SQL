@@ -36,6 +36,9 @@ jobs:
       - name: Configure environment
         run: cp .env.example .env
       - name: Validate and start containers
+        env:
+          # Test-only value. Production must provide its own secret.
+          AUTH_SECRET_KEY: ci-test-only-auth-secret-key-at-least-32-characters
         run: |
           docker compose config --quiet
           docker compose up --build --wait --wait-timeout 420
