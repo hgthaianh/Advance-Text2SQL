@@ -23,8 +23,8 @@ def test_first_failure_prefers_available_earlier_stage():
         'intent': True,
         'date': True,
         'number': True,
-        'table_recall_at_5': False,
-        'column_recall_at_5': False,
+        'table_recall_at_10': False,
+        'column_recall_at_10': False,
     }
 
     assert _first_observable_failure(checks) == 'TABLE_LINK_WRONG'
@@ -39,13 +39,15 @@ def test_evaluation_reports_compiled_bridge_and_writes_artifacts(tmp_path):
 
     result = report['cases'][0]
     assert result['checks']['date'] is True
-    assert result['primary_failure'] == 'SQL_EXECUTION_ERROR'
+    assert result['primary_failure'] is None
+    assert result['passed'] is None
+    assert report['metrics']['final_result_accuracy'] is None
     assert report['metrics']['entity_extraction_accuracy'] is None
     assert report['stage_availability']['entity_extraction'] is True
     assert report['stage_availability']['database_execution'] is False
 
     output, summary, failures = (tmp_path / 'result.json', tmp_path / 'summary.md', tmp_path / 'failures.csv')
     write_reports(report, output, summary, failures)
-    assert 'SQL_EXECUTION_ERROR' in output.read_text(encoding='utf-8')
+    assert 'not_measured' in output.read_text(encoding='utf-8')
     assert 'Final-result accuracy' in summary.read_text(encoding='utf-8')
     assert 'primary_failure' in failures.read_text(encoding='utf-8')

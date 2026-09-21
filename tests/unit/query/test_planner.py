@@ -6,7 +6,7 @@ import pytest
 from src.query.ir import FilterCondition, QueryFilter, QueryIR
 from src.shared.enums import Aggregation, Intent
 from src.shared.exceptions import (
-    InvalidColumnError, InvalidTableError, MalformedQueryIRError,
+    FanoutRiskError, InvalidColumnError, InvalidTableError, MalformedQueryIRError,
     MissingAggregationColumnError, UnsupportedAggregationError,
     UnsupportedIntentError, UnsupportedOperatorError,
 )
@@ -50,6 +50,36 @@ def test_related_permission_filter_is_not_dropped(planner):
     plan = planner.plan(dict(intent='COUNT',tables=['orders'],filters=[dict(column='customers.customer_type',operator='=',value='VIP',source='permission')]))
     assert len(plan.joins) == 1
     assert plan.query.filters[0].source == 'permission'
+
+
+def test_parent_column_aggregate_rejects_child_join_fanout(planner):
+    with pytest.raises(FanoutRiskError):
+        planner.plan(dict(
+            intent='SUM', tables=['customers', 'orders'],
+            select=['customers.id'],
+        ))
+
+
+def test_parent_lookup_join_does_not_reject_child_owned_aggregate(planner):
+    plan = planner.plan(dict(
+        intent='SUM', tables=['orders', 'customers'], select=['orders.total_amount'],
+    ))
+    assert plan.query.select[0].column == 'public.orders.total_amount'
+
+
+def test_parent_aggregate_rejects_fanout_beyond_a_safe_many_to_one_hop():
+    from src.query.planner import QueryPlanner
+    from src.schema.relationship_graph import RelationshipGraph
+    from tests.unit.query.conftest import make_registry
+
+    registry = make_registry(['orders', 'customers', 'customer_contacts'], [
+        ('orders', 'customer_id', 'customers'),
+        ('customer_contacts', 'customer_id', 'customers'),
+    ])
+    with pytest.raises(FanoutRiskError):
+        QueryPlanner(registry, RelationshipGraph(registry)).plan(dict(
+            intent='SUM', tables=['orders', 'customer_contacts'], select=['orders.id'],
+        ))
 
 
 @pytest.mark.parametrize('query,error', [

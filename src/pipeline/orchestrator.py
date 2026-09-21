@@ -12,6 +12,7 @@ from src.config import get_settings
 from src.database.executor import ReadOnlyExecutor
 from src.nlp.entity_extractor import DeterministicEntityExtractor, EntityExtractor
 from src.nlp.robustness import NLPRobustnessProcessor
+from src.nlp.scope_router import ScopeRouter
 from src.permission.column_policy import DefaultColumnPolicy
 from src.permission.resolver import DefaultPermissionResolver, PermissionResolver
 from src.permission.row_policy import ScopedRowPolicy
@@ -25,6 +26,7 @@ from src.shared.exceptions import (
     PermissionDeniedError, QueryExecutionError, QueryValidationError,
     SQLValidationError, UnsupportedQueryError,
 )
+from src.shared.enums import ScopeDecision
 from src.shared.models import QueryResult, UserContext
 from src.validation.sql_validator import ReadOnlySQLValidator, SQLValidator
 
@@ -34,12 +36,14 @@ class Text2SQLPipeline:
 
     def __init__(self, *, registry: SchemaRegistry | None = None, engine: Engine | None = None,
                  nlp: NLPRobustnessProcessor | None = None, linker: SchemaLinker | None = None,
+                 scope_router: ScopeRouter | None = None,
                  entity_extractor: EntityExtractor | None = None, ir_builder: QueryIRBuilder | None = None,
                  permission_resolver: PermissionResolver | None = None,
                  validator: SQLValidator | None = None, executor: ReadOnlyExecutor | None = None,
                  observer: PipelineObserver | None = None) -> None:
         self.registry = registry or SchemaRegistry()
         self.nlp = nlp or NLPRobustnessProcessor()
+        self.scope_router = scope_router or ScopeRouter()
         self.linker = linker or SchemaLinker(self.registry)
         if self.linker.registry is not self.registry:
             raise ValueError('Pipeline linker and registry must be identical')
@@ -63,6 +67,12 @@ class Text2SQLPipeline:
         stage = 'preprocess'
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
+            stage = 'scope_routing'
+            scope = self.scope_router.route(preprocessed)
+            if scope.decision == ScopeDecision.OUT_OF_SCOPE:
+                raise UnsupportedQueryError('Question is outside the database query scope')
+            if scope.decision == ScopeDecision.AMBIGUOUS:
+                raise AmbiguousQueryError('Question lacks enough database-query context')
             stage = 'schema_linking'
             links = self.linker.link(preprocessed)
             stage = 'entity_extraction'

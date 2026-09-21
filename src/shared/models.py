@@ -4,13 +4,22 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.shared.enums import Intent
+from src.shared.enums import Intent, ScopeDecision
 
 
 class IntentResult(BaseModel):
     intent: Intent
     confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     reason: str | None = None
+
+
+class ScopeRoutingResult(BaseModel):
+    """Stable, diagnostic-only result of deterministic request routing."""
+
+    decision: ScopeDecision
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    reasons: list[str] = Field(default_factory=list)
+    matched_signals: list[str] = Field(default_factory=list)
 
 
 class UserContext(BaseModel):
@@ -60,6 +69,8 @@ class SchemaLinkResult(BaseModel):
     tables: list[SchemaCandidate] = Field(default_factory=list)
     columns: list[SchemaCandidate] = Field(default_factory=list)
     concepts: list[SchemaCandidate] = Field(default_factory=list)
+    relationship_hints: list[tuple[str, str]] = Field(default_factory=list)
+    ambiguous_concepts: list[str] = Field(default_factory=list)
     unmatched_terms: list[str] = Field(default_factory=list)
     ambiguous_terms: list[str] = Field(default_factory=list)
 

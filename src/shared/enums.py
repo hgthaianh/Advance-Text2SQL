@@ -47,3 +47,11 @@ class PermissionScope(StrEnum):
     DEPARTMENT = "DEPARTMENT"
     TEAM = "TEAM"
     SELF = "SELF"
+
+
+class ScopeDecision(StrEnum):
+    """Whether a request belongs to the database-backed Text2SQL surface."""
+
+    IN_SCOPE = "IN_SCOPE"
+    OUT_OF_SCOPE = "OUT_OF_SCOPE"
+    AMBIGUOUS = "AMBIGUOUS"

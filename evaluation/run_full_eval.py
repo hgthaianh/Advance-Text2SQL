@@ -54,12 +54,13 @@ def load_cases(path: Path = DEFAULT_CASES) -> tuple[list[dict[str, Any]], date]:
     return cases, date.fromisoformat(config['reference_date'])
 
 
-def _rate(values: list[bool]) -> float | None:
+def _rate(values: list[bool | float]) -> float | None:
     return round(sum(values) / len(values), 6) if values else None
 
 
-def _recall(actual: list[str], expected: list[str], k: int) -> bool | None:
-    return bool(set(actual[:k]) >= set(expected)) if expected else None
+def _recall(actual: list[str], expected: list[str], k: int) -> float | None:
+    """Macro Recall@K; cases with more than K gold items remain measurable."""
+    return len(set(actual[:k]) & set(expected)) / len(expected) if expected else None
 
 
 def _date_matches(actual: dict[str, Any] | None, expected: dict[str, Any]) -> bool:
@@ -67,16 +68,19 @@ def _date_matches(actual: dict[str, Any] | None, expected: dict[str, Any]) -> bo
     return actual is not None and all(actual.get(key) == value for key, value in expected.items())
 
 
-def _first_observable_failure(checks: dict[str, bool | None]) -> str | None:
+def _first_observable_failure(checks: dict[str, bool | float | None]) -> str | None:
     """Return the earliest failed stage for fields the case actually asserts."""
     for check, failure in (
         ('intent', 'INTENT_WRONG'),
         ('date', 'DATE_PARSE_WRONG'),
         ('number', 'NUMBER_PARSE_WRONG'),
-        ('table_recall_at_5', 'TABLE_LINK_WRONG'),
-        ('column_recall_at_5', 'COLUMN_LINK_WRONG'),
+        # A case may legitimately have more than five required schema items.
+        # Use Recall@10 for pass/fail; Recall@1/3/5 remain diagnostic metrics.
+        ('table_recall_at_10', 'TABLE_LINK_WRONG'),
+        ('column_recall_at_10', 'COLUMN_LINK_WRONG'),
     ):
-        if checks.get(check) is False:
+        value = checks.get(check)
+        if value is False or isinstance(value, float) and value < 1:
             return failure
     return None
 
@@ -111,12 +115,12 @@ def evaluate_case(case: dict[str, Any], reference_date: date, nlp: NLPRobustness
         'entity_extractor': 'available', 'entities': [], 'query_ir': None, 'permission_scope': None,
         'permission_outcome': None, 'sql': None, 'execution': 'unavailable', 'result': None,
     }
-    checks: dict[str, bool | None] = {
+    checks: dict[str, bool | float | None] = {
         'intent': actual['intent'] == expected['intent'] if 'intent' in expected else None,
         'date': _date_matches(actual['date_range'], expected['date_range']) if 'date_range' in expected else None,
         'number': actual['numbers'] == expected['numbers'] if 'numbers' in expected else None,
-        **{f'table_recall_at_{k}': _recall(tables, expected.get('tables', []), k) for k in (1, 3, 5)},
-        **{f'column_recall_at_{k}': _recall(columns, expected.get('columns', []), k) for k in (1, 3, 5)},
+        **{f'table_recall_at_{k}': _recall(tables, expected.get('tables', []), k) for k in (1, 3, 5, 10)},
+        **{f'column_recall_at_{k}': _recall(columns, expected.get('columns', []), k) for k in (1, 3, 5, 10)},
     }
     failure = _first_observable_failure(checks)
     unsupported = preprocessed.intent_result.intent.value in {'unknown', 'trend', 'comparison'} or not tables and not columns
@@ -141,8 +145,10 @@ def evaluate_case(case: dict[str, Any], reference_date: date, nlp: NLPRobustness
             actual['sql'], actual['params'] = compiled.sql, compiled.params
             checks['planning_success'] = True
             checks['sql_compile_success'] = True
-            # The full 100-table evaluation corpus has no corresponding fixed database fixture.
-            passed, failure = False, 'SQL_EXECUTION_ERROR'
+            # The full corpus has no independent expected database result.
+            # Compilation is measured above; result correctness is not.
+            actual['execution'] = 'not_measured'
+            passed, failure = None, None
         except Exception as exc:
             actual['error'] = f'{type(exc).__name__}: {exc}'
             checks['planning_success'] = False
@@ -179,8 +185,8 @@ def evaluate_case(case: dict[str, Any], reference_date: date, nlp: NLPRobustness
                         validator.validate(compiled.statement, permissions)
                         checks['planning_success'] = True
                         checks['sql_compile_success'] = True
-                        # QueryExecutor and SQLValidator are abstract, so SQL cannot execute.
-                        passed, failure = False, 'SQL_EXECUTION_ERROR'
+                        actual['execution'] = 'not_measured'
+                        passed, failure = None, None
                     except Exception as exc:
                         actual['error'] = f'{type(exc).__name__}: {exc}'
                         checks['planning_success'] = False
@@ -202,8 +208,8 @@ def evaluate(cases: list[dict[str, Any]], reference_date: date) -> dict[str, Any
     def metric(name: str) -> float | None: return _rate([r['checks'][name] for r in results if r['checks'].get(name) is not None])
     measured_names = (
         'intent', 'date', 'number',
-        'table_recall_at_1', 'table_recall_at_3', 'table_recall_at_5',
-        'column_recall_at_1', 'column_recall_at_3', 'column_recall_at_5',
+        'table_recall_at_1', 'table_recall_at_3', 'table_recall_at_5', 'table_recall_at_10',
+        'column_recall_at_1', 'column_recall_at_3', 'column_recall_at_5', 'column_recall_at_10',
         'unsupported', 'permission_scope', 'planning_success', 'sql_compile_success',
     )
     metrics = {name: metric(name) for name in measured_names}
@@ -232,24 +238,45 @@ def evaluate(cases: list[dict[str, Any]], reference_date: date) -> dict[str, Any
     metrics['query_ir_accuracy'] = None
     metrics['join_path_accuracy'] = None
     metrics['sql_execution_accuracy'] = None
-    metrics['final_result_accuracy'] = _rate([r['passed'] for r in results])
-    metrics['end_to_end_success_rate'] = metrics['final_result_accuracy']
+    metrics['final_result_accuracy'] = None
+    metrics['end_to_end_success_rate'] = None
     metrics['ambiguity_rate'] = _rate([bool(r['actual']['ambiguous_terms']) for r in results])
     metric_samples.update({
         'entity_extraction_accuracy': 0,
         'query_ir_accuracy': 0,
         'join_path_accuracy': 0,
         'sql_execution_accuracy': 0,
-        'final_result_accuracy': len(results),
-        'end_to_end_success_rate': len(results),
+        'final_result_accuracy': 0,
+        'end_to_end_success_rate': 0,
         'ambiguity_rate': len(results),
     })
     categories: dict[str, list[dict]] = defaultdict(list)
     for result in results:
         for category in result['category']: categories[category].append(result)
-    category_metrics = {name: {'cases': len(rows), 'success_rate': _rate([r['passed'] for r in rows])} for name, rows in sorted(categories.items())}
+    category_metrics = {
+        name: {
+            'cases': len(rows),
+            'success_rate': _rate([r['passed'] for r in rows if r['passed'] is not None]),
+        }
+        for name, rows in sorted(categories.items())
+    }
     latency = sorted(r['latency_ms'] for r in results)
-    return {'summary': {'total_cases': len(results), 'passed': sum(r['passed'] for r in results), 'failed': sum(not r['passed'] for r in results)}, 'metrics': metrics, 'metric_samples': metric_samples, 'failure_counts': dict(failures), 'category_metrics': category_metrics, 'latency_ms': {'p50': median(latency), 'p95': latency[int(.95 * (len(latency) - 1))]}, 'stage_availability': {'entity_extraction': True, 'query_ir_construction': True, 'sql_validation': True, 'database_execution': False}, 'cases': results}
+    return {
+        'summary': {
+            'total_cases': len(results),
+            'passed': sum(r['passed'] is True for r in results),
+            'failed': sum(r['passed'] is False for r in results),
+            'unmeasured': sum(r['passed'] is None for r in results),
+        },
+        'metrics': metrics, 'metric_samples': metric_samples,
+        'failure_counts': dict(failures), 'category_metrics': category_metrics,
+        'latency_ms': {'p50': median(latency), 'p95': latency[int(.95 * (len(latency) - 1))]},
+        'stage_availability': {
+            'entity_extraction': True, 'query_ir_construction': True,
+            'sql_validation': True, 'database_execution': False,
+        },
+        'cases': results,
+    }
 
 
 def write_reports(report: dict[str, Any], output: Path, summary_path: Path, failures_path: Path) -> None:
@@ -259,7 +286,7 @@ def write_reports(report: dict[str, Any], output: Path, summary_path: Path, fail
     def display(value: float | None) -> str:
         return 'not available' if value is None else f'{value:.1%}'
 
-    lines = ['# Full pipeline evaluation', '', f"Total cases: {summary['total_cases']}", f"Passed: {summary['passed']}", f"Failed: {summary['failed']}", f"Final-result accuracy: {display(metrics['final_result_accuracy'])}", f"End-to-end success: {display(metrics['end_to_end_success_rate'])}", '', '## Stage metrics', '']
+    lines = ['# Full pipeline evaluation', '', f"Total cases: {summary['total_cases']}", f"Passed: {summary['passed']}", f"Failed: {summary['failed']}", f"Unmeasured result cases: {summary['unmeasured']}", f"Final-result accuracy: {display(metrics['final_result_accuracy'])}", f"End-to-end success: {display(metrics['end_to_end_success_rate'])}", '', '## Stage metrics', '']
     lines += [f"- {name}: {display(value)} (n={samples[name]})" for name, value in metrics.items()]
     lines += ['', '## First-failure breakdown', '']
     lines += [f'- {name}: {count}' for name, count in Counter(report['failure_counts']).most_common()]
@@ -273,7 +300,10 @@ def write_reports(report: dict[str, Any], output: Path, summary_path: Path, fail
     top_failure = next(iter(Counter(report['failure_counts']).most_common()), None)
     if top_failure:
         lines += ['', '## Recommended next focus', '', f"- {recommendations.get(top_failure[0], 'Inspect the highest-volume first-failure category.')} ({top_failure[0]}, {top_failure[1]} cases)"]
-    worst = sorted(report['category_metrics'].items(), key=lambda item: item[1]['success_rate'])[:5]
+    worst = sorted(
+        report['category_metrics'].items(),
+        key=lambda item: item[1]['success_rate'] if item[1]['success_rate'] is not None else 1,
+    )[:5]
     lines += ['', '## Worst categories', '']
     lines += [f"- {name}: {display(values['success_rate'])} ({values['cases']} cases)" for name, values in worst]
     lines += ['', '## Measured limitations', '', '- The runner now exercises entity extraction, QueryIR construction, planning, and SQL validation. Its fixed 233-case corpus has no deterministic database fixture for all 100 schema tables, so compilation is reported separately from execution.', '- QueryIR cases are downstream contract probes. They measure permission, planning and compilation only; they do not claim natural-language-to-IR accuracy.']

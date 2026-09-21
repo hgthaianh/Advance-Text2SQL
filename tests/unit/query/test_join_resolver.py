@@ -50,6 +50,16 @@ def test_parallel_foreign_keys_are_ambiguous():
         JoinResolver().resolve(['a','b'], RelationshipGraph(registry))
 
 
+def test_role_hint_selects_one_parallel_foreign_key_without_defaulting():
+    registry = make_registry(['a','b'], [('a','primary_b_id','b'),('a','backup_b_id','b')])
+    graph = RelationshipGraph(registry)
+    hint = frozenset(('public.a.primary_b_id', 'public.b.id'))
+
+    joins = JoinResolver().resolve(['a', 'b'], graph, {hint})
+
+    assert joins == [SchemaRelationship(source='public.a.primary_b_id', target='public.b.id')]
+
+
 def test_diamond_paths_are_ambiguous():
     registry = make_registry(['a','b','c','d'], [('a','b_id','b'),('a','c_id','c'),('b','d_id','d'),('c','d_id','d')])
     with pytest.raises(AmbiguousJoinPathError):

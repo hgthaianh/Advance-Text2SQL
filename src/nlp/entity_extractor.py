@@ -56,6 +56,12 @@ class DeterministicEntityExtractor(EntityExtractor):
         folded = strip_accents(normalized)
         entities: list[ExtractedEntity] = []
         for match in self.catalog.match(normalized):
+            # “Kế toán” is both a department name and a finance-domain noun.
+            # Treat it as a department only when the sentence does not name a
+            # financial record; otherwise it injects an unrelated FK filter.
+            if (match.entity_type == 'department_name' and match.value == 'Kế toán'
+                    and any(phrase in folded for phrase in ('tai khoan', 'but toan', 'ky ke toan'))):
+                continue
             entities.append(ExtractedEntity(
                 text=normalized[match.start:match.end], normalized_value=match.value,
                 entity_type=match.entity_type, start=match.start, end=match.end, confidence=1.0,

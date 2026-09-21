@@ -117,6 +117,8 @@ tables:
     - permission
   iam.user_roles:
     aliases:
+    - gán vai trò cho tài khoản
+    - gán vai trò
     - vai trò người dùng
     - gán quyền người dùng
     - user role
@@ -428,6 +430,7 @@ tables:
     - budget
   finance.vendor_bills:
     aliases:
+    - hóa đơn đầu vào
     - hóa đơn nhà cung cấp
     - hóa đơn mua hàng
     - vendor bill
@@ -489,6 +492,7 @@ tables:
     - audit log
   audit.data_access_logs:
     aliases:
+    - nhật ký đọc dữ liệu
     - nhật ký truy cập dữ liệu
     - lịch sử đọc dữ liệu
     - data access log
@@ -563,10 +567,14 @@ columns:
     aliases:
     - vĩ độ của địa điểm
     - vĩ độ
+    - tọa độ gps
+    - tọa độ
   org.locations.longitude:
     aliases:
     - kinh độ của địa điểm
     - kinh độ
+    - tọa độ gps
+    - tọa độ
   org.branches.tenant_id:
     aliases:
     - mã đơn vị thuê hệ thống của chi nhánh
@@ -589,6 +597,8 @@ columns:
   org.departments.parent_department_id:
     aliases:
     - mã phòng ban của phòng ban
+    - phòng ban cấp trên
+    - mã phòng ban cấp trên
   org.departments.name:
     aliases:
     - tên phòng ban
@@ -626,6 +636,8 @@ columns:
     aliases:
     - ngân sách năm của trung tâm chi phí
     - ngân sách năm
+    - tiền được cấp trong năm
+    - cấp bao nhiêu tiền
   org.cost_centers.currency:
     aliases:
     - tiền tệ của trung tâm chi phí
@@ -705,6 +717,7 @@ columns:
     - ngày tuyển dụng của nhân viên
     - ngày vào làm
     - ngày tuyển dụng
+    - bắt đầu làm
   hr.employees.employment_status:
     aliases:
     - tình trạng việc làm của nhân viên
@@ -769,6 +782,8 @@ columns:
     aliases:
     - ngày kết thúc của hợp đồng lao động
     - ngày kết thúc
+    - hết hạn hợp đồng
+    - sắp hết hạn
   hr.employment_contracts.base_salary:
     aliases:
     - lương cơ bản của hợp đồng lao động
@@ -862,6 +877,8 @@ columns:
     aliases:
     - ngày phép còn lại của số dư nghỉ phép
     - ngày phép còn lại
+    - còn bao nhiêu ngày phép
+    - ngày phép chưa dùng
   hr.leave_requests.employee_id:
     aliases:
     - mã nhân viên của đơn nghỉ phép
@@ -962,6 +979,8 @@ columns:
     aliases:
     - lương thực nhận của chi tiết bảng lương
     - lương thực nhận
+    - lương sau khấu trừ
+    - tiền thực lĩnh
   hr.performance_reviews.employee_id:
     aliases:
     - mã nhân viên của đánh giá hiệu suất
@@ -1090,6 +1109,12 @@ columns:
     aliases:
     - mô tả của vai trò
     - mô tả
+  iam.roles.is_active:
+    aliases:
+    - còn được kích hoạt
+    - vai trò còn hoạt động
+    - vai trò được kích hoạt
+    - cờ hoạt động
   iam.permissions.resource_type:
     aliases:
     - loại tài nguyên của quyền truy cập
@@ -1126,6 +1151,8 @@ columns:
     - thời điểm phân công
   iam.user_roles.valid_to:
     aliases:
+    - hiệu lực đến
+    - hiệu lực đến lúc nào
     - hết hiệu lực của vai trò người dùng
     - hết hiệu lực
   iam.role_permissions.role_id:
@@ -1197,6 +1224,8 @@ columns:
     - được phép lọc
   iam.column_access_policies.mask_type:
     aliases:
+    - cách làm mờ giá trị
+    - làm mờ giá trị
     - kiểu che dữ liệu của chính sách truy cập cột
     - kiểu che dữ liệu
   iam.login_sessions.user_id:
@@ -1359,6 +1388,8 @@ columns:
     aliases:
     - ngày tham gia của thành viên nhóm khách hàng
     - ngày tham gia
+    - được thêm vào nhóm từ ngày nào
+    - thời điểm tham gia nhóm
   customer.customer_contacts.customer_id:
     aliases:
     - mã khách hàng của liên hệ khách hàng
@@ -1414,6 +1445,9 @@ columns:
   product.categories.parent_id:
     aliases:
     - mã danh mục sản phẩm của danh mục sản phẩm
+    - danh mục cha
+    - loại sản phẩm cha
+    - nằm dưới loại nào
   product.categories.name:
     aliases:
     - tên danh mục sản phẩm
@@ -1455,6 +1489,8 @@ columns:
     aliases:
     - ngưỡng đặt lại hàng của sản phẩm
     - ngưỡng đặt lại hàng
+    - chạm mức tồn để đặt lại
+    - ngưỡng tái đặt hàng
   product.product_categories.product_id:
     aliases:
     - mã sản phẩm của phân loại sản phẩm
@@ -1551,6 +1587,7 @@ columns:
     aliases:
     - đơn giá của chi tiết bảng giá
     - đơn giá
+    - niêm yết bao nhiêu
   product.product_tags.product_id:
     aliases:
     - mã sản phẩm của nhãn sản phẩm
@@ -1596,10 +1633,14 @@ columns:
     aliases:
     - nhiệt độ tối thiểu của khu vực kho
     - nhiệt độ tối thiểu
+    - nhiệt độ nhỏ nhất
+    - giới hạn nhiệt độ
   inventory.warehouse_zones.temperature_max:
     aliases:
     - nhiệt độ tối đa của khu vực kho
     - nhiệt độ tối đa
+    - nhiệt độ lớn nhất
+    - giới hạn nhiệt độ
   inventory.inventory_balances.warehouse_id:
     aliases:
     - mã kho hàng của tồn kho
@@ -1630,6 +1671,7 @@ columns:
     aliases:
     - giá vốn bình quân của tồn kho
     - giá vốn bình quân
+    - chi phí bình quân đơn vị
   inventory.inventory_balances.last_counted_at:
     aliases:
     - lần kiểm kê gần nhất của tồn kho
@@ -1780,9 +1822,13 @@ columns:
   inventory.stock_transfers.source_warehouse_id:
     aliases:
     - mã kho hàng của phiếu chuyển kho
+    - kho nguồn
+    - đi từ kho nào
   inventory.stock_transfers.destination_warehouse_id:
     aliases:
     - mã kho hàng của phiếu chuyển kho
+    - kho đích
+    - tới kho nào
   inventory.stock_transfers.requested_by_employee_id:
     aliases:
     - mã nhân viên của phiếu chuyển kho
@@ -2401,6 +2447,7 @@ columns:
     - tên tài khoản kế toán
   finance.chart_of_accounts.account_type:
     aliases:
+    - loại tài khoản
     - loại tài khoản kế toán của hệ thống tài khoản kế toán
     - loại tài khoản kế toán
   finance.chart_of_accounts.normal_balance:
@@ -2483,8 +2530,11 @@ columns:
     - số tiền ghi nợ
   finance.journal_entry_lines.credit_amount:
     aliases:
+    - ghi có
+    - tiền bên có
     - số tiền ghi có của chi tiết bút toán
     - số tiền ghi có
+    - giá trị bên có
   finance.journal_entry_lines.currency:
     aliases:
     - tiền tệ của chi tiết bút toán
@@ -2525,6 +2575,8 @@ columns:
     - số tiền thực tế
   finance.budgets.committed_amount:
     aliases:
+    - cam kết chi
+    - khoản tiền cam kết
     - số tiền cam kết của ngân sách
     - số tiền cam kết
   finance.budgets.currency:
@@ -2552,8 +2604,11 @@ columns:
     - ngày hóa đơn mua
   finance.vendor_bills.due_date:
     aliases:
+    - hạn thanh toán
+    - phải trả trước ngày nào
     - ngày đến hạn của hóa đơn nhà cung cấp
     - ngày đến hạn
+    - hạn thanh toán nhà cung cấp
   finance.vendor_bills.currency:
     aliases:
     - tiền tệ của hóa đơn nhà cung cấp
@@ -2746,6 +2801,7 @@ columns:
     aliases:
     - thời gian phản hồi đầu tiên của chính sách sla
     - thời gian phản hồi đầu tiên
+    - số phút phản hồi đầu tiên
   support.sla_policies.resolution_minutes:
     aliases:
     - thời gian giải quyết của chính sách sla
@@ -2894,6 +2950,8 @@ columns:
     - loại truy cập
   audit.data_access_logs.accessed_columns:
     aliases:
+    - cột đã xem
+    - cột được xem
     - cột đã truy cập của nhật ký truy cập dữ liệu
     - cột đã truy cập
   audit.data_access_logs.row_count:
@@ -2912,6 +2970,8 @@ columns:
     - mã lỗi
   audit.error_logs.message:
     aliases:
+    - nội dung báo lỗi
+    - thông báo của bản ghi log lỗi
     - thông báo của nhật ký lỗi
     - thông báo
   audit.error_logs.stack_trace:
@@ -2987,8 +3047,12 @@ columns:
     - sql được cấp quyền
   audit.text2sql_query_logs.execution_status:
     aliases:
+    - thực thi thành công hay thất bại
+    - trạng thái chạy
+    - trạng thái chạy truy vấn
     - trạng thái thực thi của nhật ký truy vấn text2sql
     - trạng thái thực thi
+    - kết quả chạy truy vấn
   audit.text2sql_query_logs.result_row_count:
     aliases:
     - số dòng kết quả của nhật ký truy vấn text2sql
@@ -3051,3 +3115,59 @@ concepts:
     - org.branches
     columns:
     - org.locations.city
+  unspecified_code:
+    aliases:
+    - mã
+    - code
+    tables:
+    - customer.customers
+    - product.products
+    columns:
+    - customer.customers.code
+    - product.products.code
+    ambiguous: true
+  unspecified_manager:
+    aliases:
+    - quản lý
+    - manager
+    tables:
+    - org.branches
+    - inventory.warehouses
+    columns:
+    - org.branches.manager_employee_id
+    - inventory.warehouses.manager_employee_id
+    ambiguous: true
+  unspecified_account:
+    aliases:
+    - tài khoản
+    - account
+    tables:
+    - iam.users
+    - finance.chart_of_accounts
+    columns:
+    - iam.users.username
+    - finance.chart_of_accounts.account_code
+    ambiguous: true
+  unspecified_score:
+    aliases:
+    - điểm
+    - score
+    tables:
+    - hr.training_records
+    - hr.performance_reviews
+    columns:
+    - hr.training_records.score
+    - hr.performance_reviews.performance_score
+    ambiguous: true
+  user_role_assignment:
+    aliases:
+    - vai trò của người dùng
+    - user role assignment
+    tables:
+    - iam.roles
+    - iam.users
+    columns:
+    - iam.roles.name
+    join_hints:
+    - [iam.user_roles.role_id, iam.roles.id]
+    - [iam.user_roles.user_id, iam.users.id]

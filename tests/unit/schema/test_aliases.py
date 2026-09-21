@@ -64,6 +64,9 @@ def test_spec_matches_bundled_ddl_and_manifest(registry):
     ({'concepts': {'test': {'aliases': ['test'], 'tables': ['fake']}}}, 'table'),
     ({'concepts': {'test': {'aliases': ['test'], 'columns': ['customers.fake']}}}, 'column'),
     ({'concepts': {'test': {'aliases': ['test'], 'tables': 'customers'}}}, 'list'),
+    ({'concepts': {'test': {'aliases': ['test'], 'tables': ['customers'], 'ambiguous': 'yes'}}}, 'boolean'),
+    ({'concepts': {'test': {'aliases': ['test'], 'tables': ['customers'], 'join_hints': ['customers.id']}}}, 'column pair'),
+    ({'concepts': {'test': {'aliases': ['test'], 'tables': ['customers'], 'join_hints': [['customers.id', 'employees.id']]}}}, 'not a relationship'),
     ({'tables': {'customers': {'aliases': ['one']}, 'customer.customers': {'aliases': ['two']}}}, 'Duplicate canonical'),
 ])
 def test_invalid_aliases(registry, data, message):
@@ -74,6 +77,23 @@ def test_invalid_aliases(registry, data, message):
 def test_shared_aliases_are_ambiguity_not_invalid(registry):
     data = {'columns': {'customers.name': {'aliases': ['name']}, 'products.name': {'aliases': ['name']}}}
     assert len(validate_aliases(data, registry)['columns']) == 2
+
+
+def test_ambiguous_concept_is_valid(registry):
+    data = {'concepts': {'code': {
+        'aliases': ['mã'], 'tables': ['customers'], 'columns': ['customers.code'], 'ambiguous': True,
+    }}}
+    assert validate_aliases(data, registry)['concepts']['code']['ambiguous'] is True
+
+
+def test_concept_join_hints_are_canonical_and_validated(registry):
+    data = {'concepts': {'customer_orders': {
+        'aliases': ['đơn của khách'], 'tables': ['customers', 'orders'],
+        'join_hints': [['orders.customer_id', 'customers.id']],
+    }}}
+    assert validate_aliases(data, registry)['concepts']['customer_orders']['join_hints'] == [
+        ('sales.orders.customer_id', 'customer.customers.id')
+    ]
 
 
 def test_duplicate_yaml_keys_rejected(tmp_path):

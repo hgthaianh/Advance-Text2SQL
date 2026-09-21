@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 
 from src.pipeline.orchestrator import Text2SQLPipeline
 from src.pipeline.observability import PipelineEvent, PipelineObserver
+from src.nlp.scope_router import ScopeRouter
 from src.shared.models import UserContext
 
 
@@ -112,6 +113,28 @@ def test_unsupported_question_is_controlled(pipeline: Text2SQLPipeline):
     assert result.error_code == 'UNSUPPORTED_QUERY'
 
 
+def test_out_of_scope_request_does_not_call_schema_linker(pipeline: Text2SQLPipeline):
+    class LinkerMustNotRun:
+        registry = pipeline.registry
+        graph = pipeline.linker.graph
+
+        def link(self, *_args, **_kwargs):
+            raise AssertionError('Schema linker must not run for out-of-scope input')
+
+    pipeline.linker = LinkerMustNotRun()
+    result = _run(pipeline, 'thoi tiet HCM hom nay the nao', UserContext(user_id='admin', role='admin', tenant_id='T1'))
+
+    assert not result.success
+    assert result.error_code == 'UNSUPPORTED_QUERY'
+
+
+def test_ambiguous_scope_is_a_controlled_rejection(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'tai khoan', UserContext(user_id='admin', role='admin', tenant_id='T1'))
+
+    assert not result.success
+    assert result.error_code == 'AMBIGUOUS_QUERY'
+
+
 class _CaptureObserver(PipelineObserver):
     def __init__(self) -> None:
         self.events: list[PipelineEvent] = []
@@ -130,7 +153,7 @@ def test_pipeline_observability_excludes_question_identity_and_values(pipeline: 
     assert len(observer.events) == 1
     assert observer.events[0].query_id == result.query_id
     assert observer.events[0].outcome == 'failure'
-    assert observer.events[0].stage == 'ir_construction'
+    assert observer.events[0].stage == 'scope_routing'
     assert observer.events[0].error_code == 'UNSUPPORTED_QUERY'
     serialized = observer.events[0].model_dump_json()
     assert question not in serialized

@@ -50,3 +50,48 @@ def test_top_k_uses_related_transactional_column_and_limits_after_grouping():
     compiled = BasicQueryHandler(registry).handle(query)
     assert compiled.sql.index('GROUP BY') < compiled.sql.index('ORDER BY') < compiled.sql.index('LIMIT')
     assert compiled.params['limit'] == 5
+
+
+def test_top_k_dimension_wins_over_later_filter_mentions():
+    _, query = _build('top 5 san pham ban chay cua khach hang vip tai chi nhanh hcm thang truoc')
+
+    assert query.group_by == ['product.products.name']
+
+
+def test_top_k_roots_joins_at_the_aggregate_fact_table():
+    _, query = _build('top 5 san pham ban chay cua khach hang vip tai chi nhanh hcm thang truoc')
+
+    assert query.tables[0] == 'sales.order_items'
+    assert BasicQueryHandler(SchemaRegistry()).handle(query).sql
+
+
+def test_role_specific_catalog_filter_selects_the_corresponding_fk():
+    registry, query = _build('nhan vien ma phong ban D1')
+
+    assert ('hr.employees.department_id', 'org.departments.id') in query.join_hints
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert '"hr"."employees"."department_id" = "org"."departments"."id"' in compiled.sql
+
+
+def test_date_range_can_use_direct_transactional_neighbor_for_top_k():
+    registry, query = _build('top 2 san pham ban chay thang 8 nam 2026')
+
+    assert 'sales.orders' in query.tables
+    assert {filter_.column for filter_ in query.filters} == {'sales.orders.order_date'}
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'orders"."order_date' in compiled.sql
+
+
+def test_status_filter_uses_explicit_business_context():
+    _, query = _build('don hang da hoan thanh')
+
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('sales.orders.status', 'COMPLETED')
+    ]
+
+
+def test_group_by_uses_the_dimension_after_theo():
+    registry, query = _build('doanh thu khach hang theo chi nhanh')
+
+    assert query.group_by == ['org.branches.name']
+    assert BasicQueryHandler(registry).handle(query).sql

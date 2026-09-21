@@ -46,6 +46,10 @@ class MalformedQueryIRError(QueryValidationError):
     pass
 
 
+class FanoutRiskError(QueryValidationError):
+    """An aggregate could be duplicated by a one-to-many join."""
+
+
 class UnsupportedQueryError(QueryValidationError):
     """The deterministic pipeline cannot support the requested semantics."""
 

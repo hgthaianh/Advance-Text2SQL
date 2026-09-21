@@ -6,7 +6,8 @@ from src.shared.models import SchemaRelationship
 
 
 class JoinResolver:
-    def resolve(self, tables: list[str], graph: RelationshipGraph) -> list[SchemaRelationship]:
+    def resolve(self, tables: list[str], graph: RelationshipGraph,
+                preferred_edges: set[frozenset[str]] | None = None) -> list[SchemaRelationship]:
         """Merge unique shortest root-to-target paths in requested-table order.
 
         This is a rooted shortest-path tree, not a minimum-cost/Steiner optimizer.
@@ -19,7 +20,13 @@ class JoinResolver:
         result: list[SchemaRelationship] = []
         edges = set()
         for target in canonical[1:]:
-            for edge in graph.find_relationship_path(canonical[0], target):
+            # Preserve the two-argument call for graph implementations and
+            # test doubles which do not need role evidence.
+            if preferred_edges:
+                path = graph.find_relationship_path(canonical[0], target, preferred_edges)
+            else:
+                path = graph.find_relationship_path(canonical[0], target)
+            for edge in path:
                 key = (edge.source, edge.target)
                 if key in edges:
                     continue

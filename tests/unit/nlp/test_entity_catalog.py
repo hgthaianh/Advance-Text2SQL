@@ -32,3 +32,9 @@ def test_catalog_prefers_longest_overlapping_phrase():
     values = DeterministicEntityExtractor(catalog=catalog).extract('north region')
 
     assert [(item.entity_type, item.normalized_value) for item in values] == [('branch_name', 'North Region')]
+
+
+def test_finance_context_does_not_turn_accounting_into_a_department_filter():
+    values = DeterministicEntityExtractor().extract('he thong tai khoan ke toan')
+
+    assert 'department_name' not in {item.entity_type for item in values}
