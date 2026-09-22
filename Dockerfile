@@ -3,6 +3,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY src ./src
+COPY scripts ./scripts
+COPY evaluation ./evaluation
 RUN pip install --no-cache-dir . && useradd --create-home app
 COPY dataset_v2 ./dataset_v2
 COPY schema ./schema
