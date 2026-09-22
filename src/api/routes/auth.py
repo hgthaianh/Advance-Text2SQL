@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Request, status
 from fastapi.responses import JSONResponse, Response
 
 from src.api.dependencies import get_authentication_provider
+from src.api.errors import service_unavailable_response
 from src.auth.models import (
     AuthenticatedIdentity,
     IdentityResponse,
@@ -15,7 +16,7 @@ from src.auth.models import (
     TokenResponse,
 )
 from src.auth.provider import AuthenticationProvider
-from src.shared.exceptions import AuthenticationError
+from src.shared.exceptions import AuthenticationError, ServiceUnavailableError
 from src.shared.models import ErrorResponse
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -30,6 +31,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
             "model": ErrorResponse,
             "description": "Invalid username or password",
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse, "description": "Authentication service unavailable"},
     },
     summary="Authenticate user credentials",
     description="Authenticates the caller with username and password, returning an access token and refresh token.",
@@ -49,6 +51,8 @@ def login(
                 "message": "Invalid username or password.",
             },
         )
+    except ServiceUnavailableError:
+        return service_unavailable_response()
 
 
 @router.post(
@@ -60,6 +64,7 @@ def login(
             "model": ErrorResponse,
             "description": "Invalid, expired, or revoked refresh token",
         },
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse, "description": "Authentication service unavailable"},
     },
     summary="Refresh access token",
     description="Validates a refresh token and issues a new access token without changing user identity.",
@@ -79,13 +84,18 @@ def refresh(
                 "message": "Invalid, expired, or revoked refresh token.",
             },
         )
+    except ServiceUnavailableError:
+        return service_unavailable_response()
 
 
 @router.post(
     "/logout",
     status_code=status.HTTP_204_NO_CONTENT,
     response_model=None,
-    responses={status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse}},
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponse},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {"model": ErrorResponse, "description": "Authentication service unavailable"},
+    },
     summary="Revoke the current refresh-token session",
 )
 def logout(
@@ -104,6 +114,8 @@ def logout(
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content={
             "query_id": None, "error_code": "INVALID_REFRESH_TOKEN", "message": "Invalid refresh token.",
         })
+    except ServiceUnavailableError:
+        return service_unavailable_response()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 

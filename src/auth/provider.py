@@ -7,13 +7,14 @@ import secrets
 from typing import Callable
 
 from sqlalchemy import Engine, text
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.requests import Request
 
 from src.auth.models import AuthenticatedIdentity, LoginRequest, LogoutRequest, RefreshRequest, TokenResponse
 from src.auth.tokens import create_access_token, create_refresh_token, decode_access_token, decode_refresh_token, revoke_token
 from src.config import get_settings
 from src.database.session import get_engine
-from src.shared.exceptions import AuthenticationError
+from src.shared.exceptions import AuthenticationError, ServiceUnavailableError
 
 
 class AuthenticationProvider(ABC):
@@ -114,29 +115,38 @@ class DefaultAuthenticationProvider(AuthenticationProvider):
         return TokenResponse(access_token=access_token, expires_in=expires_in, refresh_token=refresh_token)
 
     def login(self, payload: LoginRequest) -> TokenResponse:
-        with self.engine.begin() as connection:
-            row = connection.execute(_USER_BY_USERNAME, {'username': payload.username, 'password': payload.password}).mappings().first()
-            if row is None:
-                raise AuthenticationError('Invalid credentials')
-            return self._issue(connection, dict(row))
+        try:
+            with self.engine.begin() as connection:
+                row = connection.execute(_USER_BY_USERNAME, {'username': payload.username, 'password': payload.password}).mappings().first()
+                if row is None:
+                    raise AuthenticationError('Invalid credentials')
+                return self._issue(connection, dict(row))
+        except SQLAlchemyError as exc:
+            raise ServiceUnavailableError('Authentication database is unavailable') from exc
 
     def refresh(self, payload: RefreshRequest) -> TokenResponse:
         decode_refresh_token(payload.refresh_token)
-        with self.engine.begin() as connection:
-            user_id = connection.execute(_CONSUME_SESSION, {'token_hash': _token_hash(payload.refresh_token)}).scalar_one_or_none()
-            if user_id is None:
-                raise AuthenticationError('Invalid refresh token')
-            row = connection.execute(_USER_BY_ID, {'user_id': user_id}).mappings().first()
-            if row is None:
-                raise AuthenticationError('Inactive user')
-            return self._issue(connection, dict(row))
+        try:
+            with self.engine.begin() as connection:
+                user_id = connection.execute(_CONSUME_SESSION, {'token_hash': _token_hash(payload.refresh_token)}).scalar_one_or_none()
+                if user_id is None:
+                    raise AuthenticationError('Invalid refresh token')
+                row = connection.execute(_USER_BY_ID, {'user_id': user_id}).mappings().first()
+                if row is None:
+                    raise AuthenticationError('Inactive user')
+                return self._issue(connection, dict(row))
+        except SQLAlchemyError as exc:
+            raise ServiceUnavailableError('Authentication database is unavailable') from exc
 
     def logout(self, identity: AuthenticatedIdentity, payload: LogoutRequest) -> None:
         refresh_identity = decode_refresh_token(payload.refresh_token)
         if refresh_identity.user_id != identity.user_id:
             raise AuthenticationError('Refresh token does not belong to authenticated user')
-        with self.engine.begin() as connection:
-            connection.execute(_REVOKE_SESSION, {'user_id': identity.user_id, 'token_hash': _token_hash(payload.refresh_token)})
+        try:
+            with self.engine.begin() as connection:
+                connection.execute(_REVOKE_SESSION, {'user_id': identity.user_id, 'token_hash': _token_hash(payload.refresh_token)})
+        except SQLAlchemyError as exc:
+            raise ServiceUnavailableError('Authentication database is unavailable') from exc
 
 
 class MockAuthenticationProvider(AuthenticationProvider):

@@ -2,11 +2,12 @@
 
 The full 233-case corpus measures schema linking and compilation across the production schema. It intentionally does not invent result labels for tables that have no deterministic fixture.
 
-`evaluation/execution_cases.json` is a separate six-case result-accuracy suite. It uses a dedicated PostgreSQL database whose name must end in `_eval`; the seed command refuses every other database name.
+`evaluation/result_accuracy_cases.json` is a separate 60-case result-accuracy suite. It uses a dedicated PostgreSQL database whose name must end in `_eval`; the seed command refuses every other database name.
 
 ```powershell
-.\.venv\Scripts\python.exe -m scripts.seed_execution_eval --database-url "postgresql+psycopg://text2sql:password@localhost:5432/text2sql_eval"
-.\.venv\Scripts\python.exe evaluation\run_execution_eval.py --database-url "postgresql+psycopg://text2sql:password@localhost:5432/text2sql_eval"
+.\.venv\Scripts\python.exe -m scripts.seed_execution_eval --database-url "postgresql+psycopg://text2sql:password@localhost:5432/text2sql_eval" --coverage-report evaluation\results\execution_coverage.json
+.\.venv\Scripts\python.exe evaluation\run_execution_coverage_eval.py --database-url "postgresql+psycopg://text2sql:password@localhost:5432/text2sql_eval"
+.\.venv\Scripts\python.exe evaluation\run_result_accuracy_eval.py --database-url "postgresql+psycopg://text2sql:password@localhost:5432/text2sql_eval"
 ```
 
 The seed includes two tenants, department-scoped employees, SELF identity data, VIP orders, and a sensitive salary field. It supports assertions for tenant isolation, department scope, SELF, revenue with date/entity filters, and column denial.

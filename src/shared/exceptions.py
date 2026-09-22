@@ -14,6 +14,10 @@ class AuthenticationError(Text2SQLError):
     """Caller authentication failed or identity could not be verified."""
 
 
+class ServiceUnavailableError(Text2SQLError):
+    """A required backing service is unavailable without exposing its details."""
+
+
 
 class UnsupportedIntentError(QueryValidationError):
     pass
