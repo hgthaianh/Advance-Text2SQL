@@ -38,8 +38,9 @@ class ScopedRowPolicy(RowPolicy):
             for table in self._context_tables(query, tables):
                 column = f'{table}.tenant_id'
                 if column in self.registry.columns:
+                    val = int(permissions.tenant_id) if isinstance(permissions.tenant_id, str) and permissions.tenant_id.isdigit() else permissions.tenant_id
                     tenant_filter = QueryFilter(
-                        column=column, operator=FilterOperator.EQ, value=permissions.tenant_id, source='permission',
+                        column=column, operator=FilterOperator.EQ, value=val, source='permission',
                     )
                     if tenant_filter not in merged_filters:
                         merged_filters.append(tenant_filter)

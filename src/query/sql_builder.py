@@ -1,11 +1,11 @@
-﻿"""Compile a validated plan to parameterized PostgreSQL using SQLAlchemy Core."""
+"""Compile a validated plan to parameterized PostgreSQL using SQLAlchemy Core."""
 
 from sqlalchemy import bindparam, column, false, func, select, table
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.elements import BindParameter, ColumnElement
 
-from src.query.ir import QueryFilter, Scalar
+from src.query.ir import QueryFilter, Scalar, SelectItem
 from src.query.models import CompiledQuery, QueryPlan
 from src.query.planner import QueryPlanner
 from src.schema.registry import SchemaRegistry
@@ -51,7 +51,10 @@ class SQLBuilder:
             expression = sql_column(name)
             return aggregation_functions[aggregation](expression) if aggregation else expression
 
-        projections = [sql_expression(item.column, item.aggregation) for item in query.select]
+        projections = [
+            sql_expression(item if isinstance(item, str) else (item.column or '*'), item.aggregation if isinstance(item, SelectItem) else None)
+            for item in query.select
+        ]
         from_clause = sql_tables[canonical.tables[0]]
         for edge in canonical.joins:
             destination = edge.target.rsplit('.', 1)[0]
@@ -59,9 +62,17 @@ class SQLBuilder:
         statement = select(*projections).select_from(from_clause)
         counter = 0
 
-        def parameter(value: Scalar) -> BindParameter:
+        def _cast_value_if_needed(val: Scalar, col_name: str | None) -> Scalar:
+            if col_name and self.registry and col_name in self.registry.columns:
+                dt = self.registry.columns[col_name].data_type.lower()
+                if any(t in dt for t in ('int', 'bigint', 'smallint')) and isinstance(val, str) and val.isdigit():
+                    return int(val)
+            return val
+
+        def parameter(value: Scalar, col_name: str | None = None) -> BindParameter:
             nonlocal counter
-            result = bindparam(f'p{counter}', value=value)
+            typed_val = _cast_value_if_needed(value, col_name)
+            result = bindparam(f'p{counter}', value=typed_val)
             counter += 1
             return result
 
@@ -75,11 +86,15 @@ class SQLBuilder:
             FilterOperator.LIKE: lambda c, v: c.like(v),
         }
         def predicate(condition: QueryFilter, expression: ColumnElement) -> ColumnElement:
+            col_name = condition.column
             if condition.operator == FilterOperator.IN:
-                return expression.in_([parameter(v) for v in condition.value]) if condition.value else false()
+                if isinstance(condition.value, list):
+                    return expression.in_([parameter(v, col_name) for v in condition.value]) if condition.value else false()
+                return false()
             if condition.value is None:
                 return expression.is_(None) if condition.operator == FilterOperator.EQ else expression.is_not(None)
-            return comparisons[condition.operator](expression, parameter(condition.value))
+            val: Scalar = condition.value if not isinstance(condition.value, list) else None
+            return comparisons[condition.operator](expression, parameter(val, col_name))
 
         for condition in query.filters:
             statement = statement.where(predicate(condition, sql_column(condition.column)))
@@ -91,7 +106,8 @@ class SQLBuilder:
             expression = sql_expression(item.column, item.aggregation)
             statement = statement.order_by(expression.desc() if item.direction == SortDirection.DESC else expression.asc())
         # Explicit aggregate TOP-K limits groups only, after aggregation/HAVING.
-        if not any(item.aggregation for item in query.select) or query.top_k is not None or query.intent == Intent.TOP_N:
+        has_aggregation = any(isinstance(item, SelectItem) and item.aggregation for item in query.select)
+        if not has_aggregation or query.top_k is not None or query.intent == Intent.TOP_N:
             statement = statement.limit(bindparam('limit', value=query.top_k if query.top_k is not None else query.limit))
         compiled = statement.compile(dialect=postgresql.dialect(paramstyle='named'))
         return CompiledQuery(sql=str(compiled), params=dict(compiled.params), statement=statement)
