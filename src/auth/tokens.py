@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 import uuid
 from typing import Any
 
-from jose import JWTError, jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 
 from src.auth.models import AuthenticatedIdentity
 from src.config import get_settings
@@ -127,7 +127,7 @@ def decode_access_token(token: str) -> AuthenticatedIdentity:
             settings.auth_secret_key.get_secret_value(),
             algorithms=[settings.auth_algorithm],
         )
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise AuthenticationError("Access token has expired.") from None
     except JWTError:
         raise AuthenticationError("Invalid access token.") from None
@@ -169,7 +169,7 @@ def decode_refresh_token(token: str) -> AuthenticatedIdentity:
             settings.auth_secret_key.get_secret_value(),
             algorithms=[settings.auth_algorithm],
         )
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise AuthenticationError("Refresh token has expired.") from None
     except JWTError:
         raise AuthenticationError("Invalid refresh token.") from None

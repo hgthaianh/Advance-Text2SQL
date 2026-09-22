@@ -1,4 +1,4 @@
-# Curated vocabulary. Unaccented forms are supplied by the normalizer.
+ # Curated vocabulary. Unaccented forms are supplied by the normalizer.
 # Shared aliases across targets intentionally preserve ambiguity.
 version: 1
 tables:
