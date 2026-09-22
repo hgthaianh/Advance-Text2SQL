@@ -1,6 +1,7 @@
 """Focused tests for /auth/login, /auth/refresh, and /auth/me endpoints."""
 
 from datetime import timedelta
+from typing import Any, cast
 import pytest
 from fastapi.testclient import TestClient
 
@@ -336,7 +337,7 @@ def test_identity_consistency_between_auth_me_and_query(viewer_credentials):
                 captured_user.append(user_context)
                 return original_pipeline.execute(question, user_context, reference_date=reference_date)
 
-        query_module.pipeline = CapturePipeline()
+        query_module.pipeline = cast(Any, CapturePipeline())
         try:
             client.post(
                 "/query",
