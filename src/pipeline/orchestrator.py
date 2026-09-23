@@ -16,7 +16,10 @@ from src.nlp.scope_router import ScopeRouter
 from src.permission.column_policy import DefaultColumnPolicy
 from src.permission.resolver import DefaultPermissionResolver, PermissionResolver
 from src.permission.row_policy import ScopedRowPolicy
-from src.pipeline.observability import LoggingPipelineObserver, PipelineEvent, PipelineObserver, elapsed_ms
+from src.pipeline.observability import (
+    CompositePipelineObserver, LoggingPipelineObserver, PersistedPipelineObserver,
+    PipelineEvent, PipelineObserver, elapsed_ms,
+)
 from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
@@ -58,29 +61,35 @@ class Text2SQLPipeline:
             engine = engine or create_engine(get_settings().database_url, pool_pre_ping=True)
             executor = ReadOnlyExecutor(engine, timeout_ms=get_settings().query_timeout_ms)
         self.executor = executor
-        self.observer = observer or LoggingPipelineObserver()
+        # A caller-provided observer remains untouched for tests/integrations.
+        # The default combines existing logs with durable, redacted audit data.
+        self.observer = observer or CompositePipelineObserver(
+            LoggingPipelineObserver(), PersistedPipelineObserver(self.executor.engine),
+        )
 
     def execute(self, question: str, user_context: UserContext, *, reference_date: date | None = None) -> QueryResult:
         """Return data or a controlled public failure; never expose a traceback."""
         query_id = uuid4().hex
         started_at = perf_counter()
         stage = 'preprocess'
+        stage_started_at = started_at
+        stage_durations: dict[str, float] = {}
         permissions = None
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
-            stage = 'scope_routing'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'scope_routing')
             scope = self.scope_router.route(preprocessed)
             if scope.decision == ScopeDecision.OUT_OF_SCOPE:
                 raise UnsupportedQueryError('Question is outside the database query scope')
             if scope.decision == ScopeDecision.AMBIGUOUS:
                 raise AmbiguousQueryError('Question lacks enough database-query context')
-            stage = 'schema_linking'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'schema_linking')
             links = self.linker.link(preprocessed)
-            stage = 'entity_extraction'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'entity_extraction')
             entities = self.entity_extractor.extract(preprocessed.normalized_text)
-            stage = 'ir_construction'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'ir_construction')
             query = self.ir_builder.build(preprocessed, links, entities)
-            stage = 'permission_resolution'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'permission_resolution')
             permissions = self.permission_resolver.resolve(user_context)
             query = self.row_policy.apply(query, permissions)
             # First planning discovers bridge tables; scope filters are then
@@ -88,24 +97,32 @@ class Text2SQLPipeline:
             preliminary_plan = self.handler.planner.plan(query)
             self._validate_table_access(preliminary_plan.tables, permissions.allowed_tables)
             query = self.row_policy.apply(query, permissions, tables=preliminary_plan.tables)
-            stage = 'sql_compilation'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'sql_compilation')
             self.column_policy.validate(query, permissions)
             compiled = self.handler.handle(query)
-            stage = 'sql_validation'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'sql_validation')
             self.validator.validate(compiled.statement, permissions)
-            stage = 'execution'
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'execution')
             result = self.executor.execute(compiled).model_copy(update={'query_id': query_id})
+            stage_durations[stage] = elapsed_ms(stage_started_at)
             self._record(PipelineEvent(query_id=query_id, outcome='success', stage=stage,
-                                       duration_ms=elapsed_ms(started_at)))
+                                       duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations))
             return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
+            stage_durations[stage] = elapsed_ms(stage_started_at)
             error_code = self._error_code(exc)
             self._record(PipelineEvent(query_id=query_id, outcome='failure', stage=stage,
-                                       duration_ms=elapsed_ms(started_at), error_code=error_code))
+                                       duration_ms=elapsed_ms(started_at), error_code=error_code,
+                                       stage_durations_ms=stage_durations))
             return QueryResult(
                 success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
                 ambiguity=self._safe_ambiguity(exc, permissions),
             )
+
+    @staticmethod
+    def _next_stage(current: str, started_at: float, durations: dict[str, float], next_stage: str) -> tuple[str, float]:
+        durations[current] = elapsed_ms(started_at)
+        return next_stage, perf_counter()
 
     @staticmethod
     def _safe_ambiguity(exc: Exception, permissions) -> JoinAmbiguity | None:

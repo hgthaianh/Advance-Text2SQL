@@ -69,8 +69,12 @@ execution failures map to 503. The response never exposes SQL or bind values.
 ## Observability and regression trend
 
 Every pipeline request emits a terminal event with `query_id`, terminal stage,
-outcome, latency and optional error code. It deliberately excludes question
-text, identity, SQL and bind values.
+outcome, total latency, per-stage latency and optional error code. The default
+observer also persists exactly those safe fields to `audit.text2sql_query_audits`.
+It deliberately excludes question text, identity, SQL, bind values, headers,
+tokens and exception payloads. `GET /observability/summary` is authenticated
+and exposes only bounded aggregate latency, error-category and failed-stage
+trends.
 
 Run an execution evaluation against the dedicated seeded database, then render
 its metric-only trend dashboard:
@@ -97,7 +101,7 @@ unique FK joins. It does not claim that natural-language linking or returned
 business values are correct; retain the ordinary six-case result assertions for
 that purpose.
 
-`evaluation/result_accuracy_cases.json` is a separate 60-case benchmark whose
+`evaluation/result_accuracy_cases.json` is a separate 80-case benchmark whose
 expected scalars, rows and controlled errors are manually specified from the
 fixed core rows in `scripts/seed_execution_eval.py`. Run it only after seeding
 the coverage fixture:
@@ -111,8 +115,9 @@ for this fixture and question set, not a production quality claim.
 
 ### Result baseline
 
-The latest run on the version-1 coverage fixture passed **60/60 cases
-(100%)**. Three employee code-filter cases are resolved through validated
+The benchmark uses independently specified deterministic fixture expectations;
+they are never generated from pipeline output. Three employee code-filter cases
+are resolved through validated
 role-specific FK hints, and the dated TOP-K case now uses the direct
 transactional date-table neighbor. Their independently specified expected
 results were not changed.

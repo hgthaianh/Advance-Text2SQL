@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import auth, health, query
+from src.api.routes import auth, health, observability, query
 from src.auth.middleware import AuthenticationMiddleware
 from src.config import get_settings
 
@@ -20,3 +20,4 @@ if settings.cors_origins:
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(query.router)
+app.include_router(observability.router)
