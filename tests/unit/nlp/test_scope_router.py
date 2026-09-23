@@ -19,6 +19,17 @@ def test_clear_database_requests_are_in_scope(router, question):
 
 
 @pytest.mark.parametrize('question', [
+    'co bao nhieu yeu cau mua hang', 'co bao nhieu giao dich kho',
+    'co bao nhieu ticket ho tro', 'co bao nhieu thuong hieu',
+    'co bao nhieu don nghi phep', 'co bao nhieu don mua hang',
+    'co bao nhieu lo hang', 'co bao nhieu dieu chuyen kho',
+    'co bao nhieu team', 'co bao nhieu contact', 'co bao nhieu quotation',
+])
+def test_cross_domain_business_counts_are_in_scope(router, question):
+    assert router.route(question).decision == ScopeDecision.IN_SCOPE
+
+
+@pytest.mark.parametrize('question', [
     'Thời tiết HCM hôm nay thế nào?', 'Tài khoản ngân hàng là gì?',
     'Giải thích vai trò của manager', 'dịch status pending sang tiếng Việt',
     'hướng dẫn cách làm báo cáo doanh thu', 'tin tức về sản phẩm công nghệ',

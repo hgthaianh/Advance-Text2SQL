@@ -21,13 +21,16 @@ _DATA_ENTITIES = frozenset((
     'nhan vien', 'khach hang', 'san pham', 'don hang', 'hoa don',
     'thanh toan', 'chi nhanh', 'phong ban', 'nha cung cap', 'kho',
     'doanh thu', 'ngan sach', 'but toan', 'vai tro', 'nguoi dung', 'luong',
+    'yeu cau mua hang', 'giao dich kho', 'ticket ho tro', 'thuong hieu',
+    'don nghi phep', 'don mua hang', 'lo hang', 'dieu chuyen kho', 'team',
+    'contact', 'quotation',
     'salary', 'so dien thoai', 'email', 'ton kho', 'gia ban',
     'tai khoan', 'department', 'branch', 'employee', 'customer',
     'employees', 'customers', 'product', 'products', 'order', 'orders',
     'invoice', 'invoices', 'status',
 ))
 _OUT_OF_SCOPE = frozenset((
-    'thoi tiet', 'du bao thoi tiet', 'tin tuc', 'dich ', 'dich giup',
+    'thoi tiet', 'du bao thoi tiet', 'tin tuc', 'dich status', 'dich giup',
     'viet giup', 'huong dan', 'cach lam', 'tai sao', 'giai thich',
     'dinh nghia', 'la gi', 'nghia la gi', 'cong thuc', 'bai hat',
     'am nhac', 'nau an', 'suc khoe', 'phim',
