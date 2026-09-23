@@ -51,8 +51,10 @@ jobs:
         run: |
           docker compose exec -T db sh -c 'createdb -U "$POSTGRES_USER" text2sql_eval'
           EVAL_URL="$(docker compose exec -T api python -c 'from src.config import get_settings; print(get_settings().database_url.set(database="text2sql_eval").render_as_string(hide_password=False))')"
-          docker compose exec -T api python scripts/seed_execution_eval.py --database-url "$EVAL_URL" --coverage-report evaluation/results/execution_coverage.json
-          docker compose exec -T api python evaluation/run_execution_coverage_eval.py --database-url "$EVAL_URL" --output /tmp/execution_coverage_eval.json
+          docker compose exec -T api python evaluation/run_full_eval.py --output /tmp/full_eval.json --summary /tmp/full_eval_summary.md --failures /tmp/full_eval_failures.csv
+          docker compose exec -T api python evaluation/analyze_execution_coverage.py --report /tmp/full_eval.json --output /tmp/execution_coverage.json
+          docker compose exec -T api python scripts/seed_execution_eval.py --database-url "$EVAL_URL" --coverage-report /tmp/execution_coverage.json
+          docker compose exec -T api python evaluation/run_execution_coverage_eval.py --database-url "$EVAL_URL" --report /tmp/full_eval.json --coverage /tmp/execution_coverage.json --output /tmp/execution_coverage_eval.json
           docker compose exec -T api python evaluation/run_result_accuracy_eval.py --database-url "$EVAL_URL" --output /tmp/result_accuracy_eval.json
           docker compose exec -T api python -c 'import json; coverage = json.load(open("/tmp/execution_coverage_eval.json")); result = json.load(open("/tmp/result_accuracy_eval.json")); assert coverage["failed"] == 0; assert result["failed"] == 0'
       - name: Container logs
