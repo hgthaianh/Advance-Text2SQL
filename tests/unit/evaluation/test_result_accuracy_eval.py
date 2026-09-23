@@ -7,7 +7,7 @@ def test_result_accuracy_dataset_has_independent_expected_results_in_required_ra
     data, cases = load_cases(ROOT / 'evaluation/result_accuracy_cases.json')
 
     assert data['expected_source'].startswith('Manually specified')
-    assert len(cases) == 60
+    assert len(cases) == 80
     assert all(case['expected'] for case in cases)
 
 
