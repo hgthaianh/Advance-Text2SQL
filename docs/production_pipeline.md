@@ -6,7 +6,7 @@ The pipeline calls, in order: `NLPRobustnessProcessor`, `DeterministicEntityExtr
 
 The bridge is deterministic. `QueryIRBuilder` only uses schema-linked candidates and schema metadata. It raises controlled errors for missing values, ambiguous columns, and unsupported intents instead of generating guessed SQL.
 
-`ReadOnlySQLValidator` accepts only typed SQLAlchemy `Select` statements and rejects raw SQL fragments. `ReadOnlyExecutor` accepts only `CompiledQuery`, binds parameters, applies PostgreSQL `statement_timeout` when applicable, and returns a generic execution error without connection details.
+`ReadOnlySQLValidator` accepts only typed SQLAlchemy `Select` statements and rejects raw SQL fragments. `ReadOnlyExecutor` accepts only `CompiledQuery`, binds parameters, starts PostgreSQL transactions as `READ ONLY`, applies `statement_timeout`, and returns a generic execution error without connection details.
 
 `UserContext.employee_id` is distinct from `user_id`. In registry-aware production resolution, `SELF` obtains the sole primary key of the schema's `employees` table and emits a trusted `source="permission"` filter. User filters cannot remove it; the planner validates it as a normal schema column.
 

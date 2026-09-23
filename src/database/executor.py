@@ -1,21 +1,12 @@
-from abc import ABC, abstractmethod
 from typing import Any
 
 from sqlalchemy import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import Select
-from sqlalchemy.orm import Session
 
 from src.query.models import CompiledQuery
 from src.shared.exceptions import QueryExecutionError
 from src.shared.models import QueryResult
-
-
-class QueryExecutor(ABC):
-    @abstractmethod
-    def execute(self, statement: Select, session: Session) -> QueryResult:
-        """TODO: implement this module contract without LLMs."""
-        raise NotImplementedError
 
 
 class ReadOnlyExecutor:
@@ -34,6 +25,9 @@ class ReadOnlyExecutor:
         try:
             with self.engine.connect() as connection:
                 if connection.dialect.name == 'postgresql':
+                    # Defense in depth: the validator permits only SELECT,
+                    # while PostgreSQL also refuses writes in this transaction.
+                    connection.exec_driver_sql('SET TRANSACTION READ ONLY')
                     # Integer configuration is validated in __init__, never user input.
                     connection.exec_driver_sql(f'SET LOCAL statement_timeout = {self.timeout_ms}')
                 result = connection.execute(query.statement, query.params)
