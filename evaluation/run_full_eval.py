@@ -16,6 +16,7 @@ from src.permission.column_policy import DefaultColumnPolicy
 from src.permission.resolver import DefaultPermissionResolver
 from src.permission.row_policy import ScopedRowPolicy
 from src.query.handlers.basic import BasicQueryHandler
+from src.query.handlers.complex import ComplexQueryHandler
 from src.query.ir import QueryIR
 from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
@@ -130,6 +131,35 @@ def evaluate_case(case: dict[str, Any], reference_date: date, nlp: NLPRobustness
         failure = None if passed else 'UNSUPPORTED_NOT_DETECTED'
     elif failure:
         passed = False
+    elif 'period_comparison' in case:
+        user = UserContext.model_validate(case['user_context'])
+        permissions = DefaultPermissionResolver(linker.registry).resolve(user)
+        actual['permission_scope'] = permissions.scope.value
+        checks['permission_scope'] = actual['permission_scope'] == expected.get('permission_scope', actual['permission_scope'])
+        try:
+            request = dict(case['period_comparison'])
+            scoped_query = ScopedRowPolicy(linker.registry).apply(
+                QueryIR.model_validate(request['query']), permissions,
+            )
+            DefaultColumnPolicy().validate(scoped_query, permissions)
+            request['query'] = scoped_query.model_dump(mode='json')
+            compiled_periods = ComplexQueryHandler(linker.registry).compare(request)
+            for compiled_period in compiled_periods:
+                validator.validate(compiled_period.query.statement, permissions)
+            actual['query_ir'] = scoped_query.model_dump(mode='json')
+            actual['sql'] = [compiled_period.query.sql for compiled_period in compiled_periods]
+            checks['period_comparison_success'] = len(compiled_periods) == 2
+            checks['planning_success'] = checks['period_comparison_success']
+            checks['sql_compile_success'] = checks['period_comparison_success']
+            actual['execution'] = 'not_measured'
+            passed = None
+            failure = None
+        except Exception as exc:
+            actual['error'] = f'{type(exc).__name__}: {exc}'
+            checks['period_comparison_success'] = False
+            checks['planning_success'] = False
+            checks['sql_compile_success'] = False
+            passed, failure = False, _failure_for_exception(exc)
     elif 'query_ir' not in case:
         try:
             entities = extractor.extract(question)
@@ -162,7 +192,7 @@ def evaluate_case(case: dict[str, Any], reference_date: date, nlp: NLPRobustness
         if checks['permission_scope'] is False:
             passed, failure = False, 'PERMISSION_SCOPE_WRONG'
         else:
-            query = ScopedRowPolicy().apply(QueryIR.model_validate(case['query_ir']), permissions)
+            query = ScopedRowPolicy(linker.registry).apply(QueryIR.model_validate(case['query_ir']), permissions)
             actual['query_ir'] = query.model_dump(mode='json')
             try:
                 DefaultColumnPolicy().validate(query, permissions)
@@ -210,7 +240,7 @@ def evaluate(cases: list[dict[str, Any]], reference_date: date) -> dict[str, Any
         'intent', 'date', 'number',
         'table_recall_at_1', 'table_recall_at_3', 'table_recall_at_5', 'table_recall_at_10',
         'column_recall_at_1', 'column_recall_at_3', 'column_recall_at_5', 'column_recall_at_10',
-        'unsupported', 'permission_scope', 'planning_success', 'sql_compile_success',
+        'unsupported', 'permission_scope', 'period_comparison_success', 'planning_success', 'sql_compile_success',
     )
     metrics = {name: metric(name) for name in measured_names}
     metric_samples = {

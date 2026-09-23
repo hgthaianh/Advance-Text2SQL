@@ -111,25 +111,24 @@ example `employee.department_id -> departments.id` for “mã phòng ban D1”.
 Hints rank only equally short paths; they cannot select a longer path or
 invent a join condition. Without that evidence ambiguity still fails closed.
 
-`JoinResolver` merges unique shortest paths from the first requested table to every other required table, preserving intermediate tables and deduplicating shared edges. This is a rooted shortest-path tree, not a global minimum-cost join optimizer. All generated joins are INNER JOINs on metadata FK columns.
+`JoinResolver` merges unique shortest paths from the first requested table to every other required table, preserving intermediate tables and deduplicating shared edges. This is a rooted shortest-path tree, not a global minimum-cost join optimizer. INNER JOIN remains the default. `QueryIR.outer_joins` can mark a validated destination table for a LEFT OUTER JOIN; the deterministic NLP/API input does not currently express that choice, and RIGHT/FULL joins are unsupported.
 
-The initial relationship contract represents single-column foreign keys. Self-joins with multiple table roles, composite foreign keys, explicit path disambiguation and outer joins require additional IR/metadata contracts and are not implemented. COUNT(*) counts joined rows; COUNT(column) excludes nulls. There is no automatic DISTINCT, fan-out correction or preaggregation, so upstream query construction must choose the intended relational semantics.
+Metadata and the compiler support composite FK predicates through `SchemaRelationship.composite_keys`: every registered endpoint pair is emitted in one `ON ... AND ...` condition. The checked-in production schema has no composite FK record yet, so this is metadata/compiler support rather than a current NLP/API feature.
 
-For example, one customer with two orders containing three order items produces
-three rows after `customers -> orders -> order_items`. `COUNT(customers.id)` is
-therefore **3, not 1**. This is deliberate v1 SQL row semantics, not a count of
-unique customers. SUM and AVG can also be affected by one-to-many join fan-out.
-Future support for `COUNT(DISTINCT column)` must be explicit in the IR and SQL
-builder; it is not implemented or inferred today. To avoid silently incorrect
-money and average results, the planner now rejects `SUM` or `AVG` when any
-selected FK child can fan out the aggregate table, including through an
-otherwise safe many-to-one hop. The caller must pre-aggregate until the IR has
-an explicit safe aggregate shape.
+`COUNT(*)` counts joined rows and `COUNT(column)` excludes nulls. When a one-to-many child can duplicate the owner of an explicit `COUNT(column)`, the planner automatically emits `COUNT(DISTINCT column)`. `SUM` and `AVG` continue to fail closed with `FanoutRiskError` in that shape: safe pre-aggregation would require a new aggregate-grain/subquery IR contract and is intentionally not inferred.
+
+The SQL compiler can render a `target_role` alias supplied on a validated relationship, but the normal IR/planner/resolver flow cannot yet represent two roles of the same table. Consequently self-join aliases are compiler-only support, not an end-to-end feature.
 
 Ambiguous joins always raise `AmbiguousJoinPathError`. Metadata insertion order,
 edge traversal order and query direction must never select an arbitrary first
 path. Both parallel FKs and equal-length multi-hop alternatives are covered by
 permutation tests through the full handler, ensuring no SQL is compiled.
+
+At the HTTP boundary these failures remain `AMBIGUOUS_QUERY` (422). When the
+pipeline has already resolved permissions and every table in the candidate
+paths is authorized, the optional `ambiguity` response field contains candidate
+table paths plus generic clarification hints. Otherwise that field is omitted;
+raw exception text and unauthorized schema details are never exposed.
 
 The API mock and database executor remain unchanged. Metadata can come from the default schema specification or application injection; neither path inspects a live database.
 

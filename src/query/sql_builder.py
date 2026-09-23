@@ -1,6 +1,6 @@
 """Compile a validated plan to parameterized PostgreSQL using SQLAlchemy Core."""
 
-from sqlalchemy import bindparam, column, false, func, select, table
+from sqlalchemy import and_, bindparam, column, false, func, select, table
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.elements import BindParameter, ColumnElement
@@ -30,9 +30,12 @@ class SQLBuilder:
         canonical = self.planner.plan(plan.query)
         if plan.tables != canonical.tables or plan.joins != canonical.joins:
             raise MalformedQueryIRError('Plan tables/joins differ from validated schema paths')
-        query = canonical.query
+        return self._compile_plan(canonical)
+
+    def _compile_plan(self, plan: QueryPlan) -> CompiledQuery:
+        query = plan.query
         sql_tables = {}
-        for name in canonical.tables:
+        for name in plan.tables:
             metadata = self.registry.tables[name]
             sql_tables[name] = table(
                 quoted_name(metadata.name, True),
@@ -45,20 +48,41 @@ class SQLBuilder:
             return sql_tables[owner].c[field]
 
         aggregation_functions = {Aggregation.COUNT: func.count, Aggregation.SUM: func.sum, Aggregation.AVG: func.avg}
-        def sql_expression(name: str, aggregation: Aggregation | None = None) -> ColumnElement:
+        def sql_expression(name: str, aggregation: Aggregation | None = None, distinct: bool = False) -> ColumnElement:
             if name == '*':
                 return func.count()
             expression = sql_column(name)
-            return aggregation_functions[aggregation](expression) if aggregation else expression
+            if not aggregation:
+                return expression
+            fn = aggregation_functions[aggregation]
+            return fn(expression.distinct()) if distinct else fn(expression)
 
         projections = [
-            sql_expression(item if isinstance(item, str) else (item.column or '*'), item.aggregation if isinstance(item, SelectItem) else None)
+            sql_expression(
+                item if isinstance(item, str) else (item.column or '*'),
+                item.aggregation if isinstance(item, SelectItem) else None,
+                item.distinct if isinstance(item, SelectItem) else False,
+            )
             for item in query.select
         ]
-        from_clause = sql_tables[canonical.tables[0]]
-        for edge in canonical.joins:
+        from_clause = sql_tables[plan.tables[0]]
+        for edge in plan.joins:
             destination = edge.target.rsplit('.', 1)[0]
-            from_clause = from_clause.join(sql_tables[destination], sql_column(edge.source) == sql_column(edge.target))
+            target_table = sql_tables[destination]
+            is_outer = getattr(edge, 'is_outer', False)
+            if getattr(edge, 'target_role', None):
+                role = edge.target_role
+                if role not in sql_tables:
+                    sql_tables[role] = sql_tables[destination].alias(quoted_name(role, True))
+                target_table = sql_tables[role]
+                target_col = target_table.c[edge.target.rsplit('.', 1)[1]]
+                source_col = sql_column(edge.source)
+                condition = (source_col == target_col)
+            elif getattr(edge, 'composite_keys', None):
+                condition = and_(*(sql_column(s) == sql_column(t) for s, t in edge.composite_keys))
+            else:
+                condition = (sql_column(edge.source) == sql_column(edge.target))
+            from_clause = from_clause.join(target_table, condition, isouter=is_outer)
         statement = select(*projections).select_from(from_clause)
         counter = 0
 

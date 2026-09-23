@@ -23,16 +23,20 @@ class RelationshipGraph:
         for relation in registry.relationships:
             a, ac = relation.source.rsplit('.', 1)
             b, bc = relation.target.rsplit('.', 1)
-            self.add_relationship(a, ac, b, bc)
+            self.add_relationship(a, ac, b, bc, composite_keys=relation.composite_keys)
 
-    def add_relationship(self, from_table: str, from_col: str, to_table: str, to_col: str) -> None:
+    def add_relationship(self, from_table: str, from_col: str, to_table: str, to_col: str,
+                         composite_keys: list[tuple[str, str]] | None = None) -> None:
         if self.registry is not None:
             source = self.registry.resolve_column(f'{from_table}.{from_col}')
             target = self.registry.resolve_column(f'{to_table}.{to_col}')
             from_table, from_col = source.rsplit('.', 1)
             to_table, to_col = target.rsplit('.', 1)
-        for a, ac, b, bc in ((from_table, from_col, to_table, to_col), (to_table, to_col, from_table, from_col)):
-            edge = SchemaRelationship(source=f'{a}.{ac}', target=f'{b}.{bc}')
+        comps = list(composite_keys) if composite_keys else []
+        reverse_comps = [(t, s) for s, t in comps]
+        for (a, ac, b, bc), ck in (((from_table, from_col, to_table, to_col), comps),
+                                   ((to_table, to_col, from_table, from_col), reverse_comps)):
+            edge = SchemaRelationship(source=f'{a}.{ac}', target=f'{b}.{bc}', composite_keys=ck)
             self.adjacency.setdefault(a, set()).add(b)
             if edge not in self._edges[a]:
                 self._edges[a].append(edge)
@@ -87,7 +91,32 @@ class RelationshipGraph:
             if parent is not None:
                 parents[node] = parent
         if counts[target] > 1:
-            raise AmbiguousJoinPathError(f'Multiple shortest FK paths between {source} and {target}')
+            candidate_paths: list[list[SchemaRelationship]] = []
+
+            def _collect_paths(curr: str, current_path: list[SchemaRelationship]) -> None:
+                if curr == source:
+                    candidate_paths.append(list(reversed(current_path)))
+                    return
+                if len(candidate_paths) >= 4:
+                    return
+                for edge in predecessors[curr]:
+                    prev_node = edge.source.rsplit('.', 1)[0]
+                    _collect_paths(prev_node, [*current_path, edge])
+
+            _collect_paths(target, [])
+            candidate_strs = []
+            for cp in candidate_paths:
+                chain = [source] + [e.target.rsplit('.', 1)[0] for e in cp]
+                candidate_strs.append(' -> '.join(chain))
+            details = f": {'; '.join(candidate_strs)}" if candidate_strs else ""
+            raise AmbiguousJoinPathError(
+                f"Multiple shortest FK paths between {source} and {target}{details}. "
+                "Please specify clarifying join hints or intermediate tables.",
+                candidate_paths=[
+                    [source, *[edge.target.rsplit('.', 1)[0] for edge in candidate_path]]
+                    for candidate_path in candidate_paths
+                ],
+            )
         path = []
         while target != source:
             edge = parents[target]

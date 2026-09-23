@@ -27,7 +27,7 @@ from src.shared.exceptions import (
     SQLValidationError, UnsupportedQueryError,
 )
 from src.shared.enums import ScopeDecision
-from src.shared.models import QueryResult, UserContext
+from src.shared.models import JoinAmbiguity, QueryResult, UserContext
 from src.validation.sql_validator import ReadOnlySQLValidator, SQLValidator
 
 
@@ -65,6 +65,7 @@ class Text2SQLPipeline:
         query_id = uuid4().hex
         started_at = perf_counter()
         stage = 'preprocess'
+        permissions = None
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
             stage = 'scope_routing'
@@ -101,7 +102,29 @@ class Text2SQLPipeline:
             error_code = self._error_code(exc)
             self._record(PipelineEvent(query_id=query_id, outcome='failure', stage=stage,
                                        duration_ms=elapsed_ms(started_at), error_code=error_code))
-            return QueryResult(success=False, query_id=query_id, error_code=error_code, message=self._message(exc))
+            return QueryResult(
+                success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
+                ambiguity=self._safe_ambiguity(exc, permissions),
+            )
+
+    @staticmethod
+    def _safe_ambiguity(exc: Exception, permissions) -> JoinAmbiguity | None:
+        """Expose only already-authorized table names, never raw exception text."""
+        if not isinstance(exc, AmbiguousJoinPathError) or permissions is None:
+            return None
+        paths = exc.candidate_paths
+        if not paths:
+            return None
+        allowed = set(permissions.allowed_tables)
+        if '*' not in allowed and any(table not in allowed for path in paths for table in path):
+            return None
+        return JoinAmbiguity(
+            candidate_paths=paths,
+            hints=[
+                'Specify the business relationship that should be used.',
+                'Add an intermediate table or relationship to clarify the request.',
+            ],
+        )
 
     def _record(self, event: PipelineEvent) -> None:
         """Observability must not change a completed query's public outcome."""
