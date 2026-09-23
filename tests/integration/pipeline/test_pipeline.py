@@ -19,6 +19,8 @@ def pipeline():
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS sales")
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS org")
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS customer")
+        connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS product")
+        connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS iam")
         connection.exec_driver_sql(
             'CREATE TABLE hr.employees ('
             'id TEXT, department_id TEXT, branch_id TEXT, team_id TEXT, tenant_id TEXT, '
@@ -28,6 +30,19 @@ def pipeline():
         connection.exec_driver_sql("INSERT INTO org.branches VALUES ('B1', 'T1', 'HCM'), ('B2', 'T1', 'Ha Noi'), ('B3', 'T2', 'Other Branch')")
         connection.exec_driver_sql('CREATE TABLE customer.customers (id TEXT, tenant_id TEXT, customer_type TEXT, name TEXT)')
         connection.exec_driver_sql("INSERT INTO customer.customers VALUES ('C1', 'T1', 'VIP', 'VIP Co'), ('C2', 'T1', 'NORMAL', 'Normal Co'), ('C3', 'T2', 'VIP', 'Other VIP')")
+        connection.exec_driver_sql('CREATE TABLE product.products (id TEXT, tenant_id TEXT, name TEXT)')
+        connection.exec_driver_sql("INSERT INTO product.products VALUES ('P1', 'T1', 'Widget A'), ('P2', 'T1', 'Widget B'), ('P3', 'T2', 'Other Widget')")
+        connection.exec_driver_sql(
+            'CREATE TABLE iam.users ('
+            'id TEXT, tenant_id TEXT, branch_id TEXT, department_id TEXT, team_id TEXT, employee_id TEXT, '
+            'username TEXT, full_name TEXT, email TEXT, password_hash TEXT)'
+        )
+        connection.exec_driver_sql(
+            "INSERT INTO iam.users VALUES "
+            "('U1', 'T1', 'B1', 'D1', 'T1', 'E1', 'an', 'An', 'an@example.test', 'secret-1'), "
+            "('U2', 'T1', 'B2', 'D2', 'T2', 'E3', 'chi', 'Chi', 'chi@example.test', 'secret-2'), "
+            "('U3', 'T2', 'B1', 'D1', 'T1', 'E4', 'other', 'Other', 'other@example.test', 'secret-3')"
+        )
         connection.exec_driver_sql(
             'CREATE TABLE sales.orders ('
             'id TEXT, tenant_id TEXT, customer_id TEXT, branch_id TEXT, order_date DATE, total_amount NUMERIC)'
@@ -123,6 +138,22 @@ def test_grouped_revenue_join_executes(pipeline: Text2SQLPipeline):
     assert {tuple(row.values()) for row in result.rows} == {('HCM', 300), ('Ha Noi', 900)}
 
 
+def test_product_lookup_enforces_tenant_scope_through_public_pipeline(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'san pham', UserContext(user_id='admin', role='admin', tenant_id='T1'))
+
+    assert result.success
+    assert result.rows == [{'name': 'Widget A'}, {'name': 'Widget B'}]
+
+
+def test_iam_user_lookup_enforces_branch_scope_through_public_pipeline(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'danh sach nguoi dung', UserContext(
+        user_id='branch-manager', role='branch_manager', tenant_id='T1', branch_id='B1',
+    ))
+
+    assert result.success
+    assert result.rows == [{'id': 'U1'}]
+
+
 def test_employee_manager_self_join_executes_through_public_pipeline(pipeline: Text2SQLPipeline):
     result = _run(pipeline, 'List each employee and their manager', UserContext(
         user_id='admin', role='admin', tenant_id='T1',
@@ -134,6 +165,28 @@ def test_employee_manager_self_join_executes_through_public_pipeline(pipeline: T
         {'full_name': 'Binh', 'full_name_1': None},
         {'full_name': 'Chi', 'full_name_1': 'Binh'},
     ]
+
+
+def test_explicit_include_without_manager_intent_reaches_public_left_join(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'List all employees and their managers, including employees without managers', UserContext(
+        user_id='admin', role='admin', tenant_id='T1',
+    ))
+
+    assert result.success
+    assert result.rows == [
+        {'full_name': 'An', 'full_name_1': 'Binh'},
+        {'full_name': 'Binh', 'full_name_1': None},
+        {'full_name': 'Chi', 'full_name_1': 'Binh'},
+    ]
+
+
+def test_ambiguous_employee_manager_wording_is_not_assigned_a_join_role(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'Show employees and managers', UserContext(
+        user_id='admin', role='admin', tenant_id='T1',
+    ))
+
+    assert not result.success
+    assert result.error_code == 'AMBIGUOUS_QUERY'
 
 
 def test_employee_manager_self_join_keeps_employee_when_manager_is_outside_department_scope(pipeline: Text2SQLPipeline):
