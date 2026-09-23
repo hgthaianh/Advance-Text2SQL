@@ -340,6 +340,21 @@ class SchemaLinker:
                         similarity = SequenceMatcher(None, window, key, autojunk=False).ratio()
                         if similarity < self.config.fuzzy_match_min:
                             continue
+                        # Character-level similarity can mistake a normal phrase
+                        # such as "chuyen ve" for the business alias "chuyen vien".
+                        # For multiword aliases, preserve typo recovery only when
+                        # every aligned word is itself sufficiently similar.
+                        key_words = key.split()
+                        window_words = window.split()
+                        if len(key_words) > 1 and (
+                            len(window_words) != len(key_words)
+                            or any(
+                                SequenceMatcher(None, source, target, autojunk=False).ratio()
+                                < self.config.fuzzy_match_min
+                                for source, target in zip(window_words, key_words)
+                            )
+                        ):
+                            continue
                         if key.startswith(window) or window.startswith(key) or key.endswith(window) or window.endswith(key):
                             add(key, start, end, "prefix", self.config.prefix_score)
                         else:

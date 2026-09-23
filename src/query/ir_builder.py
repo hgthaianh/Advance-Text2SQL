@@ -14,7 +14,7 @@ from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
 from src.shared.enums import Aggregation, FilterOperator, Intent, SortDirection
 from src.shared.exceptions import AmbiguousQueryError, MissingEntityError, UnsupportedQueryError
-from src.shared.models import PreprocessedQuery, SchemaLinkResult
+from src.shared.models import PreprocessedQuery, SchemaLinkResult, UserContext
 
 
 _AGGREGATE_INTENTS = {Intent.REVENUE: Intent.SUM, Intent.AVERAGE: Intent.AVG}
@@ -30,7 +30,10 @@ class QueryIRBuilder:
         self.graph = RelationshipGraph(registry)
 
     def build(self, preprocessed: PreprocessedQuery, schema_links: SchemaLinkResult,
-              entities: list[ExtractedEntity]) -> QueryIR:
+              entities: list[ExtractedEntity], user_context: UserContext | None = None) -> QueryIR:
+        self_department = self._self_department_query(preprocessed, user_context)
+        if self_department is not None:
+            return self_department
         employee_manager = self._employee_manager_query(preprocessed)
         if employee_manager is not None:
             return employee_manager
@@ -42,11 +45,25 @@ class QueryIRBuilder:
             # product dimension. Only numeric aggregate candidates are added:
             # dimensions and filters are resolved below from explicit grammar
             # and extracted entities.
-            tables = list(dict.fromkeys(tables + [
-                candidate.name.rsplit('.', 1)[0] for candidate in schema_links.columns
+            numeric_columns = [
+                candidate for candidate in schema_links.columns
                 if candidate.score >= 0.80
                 and candidate.reason not in schema_links.ambiguous_concepts
                 and self.registry.columns[candidate.name].name in _NUMERIC_NAMES
+            ]
+            direct_tables = {
+                candidate.name for candidate in schema_links.tables
+                if candidate.reason != 'owner_of_matched_column'
+                and candidate.match_type in ('exact', 'accent_insensitive')
+            }
+            contextual_columns = [
+                candidate for candidate in numeric_columns
+                if candidate.name.rsplit('.', 1)[0] in direct_tables
+            ]
+            if contextual_columns:
+                numeric_columns = contextual_columns
+            tables = list(dict.fromkeys(tables + [
+                candidate.name.rsplit('.', 1)[0] for candidate in numeric_columns
             ]))
         if intent in {Intent.UNKNOWN, Intent.DETAIL, Intent.LIST, Intent.SELECT, Intent.FILTER}:
             if not tables:
@@ -109,7 +126,11 @@ class QueryIRBuilder:
             group_by = [group_column]
             value_column = select[1]
             assert isinstance(value_column, SelectItem)
-            order_by = [OrderBy(column=value_column.column, aggregation=Aggregation.SUM, direction=SortDirection.DESC)]
+            order_by = [OrderBy(
+                column=value_column.column,
+                aggregation=Aggregation.SUM,
+                direction=self._ranking_direction(preprocessed),
+            )]
             top_k = self._top_k(preprocessed)
         elif aggregate and 'theo' in preprocessed.accent_stripped_text:
             group_column = self._group_column(preprocessed, tables)
@@ -229,6 +250,25 @@ class QueryIRBuilder:
             raise AmbiguousQueryError('Manager role requires an explicit employee-manager relationship')
         return None
 
+    def _self_department_query(self, preprocessed: PreprocessedQuery,
+                               user_context: UserContext | None) -> QueryIR | None:
+        """Resolve an explicit first-person department question using trusted identity."""
+        text = preprocessed.accent_stripped_text
+        if not re.search(r'\b(?:toi|me)\s+(?:thuoc\s+)?(?:phong ban|department)\s+(?:nao|gi|which|what)\b', text):
+            return None
+        if user_context is None or not user_context.employee_id:
+            raise MissingEntityError('An employee identity is required for a self department query')
+        employee_id: int | str = user_context.employee_id
+        if isinstance(employee_id, str) and employee_id.isdigit():
+            employee_id = int(employee_id)
+        return QueryIR(
+            intent=Intent.LOOKUP,
+            tables=['hr.employees', 'org.departments'],
+            select=['org.departments.name'],
+            filters=[QueryFilter(column='hr.employees.id', operator=FilterOperator.EQ, value=employee_id)],
+            join_hints=[('hr.employees.department_id', 'org.departments.id')],
+        )
+
     def _tables(self, links: SchemaLinkResult) -> list[str]:
         # Only strong semantic table evidence establishes the query context.
         # Weak identifier matches such as the English verb "list" are not tables.
@@ -246,6 +286,20 @@ class QueryIRBuilder:
     def _value_column(self, links: SchemaLinkResult, tables: list[str]) -> str:
         candidates = [c.name for c in links.columns if c.score >= 0.75 and c.name.rsplit('.', 1)[0] in tables]
         candidates = [c for c in candidates if self.registry.columns[c].name in _NUMERIC_NAMES]
+        # A direct table phrase such as "nhân viên" is stronger context than a
+        # generic value phrase such as "lương".  Prefer its numeric columns
+        # before considering other tables inferred only from the generic phrase.
+        direct_tables = {
+            candidate.name for candidate in links.tables
+            if candidate.reason != 'owner_of_matched_column'
+            and candidate.match_type in ('exact', 'accent_insensitive')
+        }
+        contextual_candidates = [
+            candidate for candidate in candidates
+            if candidate.rsplit('.', 1)[0] in direct_tables
+        ]
+        if contextual_candidates:
+            return self._one(contextual_candidates, 'numeric value column')
         if not candidates:
             for table in tables:
                 candidates.extend(f'{table}.{name}' for name in _NUMERIC_NAMES if f'{table}.{name}' in self.registry.columns)
@@ -285,12 +339,14 @@ class QueryIRBuilder:
         preferred = []
         # "top N <dimension>" states the output dimension directly, even
         # when later phrases mention filters such as customer or branch.
-        top_dimension = re.search(r'\btop\s+\d+\s+(san pham|khach hang|chi nhanh)\b', text)
+        top_dimension = re.search(r'\btop\s+\d+\s+(san pham|khach hang|chi nhanh|nhan vien|chuyen vien)\b', text)
         if top_dimension:
             column = {
                 'san pham': 'product.products.name',
                 'khach hang': 'customer.customers.name',
                 'chi nhanh': 'org.branches.name',
+                'nhan vien': 'hr.employees.full_name',
+                'chuyen vien': 'hr.employees.full_name',
             }[top_dimension.group(1)]
             if column in self.registry.columns:
                 return column
@@ -301,6 +357,8 @@ class QueryIRBuilder:
             ('chi nhanh', 'org.branches.name'),
             ('khach hang', 'customer.customers.name'),
             ('san pham', 'product.products.name'),
+            ('nhan vien', 'hr.employees.full_name'),
+            ('chuyen vien', 'hr.employees.full_name'),
         ):
             if phrase in grouping_text:
                 preferred.append(column)
@@ -309,6 +367,8 @@ class QueryIRBuilder:
                 ('chi nhanh', 'org.branches.name'),
                 ('khach hang', 'customer.customers.name'),
                 ('san pham', 'product.products.name'),
+                ('nhan vien', 'hr.employees.full_name'),
+                ('chuyen vien', 'hr.employees.full_name'),
             ):
                 if phrase in text:
                     preferred.append(column)
@@ -405,6 +465,13 @@ class QueryIRBuilder:
         if len(values) != 1:
             raise MissingEntityError('TOP-K requires exactly one positive integer')
         return values[0]
+
+    @staticmethod
+    def _ranking_direction(preprocessed: PreprocessedQuery) -> SortDirection:
+        """Rank smallest values first only when the language states that direction."""
+        if re.search(r'\b(?:thap nhat|it nhat|nho nhat|lowest|least)\b', preprocessed.accent_stripped_text):
+            return SortDirection.ASC
+        return SortDirection.DESC
 
     @staticmethod
     def _one(candidates: list[str], meaning: str) -> str:

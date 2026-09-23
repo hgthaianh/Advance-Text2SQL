@@ -32,7 +32,9 @@ python -m uvicorn src.main:app --reload
 API: http://localhost:8000. Swagger: http://localhost:8000/docs.
 `GET /health` checks process liveness and `GET /health/ready` verifies PostgreSQL readiness. `POST /query` runs the deterministic pipeline.
 Authentication uses `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, and `GET /auth/me`.
-The default provider verifies active users and password hashes from the IAM schema; it does not ship demo credentials.
+The default provider verifies active users and password hashes from the IAM schema. The local Docker seed
+includes synthetic test accounts; startup, credentials, API examples, and role-based test cases are in
+[docs/usage_and_api_testing.md](docs/usage_and_api_testing.md).
 
 ## Test
 
