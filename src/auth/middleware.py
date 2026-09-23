@@ -12,6 +12,7 @@ from src.shared.exceptions import AuthenticationError
 
 PUBLIC_PATHS = frozenset({
     "/health",
+    "/health/ready",
     "/openapi.json",
     "/docs",
     "/redoc",

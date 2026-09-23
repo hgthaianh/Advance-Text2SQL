@@ -16,6 +16,18 @@ _UNPROCESSABLE_CODES = {
 }
 
 
+def service_unavailable_response() -> JSONResponse:
+    """Return the stable public response for an unavailable backing service."""
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content=ErrorResponse(
+            query_id=None,
+            error_code='SERVICE_UNAVAILABLE',
+            message='The service is temporarily unavailable. Please try again later.',
+        ).model_dump(),
+    )
+
+
 def error_response(result: QueryResult) -> JSONResponse:
     """Return only public error data for a failed pipeline result."""
     if result.success or not result.error_code:
