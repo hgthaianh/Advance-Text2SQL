@@ -8,9 +8,12 @@ from src.schema.relationship_graph import FKRelationshipGraph
 from src.query.join_resolver import FKJoinResolver
 
 from src.config import get_settings
-from src.query.ir import OrderBy, QueryFilter, QueryIR, SelectItem
+from src.query.ir import (
+    ColumnRef, InstancePermissionFilter, InstanceQueryFilter, OrderBy,
+    QueryFilter, QueryIR, SelectItem,
+)
 from src.query.join_resolver import JoinResolver
-from src.query.models import QueryPlan
+from src.query.models import InstanceJoin, QueryPlan
 from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
 from src.shared.enums import Aggregation, FilterOperator, Intent
@@ -132,6 +135,116 @@ class QueryPlanner:
         owner = item.column.rsplit('.', 1)[0]
         return any(column.primary_key for column in self.registry.tables[owner].columns)
 
+    def _validate_instance_joins(self, query: QueryIR) -> list[InstanceJoin]:
+        """Validate only the fixed employee_instance -> manager_instance self-FK.
+
+        This deliberately bypasses neither RelationshipGraph nor its legacy
+        physical-table de-duplication.  The self relationship is identified by
+        explicit logical-instance evidence and then verified against registry
+        metadata; no role or shortest-path inference is performed.
+        """
+        if not query.instance_joins:
+            return []
+        instances = {instance.instance_id: instance for instance in query.table_instances}
+        expected_source = 'employee_instance'
+        expected_target = 'manager_instance'
+        expected_source_column = 'manager_id'
+        expected_target_column = 'id'
+        relationship = next((
+            relation for relation in self.registry.relationships
+            if relation.source == 'hr.employees.manager_id' and relation.target == 'hr.employees.id'
+        ), None)
+        if relationship is None:
+            raise MalformedQueryIRError('Registered employee-manager foreign key is required')
+
+        validated: list[InstanceJoin] = []
+        for requested in query.instance_joins:
+            source = instances.get(requested.source_instance_id)
+            target = instances.get(requested.target_instance_id)
+            if source is None or target is None:
+                raise MalformedQueryIRError('Logical instance join references an unknown table instance')
+            if source.instance_id == target.instance_id:
+                raise MalformedQueryIRError('Logical instance join requires distinct source and target instances')
+            if source.physical_table != 'hr.employees' or target.physical_table != 'hr.employees':
+                raise MalformedQueryIRError('Logical employee-manager instances must resolve to hr.employees')
+            # Resolve before checking the allowlisted FK shape so malformed or
+            # forged columns cannot be mistaken for relationship evidence.
+            query.resolve_instance_column(
+                ColumnRef(instance_id=source.instance_id, column=requested.source_column), self.registry,
+            )
+            query.resolve_instance_column(
+                ColumnRef(instance_id=target.instance_id, column=requested.target_column), self.registry,
+            )
+            if (
+                requested.source_instance_id != expected_source
+                or requested.target_instance_id != expected_target
+                or requested.source_column != expected_source_column
+                or requested.target_column != expected_target_column
+                or requested.join_type != 'left'
+            ):
+                raise MalformedQueryIRError('Only employee_instance.manager_id -> manager_instance.id LEFT join is supported')
+            validated.append(InstanceJoin(
+                source_instance_id=expected_source,
+                source_column=expected_source_column,
+                target_instance_id=expected_target,
+                target_column=expected_target_column,
+                join_type='left',
+                relationship=relationship,
+            ))
+        return validated
+
+    def _validate_instance_permission_filters(
+        self, query: QueryIR,
+    ) -> tuple[list[InstancePermissionFilter], dict[str, list[InstancePermissionFilter]]]:
+        """Validate policy-created filter placement without assigning SQL aliases.
+
+        The fixed logical join has one base employee and one optional manager.
+        Therefore manager filters are never accepted in the base collection.
+        This is the representation Phase 2C will compile into LEFT JOIN ON.
+        """
+        if not query.instance_joins:
+            if query.instance_base_filters or query.instance_join_filters:
+                raise MalformedQueryIRError('Logical instance permission filters require an instance join')
+            return [], {}
+
+        def validate_filter(filter_: InstancePermissionFilter, expected_instance: str) -> None:
+            if filter_.source != 'permission' or filter_.instance_id != expected_instance:
+                raise MalformedQueryIRError('Logical permission filter has an invalid instance or source')
+            query.resolve_instance_column(
+                ColumnRef(instance_id=filter_.instance_id, column=filter_.column), self.registry,
+            )
+            self._validate_filter(QueryFilter(
+                column=filter_.column, operator=filter_.operator, value=filter_.value, source='permission',
+            ))
+
+        for filter_ in query.instance_base_filters:
+            validate_filter(filter_, 'employee_instance')
+        if set(query.instance_join_filters) - {'manager_instance'}:
+            raise MalformedQueryIRError('Logical join permission filters may target only manager_instance')
+        join_filters = query.instance_join_filters.get('manager_instance', [])
+        for filter_ in join_filters:
+            validate_filter(filter_, 'manager_instance')
+        return list(query.instance_base_filters), {'manager_instance': list(join_filters)}
+
+    def _validate_instance_filters(self, query: QueryIR) -> list[InstanceQueryFilter]:
+        if not query.instance_filters:
+            return []
+        if not query.instance_joins:
+            raise MalformedQueryIRError('Logical instance filters require an instance join')
+        validated: list[InstanceQueryFilter] = []
+        for filter_ in query.instance_filters:
+            if filter_.source != 'user':
+                raise MalformedQueryIRError('Logical instance user filter has an invalid source')
+            query.resolve_instance_column(
+                ColumnRef(instance_id=filter_.instance_id, column=filter_.column), self.registry,
+            )
+            self._validate_filter(QueryFilter(
+                column=filter_.column, operator=filter_.operator, value=filter_.value, source='user',
+            ))
+            if filter_ not in validated:
+                validated.append(filter_)
+        return validated
+
     def plan(self, query: QueryIR | dict) -> QueryPlan:
         """Resolve identifiers, aggregate semantics, filters and unique FK paths.
 
@@ -148,6 +261,9 @@ class QueryPlanner:
             raise MalformedQueryIRError(str(exc)) from exc
         if validated.intent not in _LOOKUP | _AGGREGATES.keys():
             raise UnsupportedIntentError(f'Unsupported planning intent: {validated.intent}')
+        instance_joins = self._validate_instance_joins(validated)
+        instance_base_filters, instance_join_filters = self._validate_instance_permission_filters(validated)
+        instance_filters = self._validate_instance_filters(validated)
         requested = list(dict.fromkeys(self.registry.resolve_table(t) for t in validated.tables))
         if not requested:
             raise MalformedQueryIRError('An explicit base table is required')
@@ -163,6 +279,16 @@ class QueryPlanner:
         groups = list(dict.fromkeys(resolve(c) for c in validated.group_by))
         expected_aggregation = _AGGREGATES.get(validated.intent)
         raw_select = validated.select
+        if instance_joins:
+            # Phase 2C compiles only the explicitly instance-qualified lookup
+            # shape. Refuse mixed legacy fields rather than silently omitting a
+            # physical projection/filter or inventing aggregate semantics.
+            if any(isinstance(item, ColumnRef) for item in raw_select) and any(
+                not isinstance(item, ColumnRef) for item in raw_select
+            ):
+                raise MalformedQueryIRError(
+                    'Instance-aware projections cannot mix logical and legacy columns'
+                )
         if not raw_select:
             if expected_aggregation == Aggregation.COUNT:
                 raw_select = [SelectItem(column='*', aggregation=Aggregation.COUNT)]
@@ -171,8 +297,13 @@ class QueryPlanner:
             else:
                 raise MalformedQueryIRError('LOOKUP/FILTER require explicit selected columns')
         selected = []
+        instance_select: list[ColumnRef] = []
         for raw in raw_select:
-            item = SelectItem(column=raw) if isinstance(raw, str) else raw.model_copy()
+            if isinstance(raw, ColumnRef):
+                item = SelectItem(column=validated.resolve_instance_column(raw, self.registry))
+                instance_select.append(raw)
+            else:
+                item = SelectItem(column=raw) if isinstance(raw, str) else raw.model_copy()
             if item.column not in (None, '*'):
                 item.column = resolve(item.column)
             if item.aggregation is None and item.column not in groups:
@@ -257,12 +388,20 @@ class QueryPlanner:
             ]
         pre_aggregate_owner = self._validate_fanout_risk(validated, selected, joins)
         normalized = validated.model_copy(update={
-            'tables': tables, 'select': selected, 'filters': filters, 'having': having,
+            'tables': tables,
+            # Keep logical projections for the instance compiler. Legacy
+            # queries retain the canonical SelectItem representation.
+            'select': validated.select if instance_joins else selected, 'filters': filters, 'having': having,
             'group_by': groups, 'order_by': order,
         })
         physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
         return QueryPlan(
             query=normalized, tables=physical_tables, joins=joins,
+            instance_joins=instance_joins,
+            instance_base_filters=instance_base_filters,
+            instance_join_filters=instance_join_filters,
+            instance_select=instance_select,
+            instance_filters=instance_filters,
             pre_aggregate_owner=pre_aggregate_owner,
         )
 
