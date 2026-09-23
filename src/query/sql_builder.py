@@ -5,7 +5,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.elements import BindParameter, ColumnElement
 
-from src.query.ir import QueryFilter, Scalar, SelectItem
+from src.query.ir import ColumnRef, InstancePermissionFilter, InstanceQueryFilter, QueryFilter, Scalar, SelectItem
 from src.query.models import CompiledQuery, QueryPlan
 from src.query.planner import QueryPlanner
 from src.schema.registry import SchemaRegistry
@@ -28,9 +28,133 @@ class SQLBuilder:
         if not isinstance(plan, QueryPlan):
             raise MalformedQueryIRError('SQLBuilder expects a QueryPlan')
         canonical = self.planner.plan(plan.query)
-        if plan.tables != canonical.tables or plan.joins != canonical.joins:
+        if (plan.tables != canonical.tables or plan.joins != canonical.joins
+                or plan.instance_joins != canonical.instance_joins
+                or plan.instance_base_filters != canonical.instance_base_filters
+                or plan.instance_join_filters != canonical.instance_join_filters
+                or plan.instance_select != canonical.instance_select
+                or plan.instance_filters != canonical.instance_filters):
             raise MalformedQueryIRError('Plan tables/joins differ from validated schema paths')
+        if canonical.instance_joins:
+            if canonical.pre_aggregate_owner:
+                raise MalformedQueryIRError('Pre-aggregation with instance-aware joins is not supported')
+            return self._compile_instance_plan(canonical)
         return self._compile_plan(canonical)
+
+    def _compile_instance_plan(self, plan: QueryPlan) -> CompiledQuery:
+        """Compile only the planner-validated employee-to-manager LEFT join.
+
+        Alias names are constants selected from validated instance IDs.  This
+        path never accepts SQL aliases, physical tables, or relationships from
+        a caller and leaves the legacy compiler untouched.
+        """
+        if len(plan.instance_joins) != 1:
+            raise MalformedQueryIRError('Exactly one validated instance join is required')
+        if (
+            any(not isinstance(item, ColumnRef) for item in plan.query.select)
+            or plan.query.filters or plan.query.having or plan.query.group_by
+            or plan.query.order_by or plan.query.top_k is not None
+            or plan.query.intent != Intent.LOOKUP
+        ):
+            raise MalformedQueryIRError(
+                'Instance-aware SQL requires instance-qualified LOOKUP projections and filters only'
+            )
+        join = plan.instance_joins[0]
+        if (
+            join.source_instance_id != 'employee_instance'
+            or join.target_instance_id != 'manager_instance'
+            or join.source_column != 'manager_id'
+            or join.target_column != 'id'
+            or join.join_type != 'left'
+            or join.relationship.source != 'hr.employees.manager_id'
+            or join.relationship.target != 'hr.employees.id'
+        ):
+            raise MalformedQueryIRError('Unsupported validated instance join')
+        instances = {instance.instance_id: instance for instance in plan.query.table_instances}
+        if set(instances) != {'employee_instance', 'manager_instance'}:
+            raise MalformedQueryIRError('Validated employee-manager instances are required')
+        if any(instance.physical_table != 'hr.employees' for instance in instances.values()):
+            raise MalformedQueryIRError('Logical instances have an invalid physical table')
+
+        metadata = self.registry.tables.get('hr.employees')
+        if metadata is None:
+            raise MalformedQueryIRError('Employee table metadata is required')
+        base = table(
+            quoted_name(metadata.name, True),
+            *(column(quoted_name(c.name, True)) for c in metadata.columns),
+            schema=quoted_name(metadata.schema_name, True),
+        )
+        aliases = {
+            'employee_instance': base.alias(quoted_name('employee', True)),
+            'manager_instance': base.alias(quoted_name('manager', True)),
+        }
+
+        def instance_column(instance_id: str, field: str) -> ColumnElement:
+            if instance_id not in aliases:
+                raise MalformedQueryIRError('Unknown validated logical instance')
+            physical = plan.query.resolve_instance_column(
+                ColumnRef(instance_id=instance_id, column=field), self.registry,
+            )
+            return aliases[instance_id].c[physical.rsplit('.', 1)[1]]
+
+        counter = 0
+
+        def parameter(value: Scalar) -> BindParameter:
+            nonlocal counter
+            result = bindparam(f'p{counter}', value=value)
+            counter += 1
+            return result
+
+        comparisons = {
+            FilterOperator.EQ: lambda c, v: c == v,
+            FilterOperator.NE: lambda c, v: c != v,
+            FilterOperator.GT: lambda c, v: c > v,
+            FilterOperator.GTE: lambda c, v: c >= v,
+            FilterOperator.LT: lambda c, v: c < v,
+            FilterOperator.LTE: lambda c, v: c <= v,
+            FilterOperator.LIKE: lambda c, v: c.like(v),
+        }
+
+        def predicate(filter_: InstancePermissionFilter | InstanceQueryFilter) -> ColumnElement:
+            expression = instance_column(filter_.instance_id, filter_.column)
+            if filter_.operator == FilterOperator.IN:
+                if not isinstance(filter_.value, list):
+                    raise MalformedQueryIRError('Validated IN filter requires a list')
+                return expression.in_([parameter(value) for value in filter_.value]) if filter_.value else false()
+            if filter_.value is None:
+                return expression.is_(None) if filter_.operator == FilterOperator.EQ else expression.is_not(None)
+            if isinstance(filter_.value, list):
+                raise MalformedQueryIRError('Only IN accepts a list')
+            return comparisons[filter_.operator](expression, parameter(filter_.value))
+
+        on_conditions = [
+            instance_column(join.source_instance_id, join.source_column)
+            == instance_column(join.target_instance_id, join.target_column),
+        ]
+        for filter_ in plan.instance_join_filters.get('manager_instance', []):
+            if filter_.instance_id != 'manager_instance' or filter_.source != 'permission':
+                raise MalformedQueryIRError('Invalid manager join-scoped permission filter')
+            on_conditions.append(predicate(filter_))
+        from_clause = aliases['employee_instance'].join(
+            aliases['manager_instance'], and_(*on_conditions), isouter=True,
+        )
+
+        if not plan.instance_select:
+            raise MalformedQueryIRError('Instance-aware queries require instance-qualified projections')
+        projections = [instance_column(reference.instance_id, reference.column) for reference in plan.instance_select]
+        statement = select(*projections).select_from(from_clause)
+        for filter_ in plan.instance_base_filters:
+            if filter_.instance_id != 'employee_instance' or filter_.source != 'permission':
+                raise MalformedQueryIRError('Invalid employee base permission filter')
+            statement = statement.where(predicate(filter_))
+        for filter_ in plan.instance_filters:
+            # User filters retain normal WHERE semantics. A manager-side user
+            # filter intentionally filters result rows; only permission scope
+            # is protected from changing LEFT JOIN semantics via ON placement.
+            statement = statement.where(predicate(filter_))
+        statement = statement.limit(bindparam('limit', value=plan.query.limit))
+        compiled = statement.compile(dialect=postgresql.dialect(paramstyle='named'))
+        return CompiledQuery(sql=str(compiled), params=dict(compiled.params), statement=statement)
 
     def _compile_plan(self, plan: QueryPlan) -> CompiledQuery:
         query = plan.query

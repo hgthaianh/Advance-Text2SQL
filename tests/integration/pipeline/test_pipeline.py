@@ -22,7 +22,7 @@ def pipeline():
         connection.exec_driver_sql(
             'CREATE TABLE hr.employees ('
             'id TEXT, department_id TEXT, branch_id TEXT, team_id TEXT, tenant_id TEXT, '
-            'full_name TEXT, base_salary NUMERIC)'
+            'full_name TEXT, base_salary NUMERIC, manager_id TEXT)'
         )
         connection.exec_driver_sql('CREATE TABLE org.branches (id TEXT, tenant_id TEXT, name TEXT)')
         connection.exec_driver_sql("INSERT INTO org.branches VALUES ('B1', 'T1', 'HCM'), ('B2', 'T1', 'Ha Noi'), ('B3', 'T2', 'Other Branch')")
@@ -41,10 +41,10 @@ def pipeline():
         )
         connection.exec_driver_sql(
             "INSERT INTO hr.employees VALUES "
-            "('E1', 'D1', 'B1', 'T1', 'T1', 'An', 100), "
-            "('E2', 'D1', 'B1', 'T2', 'T1', 'Binh', 200), "
-            "('E3', 'D2', 'B2', 'T3', 'T1', 'Chi', 300), "
-            "('E4', 'D1', 'B1', 'T1', 'T2', 'Other Tenant', 400)"
+            "('E1', 'D1', 'B1', 'T1', 'T1', 'An', 100, 'E2'), "
+            "('E2', 'D1', 'B1', 'T2', 'T1', 'Binh', 200, NULL), "
+            "('E3', 'D2', 'B2', 'T3', 'T1', 'Chi', 300, 'E2'), "
+            "('E4', 'D1', 'B1', 'T1', 'T2', 'Other Tenant', 400, NULL)"
         )
     yield Text2SQLPipeline(engine=engine)
     engine.dispose()
@@ -121,6 +121,37 @@ def test_grouped_revenue_join_executes(pipeline: Text2SQLPipeline):
 
     assert result.success
     assert {tuple(row.values()) for row in result.rows} == {('HCM', 300), ('Ha Noi', 900)}
+
+
+def test_employee_manager_self_join_executes_through_public_pipeline(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'List each employee and their manager', UserContext(
+        user_id='admin', role='admin', tenant_id='T1',
+    ))
+
+    assert result.success
+    assert result.rows == [
+        {'full_name': 'An', 'full_name_1': 'Binh'},
+        {'full_name': 'Binh', 'full_name_1': None},
+        {'full_name': 'Chi', 'full_name_1': 'Binh'},
+    ]
+
+
+def test_employee_manager_self_join_keeps_employee_when_manager_is_outside_department_scope(pipeline: Text2SQLPipeline):
+    class DepartmentResolver:
+        def resolve(self, _user):
+            return PermissionContext(
+                allowed_tables=['*'], allowed_columns={'hr.employees': ['full_name']},
+                tenant_id='T1', scope='DEPARTMENT',
+                row_filters=[{'column': 'department_id', 'value': 'D2', 'source': 'permission'}],
+            )
+
+    pipeline.permission_resolver = DepartmentResolver()
+    result = _run(pipeline, 'List each employee and their manager', UserContext(
+        user_id='manager', role='department_manager', department_id='D2', tenant_id='T1',
+    ))
+
+    assert result.success
+    assert result.rows == [{'full_name': 'Chi', 'full_name_1': None}]
 
 
 def test_unsupported_question_is_controlled(pipeline: Text2SQLPipeline):

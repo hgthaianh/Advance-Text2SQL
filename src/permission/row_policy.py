@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 
 from src.permission.models import PermissionContext
-from src.query.ir import QueryFilter, QueryIR
+from src.query.ir import ColumnRef, InstancePermissionFilter, QueryFilter, QueryIR
 from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
 from src.shared.enums import FilterOperator, PermissionScope
-from src.shared.exceptions import AmbiguousJoinPathError, JoinPathNotFoundError, PermissionDeniedError
+from src.shared.exceptions import AmbiguousJoinPathError, InvalidColumnError, JoinPathNotFoundError, PermissionDeniedError
 from src.shared.models import UserContext
 
 
@@ -25,6 +25,8 @@ class ScopedRowPolicy(RowPolicy):
 
     def apply(self, query: QueryIR, permissions: PermissionContext, *, tables: list[str] | None = None) -> QueryIR:
         """Inject row permission filters from PermissionContext into query.filters before compilation."""
+        if query.instance_joins:
+            return self._apply_instance_permissions(query, permissions)
         if not permissions.row_filters and not permissions.tenant_id:
             return query
 
@@ -46,6 +48,81 @@ class ScopedRowPolicy(RowPolicy):
                         merged_filters.append(tenant_filter)
 
         return query.model_copy(update={"filters": merged_filters})
+
+    def _apply_instance_permissions(self, query: QueryIR, permissions: PermissionContext) -> QueryIR:
+        """Build independent permission contexts for the fixed self-join roles.
+
+        ``manager_instance`` is the optional right side of a LEFT join.  Its
+        predicates must remain separate from base filters so a later compiler
+        can append them to that join's ON condition, never global WHERE.
+        """
+        if self.registry is None:
+            raise PermissionDeniedError('Logical instance permissions require schema metadata')
+        instances = {instance.instance_id: instance for instance in query.table_instances}
+        employee = instances.get('employee_instance')
+        manager = instances.get('manager_instance')
+        if employee is None or manager is None:
+            raise PermissionDeniedError('Employee-manager join requires both logical table instances')
+
+        base_filters = self._filters_for_instance(query, employee.instance_id, permissions)
+        manager_filters = self._filters_for_instance(query, manager.instance_id, permissions)
+        return query.model_copy(update={
+            # Do not place either instance's permission predicates in legacy
+            # physical ``filters``. That would lose target-side LEFT semantics.
+            'instance_base_filters': base_filters,
+            'instance_join_filters': {manager.instance_id: manager_filters},
+        })
+
+    def _filters_for_instance(self, query: QueryIR, instance_id: str,
+                              permissions: PermissionContext) -> list[InstancePermissionFilter]:
+        resolved: list[InstancePermissionFilter] = []
+        for filter_ in permissions.row_filters:
+            resolved_filter = self._resolve_instance_filter(query, instance_id, filter_)
+            if resolved_filter not in resolved:
+                resolved.append(resolved_filter)
+        if permissions.tenant_id:
+            physical_column = query.resolve_instance_column(
+                ColumnRef(instance_id=instance_id, column='tenant_id'), self.registry,
+            ) if 'hr.employees.tenant_id' in self.registry.columns else None
+            if physical_column:
+                value = int(permissions.tenant_id) if isinstance(permissions.tenant_id, str) and permissions.tenant_id.isdigit() else permissions.tenant_id
+                tenant_filter = InstancePermissionFilter(
+                    instance_id=instance_id, column=physical_column.rsplit('.', 1)[1],
+                    operator=FilterOperator.EQ, value=value,
+                )
+                if tenant_filter not in resolved:
+                    resolved.append(tenant_filter)
+        return resolved
+
+    def _resolve_instance_filter(self, query: QueryIR, instance_id: str,
+                                 filter_: QueryFilter) -> InstancePermissionFilter:
+        """Map an existing physical/bare permission rule onto one instance.
+
+        A scope rule that cannot be applied to the employee physical table is
+        denied rather than routed through an arbitrary graph path.
+        """
+        if filter_.source != 'permission':
+            raise PermissionDeniedError('Logical instance filters must originate from permission policy')
+        try:
+            if '.' in filter_.column:
+                physical = self.registry.resolve_column(filter_.column)
+                owner, column = physical.rsplit('.', 1)
+                instance_physical = query.resolve_instance_column(
+                    ColumnRef(instance_id=instance_id, column=column), self.registry,
+                ).rsplit('.', 1)[0]
+                if owner != instance_physical:
+                    raise PermissionDeniedError(f'Cannot apply scope column {filter_.column} to logical instance')
+            else:
+                physical = query.resolve_instance_column(
+                    ColumnRef(instance_id=instance_id, column=filter_.column), self.registry,
+                )
+                column = physical.rsplit('.', 1)[1]
+        except InvalidColumnError as exc:
+            raise PermissionDeniedError(f'Cannot apply scope column {filter_.column} to logical instance') from exc
+        return InstancePermissionFilter(
+            instance_id=instance_id, column=column, operator=filter_.operator,
+            value=filter_.value,
+        )
 
     def _context_tables(self, query: QueryIR, tables: list[str] | None) -> list[str]:
         if not self.registry:

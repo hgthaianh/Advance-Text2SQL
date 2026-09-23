@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Sequence
 
 from src.permission.models import PermissionContext
-from src.query.ir import QueryIR
+from src.query.ir import ColumnRef, QueryIR
 from src.shared.exceptions import PermissionDeniedError
 
 # Default list of sensitive columns (salary, bank account, PII) requiring explicit authorization
@@ -44,7 +44,21 @@ class DefaultColumnPolicy(ColumnPolicy):
 
         Raises PermissionDeniedError deterministically if any referenced column is denied or unauthorized.
         """
-        referenced_columns = self._extract_referenced_columns(query)
+        self._validate_referenced_columns(self._extract_referenced_columns(query), permissions)
+
+    def validate_instance_references(self, query: QueryIR, references: list[ColumnRef],
+                                     permissions: PermissionContext, registry) -> None:
+        """Apply existing physical column policy to validated logical references.
+
+        The role is not a permission namespace: each reference first resolves
+        to its backend physical column, preventing manager_instance from
+        bypassing hr.employees restrictions.
+        """
+        physical = [query.resolve_instance_column(reference, registry) for reference in references]
+        self._validate_referenced_columns([self._parse_col(column) for column in physical], permissions)
+
+    def _validate_referenced_columns(self, referenced_columns: list[tuple[str, str]],
+                                     permissions: PermissionContext) -> None:
         allowed_cols_map = permissions.allowed_columns
         denied_cols_set = set(permissions.denied_columns)
 
@@ -102,9 +116,17 @@ class DefaultColumnPolicy(ColumnPolicy):
         columns: list[tuple[str, str]] = []
 
         for proj in query.select:
-            col_str = proj if isinstance(proj, str) else proj.column
-            if col_str and col_str != "*":
-                columns.append(self._parse_col(col_str))
+            if isinstance(proj, ColumnRef):
+                columns.append(self._instance_column(query, proj))
+            else:
+                col_str = proj if isinstance(proj, str) else proj.column
+                if col_str and col_str != "*":
+                    columns.append(self._parse_col(col_str))
+
+        for filter_ in query.instance_filters:
+            columns.append(self._instance_column(query, ColumnRef(
+                instance_id=filter_.instance_id, column=filter_.column,
+            )))
 
         for qf in query.filters:
             # Trusted permission constraints are schema-validated by the
@@ -129,4 +151,11 @@ class DefaultColumnPolicy(ColumnPolicy):
             table, col = col_str.rsplit(".", 1)
             return table, col
         return "", col_str
+
+    @staticmethod
+    def _instance_column(query: QueryIR, reference: ColumnRef) -> tuple[str, str]:
+        instance = next((item for item in query.table_instances if item.instance_id == reference.instance_id), None)
+        if instance is None:
+            raise PermissionDeniedError(f"Unknown logical table instance '{reference.instance_id}'.")
+        return instance.physical_table, reference.column
 

@@ -5,7 +5,10 @@ from decimal import Decimal
 import re
 
 from src.nlp.entity_extractor import ExtractedEntity
-from src.query.ir import HavingCondition, OrderBy, QueryFilter, QueryIR, SelectItem
+from src.query.ir import (
+    ColumnRef, HavingCondition, InstanceJoinRequest, OrderBy, QueryFilter,
+    QueryIR, SelectItem, TableInstance,
+)
 from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
 from src.shared.enums import Aggregation, FilterOperator, Intent, SortDirection
@@ -27,6 +30,9 @@ class QueryIRBuilder:
 
     def build(self, preprocessed: PreprocessedQuery, schema_links: SchemaLinkResult,
               entities: list[ExtractedEntity]) -> QueryIR:
+        employee_manager = self._employee_manager_query(preprocessed)
+        if employee_manager is not None:
+            return employee_manager
         intent = _AGGREGATE_INTENTS.get(preprocessed.intent_result.intent, preprocessed.intent_result.intent)
         tables = self._tables(schema_links)
         if intent == Intent.TOP_N:
@@ -111,6 +117,49 @@ class QueryIRBuilder:
         return QueryIR(intent=intent, tables=tables, select=select, filters=filters,
                        having=having, group_by=group_by, order_by=order_by, top_k=top_k,
                        join_hints=join_hints)
+
+    def _employee_manager_query(self, preprocessed: PreprocessedQuery) -> QueryIR | None:
+        """Recognize only explicit employee-with-their-manager relationship evidence.
+
+        This is intentionally a small semantic whitelist, not a schema-linker
+        or keyword heuristic.  It creates no SQL aliases and relies on the
+        existing planner to verify the backend-owned self FK.
+        """
+        text = preprocessed.accent_stripped_text
+        patterns = (
+            r'\b(?:list|show)\s+(?:each\s+)?employees?\s+(?:and|with)\s+(?:their\s+)?managers?\b',
+            r'\bemployees?\s+(?:and|with)\s+(?:their\s+)?managers?\b',
+            r'\b(?:liet ke|danh sach)\s+(?:tung\s+)?nhan vien\s+(?:va|voi)\s+(?:quan ly|nguoi quan ly)\b',
+        )
+        if any(re.search(pattern, text) for pattern in patterns):
+            required_relationship = ('hr.employees.manager_id', 'hr.employees.id')
+            if (
+                'hr.employees.full_name' not in self.registry.columns
+                or not any((relationship.source, relationship.target) == required_relationship
+                           for relationship in self.registry.relationships)
+            ):
+                raise UnsupportedQueryError('Employee-manager relationship is not available')
+            return QueryIR(
+                intent=Intent.LOOKUP,
+                tables=['hr.employees'],
+                select=[
+                    ColumnRef(instance_id='employee_instance', column='full_name'),
+                    ColumnRef(instance_id='manager_instance', column='full_name'),
+                ],
+                table_instances=[
+                    TableInstance(instance_id='employee_instance', semantic_role='employee'),
+                    TableInstance(instance_id='manager_instance', semantic_role='manager'),
+                ],
+                instance_joins=[InstanceJoinRequest(
+                    source_instance_id='employee_instance', source_column='manager_id',
+                    target_instance_id='manager_instance', target_column='id', join_type='left',
+                )],
+            )
+        # ``manager`` alone is deliberately insufficient evidence for one of
+        # several schema relationships.  Reject rather than guessing a role.
+        if re.search(r'\b(?:managers?|quan ly|nguoi quan ly)\b', text):
+            raise AmbiguousQueryError('Manager role requires an explicit employee-manager relationship')
+        return None
 
     def _tables(self, links: SchemaLinkResult) -> list[str]:
         # Only strong semantic table evidence establishes the query context.
