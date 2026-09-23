@@ -123,17 +123,55 @@ class QueryPlanner:
 
     def _can_pre_aggregate(self, query: QueryIR, selected: list[SelectItem], joins: list,
                            item: SelectItem) -> bool:
-        """Allow only a scalar parent-grain SUM/AVG with unchanged join/filter semantics."""
+        """Allow a scalar or owner/dimension-grouped parent-grain SUM/AVG.
+
+        A dimension is safe only when it is the owner itself or lies on a
+        many-to-one path from the owner.  A child dimension would create an
+        ambiguous allocation of the owner's value, so it remains fail-closed.
+        """
         if item.aggregation not in (Aggregation.SUM, Aggregation.AVG) or item.distinct:
             return False
-        if len(selected) != 1 or selected[0] is not item:
+        aggregate_items = [selected_item for selected_item in selected if selected_item.aggregation]
+        if len(aggregate_items) != 1 or aggregate_items[0] is not item:
             return False
-        if query.group_by or query.having or query.order_by or query.top_k is not None or query.intent == Intent.TOP_N:
+        if query.having or query.order_by or query.top_k is not None or query.intent == Intent.TOP_N:
             return False
         if any(getattr(join, 'is_outer', False) for join in joins):
             return False
         owner = item.column.rsplit('.', 1)[0]
-        return any(column.primary_key for column in self.registry.tables[owner].columns)
+        if not any(column.primary_key for column in self.registry.tables[owner].columns):
+            return False
+        group_columns = [selected_item.column for selected_item in selected if not selected_item.aggregation]
+        # ``selected`` is canonicalized above while QueryIR may still carry
+        # short references, so use the already-validated projection shape.
+        if len(group_columns) != len(query.group_by):
+            return False
+        return all(self._is_owner_grain_dimension(owner, column.rsplit('.', 1)[0], joins)
+                   for column in group_columns)
+
+    def _is_owner_grain_dimension(self, owner: str, dimension: str, joins: list) -> bool:
+        """Return whether a dimension has at most one value for each owner row."""
+        if owner == dimension:
+            return True
+        adjacency: dict[str, list[str]] = {}
+        for join in joins:
+            relation = next((candidate for candidate in self.registry.relationships
+                             if {candidate.source, candidate.target} == {join.source, join.target}), None)
+            if relation is None:
+                continue
+            child = relation.source.rsplit('.', 1)[0]
+            parent = relation.target.rsplit('.', 1)[0]
+            adjacency.setdefault(child, []).append(parent)
+        seen, queue = {owner}, [owner]
+        while queue:
+            current = queue.pop(0)
+            for parent in adjacency.get(current, []):
+                if parent == dimension:
+                    return True
+                if parent not in seen:
+                    seen.add(parent)
+                    queue.append(parent)
+        return False
 
     def _validate_instance_joins(self, query: QueryIR) -> list[InstanceJoin]:
         """Validate only the fixed employee_instance -> manager_instance self-FK.
@@ -382,10 +420,32 @@ class QueryPlanner:
                 raise MalformedQueryIRError('Supplied joins differ from validated FK paths')
         if validated.outer_joins:
             outer_set = {self.registry.resolve_table(t) for t in validated.outer_joins}
+            destinations = {join.target.rsplit('.', 1)[0] for join in joins}
+            if not outer_set <= destinations:
+                raise MalformedQueryIRError(
+                    'Outer joined tables must be non-root destinations of the validated join path'
+                )
             joins = [
                 j.model_copy(update={'is_outer': True}) if j.target.rsplit('.', 1)[0] in outer_set else j
                 for j in joins
             ]
+        else:
+            outer_set = set()
+        outer_join_filters: dict[str, list[QueryFilter]] = {}
+        for table, conditions in validated.outer_join_filters.items():
+            canonical_table = self.registry.resolve_table(table)
+            if canonical_table not in outer_set:
+                raise MalformedQueryIRError('Outer join filters require a validated outer-joined table')
+            normalized_conditions = []
+            for original in conditions:
+                if original.source != 'permission':
+                    raise MalformedQueryIRError('Only permission filters may be scoped to an outer join')
+                condition = original.model_copy(update={'column': resolve(original.column)})
+                if condition.column.rsplit('.', 1)[0] != canonical_table:
+                    raise MalformedQueryIRError('Outer join filter must belong to its destination table')
+                self._validate_filter(condition)
+                normalized_conditions.append(condition)
+            outer_join_filters[canonical_table] = normalized_conditions
         pre_aggregate_owner = self._validate_fanout_risk(validated, selected, joins)
         normalized = validated.model_copy(update={
             'tables': tables,
@@ -393,6 +453,7 @@ class QueryPlanner:
             # queries retain the canonical SelectItem representation.
             'select': validated.select if instance_joins else selected, 'filters': filters, 'having': having,
             'group_by': groups, 'order_by': order,
+            'outer_joins': sorted(outer_set), 'outer_join_filters': outer_join_filters,
         })
         physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
         return QueryPlan(

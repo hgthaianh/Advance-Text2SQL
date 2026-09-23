@@ -9,7 +9,7 @@ from src.query.sql_builder import SQLBuilder
 from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
 from src.shared.enums import Aggregation, Intent
-from src.shared.exceptions import AmbiguousJoinPathError, FanoutRiskError
+from src.shared.exceptions import AmbiguousJoinPathError, FanoutRiskError, MalformedQueryIRError
 from src.shared.models import SchemaColumn, SchemaRelationship, SchemaTable
 from tests.unit.query.conftest import make_registry
 
@@ -205,6 +205,16 @@ def test_outer_join_executes_and_returns_null_for_unmatched_records():
             assert rows[1] == (2, None)
     finally:
         engine.dispose()
+
+
+def test_outer_join_rejects_the_root_table_instead_of_silently_ignoring_it():
+    registry = make_registry(['customers', 'orders'], [('orders', 'customer_id', 'customers')])
+
+    with pytest.raises(MalformedQueryIRError, match='non-root destinations'):
+        QueryPlanner(registry).plan(dict(
+            intent='LOOKUP', tables=['customers', 'orders'], select=['customers.id'],
+            outer_joins=['customers'],
+        ))
 
 
 # ---------------------------------------------------------------------------

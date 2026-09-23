@@ -141,7 +141,12 @@ class SQLBuilder:
 
         if not plan.instance_select:
             raise MalformedQueryIRError('Instance-aware queries require instance-qualified projections')
-        projections = [instance_column(reference.instance_id, reference.column) for reference in plan.instance_select]
+        projections = [
+            instance_column(reference.instance_id, reference.column).label(
+                f'{reference.instance_id.removesuffix("_instance")}_{reference.column}'
+            )
+            for reference in plan.instance_select
+        ]
         statement = select(*projections).select_from(from_clause)
         for filter_ in plan.instance_base_filters:
             if filter_.instance_id != 'employee_instance' or filter_.source != 'permission':
@@ -189,7 +194,7 @@ class SQLBuilder:
             )
             for item in query.select
         ]
-        from_clause = sql_tables[plan.tables[0]]
+        join_specs = []
         for edge in plan.joins:
             destination = edge.target.rsplit('.', 1)[0]
             target_table = sql_tables[destination]
@@ -206,7 +211,7 @@ class SQLBuilder:
                 condition = and_(*(sql_column(s) == sql_column(t) for s, t in edge.composite_keys))
             else:
                 condition = (sql_column(edge.source) == sql_column(edge.target))
-            from_clause = from_clause.join(target_table, condition, isouter=is_outer)
+            join_specs.append((destination, target_table, condition, is_outer))
         counter = 0
 
         def _cast_value_if_needed(val: Scalar, col_name: str | None) -> Scalar:
@@ -243,25 +248,48 @@ class SQLBuilder:
             val: Scalar = condition.value if not isinstance(condition.value, list) else None
             return comparisons[condition.operator](expression, parameter(val, col_name))
 
+        from_clause = sql_tables[plan.tables[0]]
+        for destination, target_table, condition, is_outer in join_specs:
+            if is_outer:
+                conditions = [condition]
+                conditions.extend(
+                    predicate(filter_, sql_column(filter_.column))
+                    for filter_ in query.outer_join_filters.get(destination, [])
+                )
+                condition = and_(*conditions)
+            from_clause = from_clause.join(target_table, condition, isouter=is_outer)
+
         if plan.pre_aggregate_owner:
             # Keep every validated join and every user/permission filter in the
             # inner query. Grouping at the aggregate owner's PK grain removes
             # only one-to-many duplicates before the outer SUM/AVG.
-            item = query.select[0]
-            if not isinstance(item, SelectItem) or not item.column or not item.aggregation:
+            aggregate_items = [item for item in query.select
+                               if isinstance(item, SelectItem) and item.aggregation]
+            if len(aggregate_items) != 1 or not aggregate_items[0].column:
                 raise MalformedQueryIRError('Invalid pre-aggregation plan')
+            item = aggregate_items[0]
             primary_keys = [
                 sql_column(f'{plan.pre_aggregate_owner}.{column.name}').label(f'_preagg_key_{index}')
                 for index, column in enumerate(self.registry.tables[plan.pre_aggregate_owner].columns)
                 if column.primary_key
             ]
+            group_columns = [
+                sql_column(group).label(f'_preagg_group_{index}')
+                for index, group in enumerate(query.group_by)
+            ]
             value = sql_column(item.column).label('_preagg_value')
-            inner = select(*primary_keys, value).select_from(from_clause)
+            inner = select(*primary_keys, *group_columns, value).select_from(from_clause)
             for condition in query.filters:
                 inner = inner.where(predicate(condition, sql_column(condition.column)))
-            inner = inner.group_by(*primary_keys, value)
+            inner = inner.group_by(*primary_keys, *group_columns, value)
             derived = inner.subquery('pre_aggregated')
-            statement = select(aggregation_functions[item.aggregation](derived.c._preagg_value)).select_from(derived)
+            aggregate = aggregation_functions[item.aggregation](derived.c._preagg_value)
+            if group_columns:
+                outer_groups = [getattr(derived.c, f'_preagg_group_{index}')
+                                for index in range(len(group_columns))]
+                statement = select(*outer_groups, aggregate).select_from(derived).group_by(*outer_groups)
+            else:
+                statement = select(aggregate).select_from(derived)
         else:
             statement = select(*projections).select_from(from_clause)
             for condition in query.filters:

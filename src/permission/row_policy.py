@@ -31,10 +31,26 @@ class ScopedRowPolicy(RowPolicy):
             return query
 
         merged_filters = list(query.filters)
+        outer_filters = {
+            table: list(conditions) for table, conditions in query.outer_join_filters.items()
+        }
+        outer_tables = set()
+        if self.registry:
+            outer_tables = {self.registry.resolve_table(table) for table in query.outer_joins}
+
+        def add_permission_filter(filter_: QueryFilter) -> None:
+            """Keep optional-side scope in ON, preserving LEFT JOIN cardinality."""
+            owner = filter_.column.rsplit('.', 1)[0] if '.' in filter_.column else None
+            if owner in outer_tables:
+                destination_filters = outer_filters.setdefault(owner, [])
+                if filter_ not in destination_filters:
+                    destination_filters.append(filter_)
+            elif filter_ not in merged_filters:
+                merged_filters.append(filter_)
+
         for rf in permissions.row_filters:
             for resolved in self._resolve_filter(rf, query, tables):
-                if resolved not in merged_filters:
-                    merged_filters.append(resolved)
+                add_permission_filter(resolved)
 
         if permissions.tenant_id and self.registry:
             for table in self._context_tables(query, tables):
@@ -44,10 +60,9 @@ class ScopedRowPolicy(RowPolicy):
                     tenant_filter = QueryFilter(
                         column=column, operator=FilterOperator.EQ, value=val, source='permission',
                     )
-                    if tenant_filter not in merged_filters:
-                        merged_filters.append(tenant_filter)
+                    add_permission_filter(tenant_filter)
 
-        return query.model_copy(update={"filters": merged_filters})
+        return query.model_copy(update={"filters": merged_filters, "outer_join_filters": outer_filters})
 
     def _apply_instance_permissions(self, query: QueryIR, permissions: PermissionContext) -> QueryIR:
         """Build independent permission contexts for the fixed self-join roles.

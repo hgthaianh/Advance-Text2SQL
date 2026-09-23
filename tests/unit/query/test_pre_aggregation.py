@@ -134,11 +134,29 @@ def test_existing_count_semantics_are_preserved(registry, engine, intent, expect
         assert connection.execute(compiled.statement).scalar_one() == expected
 
 
-def test_grouped_parent_sum_with_fanout_remains_fail_closed(registry):
+@pytest.mark.parametrize(('intent', 'expected'), [(Intent.SUM, [('T1', 150), ('T2', 900)]),
+                                                   (Intent.AVG, [('T1', 75.0), ('T2', 900.0)])])
+def test_grouped_parent_aggregate_pre_aggregates_at_owner_grain(registry, engine, intent, expected):
+    compiled = BasicQueryHandler(registry).handle(QueryIR(
+        intent=intent,
+        tables=['parents', 'children'],
+        select=['parents.tenant_id', 'parents.amount'],
+        group_by=['parents.tenant_id'],
+    ))
+
+    assert 'pre_aggregated' in compiled.sql
+    assert 'GROUP BY pre_aggregated._preagg_group_0' in compiled.sql
+    with engine.connect() as connection:
+        rows = [(row[0], float(row[1])) for row in connection.execute(compiled.statement)]
+    assert rows == expected
+
+
+def test_grouped_parent_sum_with_having_remains_fail_closed(registry):
     with pytest.raises(FanoutRiskError):
         QueryPlanner(registry).plan(QueryIR(
             intent=Intent.SUM,
             tables=['parents', 'children'],
             select=['parents.tenant_id', 'parents.amount'],
             group_by=['parents.tenant_id'],
+            having=[{'column': 'parents.amount', 'aggregation': 'SUM', 'operator': '>', 'value': 1}],
         ))

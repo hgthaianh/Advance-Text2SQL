@@ -3,6 +3,7 @@
 from datetime import date
 from decimal import Decimal
 import re
+import unicodedata
 
 from src.nlp.entity_extractor import ExtractedEntity
 from src.query.ir import (
@@ -82,6 +83,13 @@ class QueryIRBuilder:
 
         filters, tables, join_hints = self._entity_filters(entities, tables, preprocessed)
         join_hints = list(dict.fromkeys([*schema_links.relationship_hints, *join_hints]))
+        outer_joins, absence_filters, outer_roots = self._outer_join_semantics(preprocessed, schema_links, tables)
+        if outer_roots:
+            if len(outer_roots) != 1:
+                raise AmbiguousQueryError('Absence language requires one preserved table')
+            root = outer_roots[0]
+            tables = [root, *[table for table in tables if table != root]]
+        filters.extend(absence_filters)
         if preprocessed.date_range:
             anchor = next((item.column.rsplit('.', 1)[0] for item in select if isinstance(item, SelectItem) and item.column), None)
             date_column, date_owner = self._date_column(tables, anchor)
@@ -116,7 +124,67 @@ class QueryIRBuilder:
                               aggregate or (Aggregation.SUM if intent == Intent.TOP_N else None), group_by)
         return QueryIR(intent=intent, tables=tables, select=select, filters=filters,
                        having=having, group_by=group_by, order_by=order_by, top_k=top_k,
-                       join_hints=join_hints)
+                       join_hints=join_hints, outer_joins=outer_joins)
+
+    def _outer_join_semantics(self, preprocessed: PreprocessedQuery, links: SchemaLinkResult,
+                              tables: list[str]) -> tuple[list[str], list[QueryFilter], list[str]]:
+        """Translate explicit absence language into a metadata-validated LEFT join.
+
+        ``customers without orders`` means an anti-join and therefore adds an
+        ``orders.id IS NULL`` predicate.  Inclusive wording such as ``bao gom
+        ca`` / ``including`` retains matched rows as well, so it requests only
+        the LEFT join.  The relationship direction comes exclusively from the
+        registry; uncertain or multi-parent wording is left untouched.
+        """
+        text = preprocessed.accent_stripped_text
+        inclusive = bool(re.search(r'\b(?:bao gom(?: ca)?|ke ca|including)\b', text))
+        table_set = set(tables)
+        targets: list[str] = []
+        filters: list[QueryFilter] = []
+        roots: list[str] = []
+        for candidate in links.tables:
+            child = candidate.name
+            if child not in table_set:
+                continue
+            alias = self._accent_stripped(candidate.matched_text)
+            if not alias or not re.search(
+                rf'\b(?:chua co|khong co|without)\s+(?:bat ky\s+|any\s+)?{re.escape(alias)}\b', text,
+            ):
+                continue
+            relationships = [
+                relationship for relationship in self.registry.relationships
+                if child in {relationship.source.rsplit('.', 1)[0], relationship.target.rsplit('.', 1)[0]}
+                and (relationship.target if relationship.source.rsplit('.', 1)[0] == child
+                     else relationship.source).rsplit('.', 1)[0] in table_set
+            ]
+            neighbors = {
+                (relationship.target if relationship.source.rsplit('.', 1)[0] == child
+                 else relationship.source).rsplit('.', 1)[0]
+                for relationship in relationships
+            }
+            # A LEFT join only has a stable meaning when this phrase identifies
+            # exactly one direct relationship under an already-mentioned root.
+            if len(relationships) != 1 or len(neighbors) != 1:
+                raise AmbiguousQueryError('Absence language requires one direct relationship between the mentioned tables')
+            roots.append(next(iter(neighbors)))
+            targets.append(child)
+            if inclusive:
+                continue
+            primary_keys = [
+                f'{child}.{column.name}' for column in self.registry.tables[child].columns
+                if column.primary_key
+            ]
+            if len(primary_keys) != 1:
+                continue
+            filters.append(QueryFilter(
+                column=primary_keys[0], operator=FilterOperator.EQ, value=None,
+            ))
+        return list(dict.fromkeys(targets)), filters, list(dict.fromkeys(roots))
+
+    @staticmethod
+    def _accent_stripped(value: str) -> str:
+        normalized = unicodedata.normalize('NFD', value.lower()).replace('đ', 'd')
+        return ''.join(char for char in normalized if not unicodedata.combining(char))
 
     def _employee_manager_query(self, preprocessed: PreprocessedQuery) -> QueryIR | None:
         """Recognize only explicit employee-with-their-manager relationship evidence.

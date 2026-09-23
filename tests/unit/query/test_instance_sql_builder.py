@@ -69,6 +69,8 @@ def test_self_join_uses_fixed_internal_aliases_and_places_permissions_correctly(
 
     assert 'FROM "hr"."employees" AS "employee" LEFT OUTER JOIN "hr"."employees" AS "manager"' in sql
     assert '"employee"."manager_id" = "manager"."id"' in sql
+    assert 'AS employee_full_name' in sql
+    assert 'AS manager_full_name' in sql
     on, where = sql.split('\nWHERE ', 1)
     assert '"manager"."department_id" = :p0' in on
     assert '"manager"."tenant_id" = :p1' in on
