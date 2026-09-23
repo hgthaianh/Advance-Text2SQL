@@ -59,8 +59,8 @@ class QueryPlanner:
         elif condition.operator == FilterOperator.LIKE and not isinstance(condition.value, str):
             raise MalformedQueryIRError('LIKE requires a string')
 
-    def _validate_fanout_risk(self, selected: list[SelectItem], joins: list) -> None:
-        """Reject a SUM/AVG after any one-to-many expansion in its join tree, and auto-protect COUNT.
+    def _validate_fanout_risk(self, query: QueryIR, selected: list[SelectItem], joins: list) -> str | None:
+        """Protect aggregates and select the narrow safe pre-aggregation shape.
 
         COUNT(*) deliberately retains documented SQL row semantics. An explicit
         aggregate of a parent table column is unsafe once a joined FK child can
@@ -74,7 +74,7 @@ class QueryPlanner:
             and item.column not in (None, '*')
         ]
         if not aggregate_items:
-            return
+            return None
         physical = {
             frozenset((relation.source, relation.target)): relation
             for relation in self.registry.relationships
@@ -102,17 +102,35 @@ class QueryPlanner:
                     queue.append(neighbor)
             return False, None
 
+        pre_aggregate_owner = None
         for item in aggregate_items:
             owner = item.column.rsplit('.', 1)[0]
             has_fanout, child = _has_child_fanout(owner)
             if has_fanout:
                 if item.aggregation == Aggregation.COUNT:
                     item.distinct = True
+                elif self._can_pre_aggregate(query, selected, joins, item):
+                    pre_aggregate_owner = owner
                 else:
                     raise FanoutRiskError(
                         f'Aggregate on {owner} may be duplicated by child table {child}; '
                         'use a pre-aggregate or a future COUNT(DISTINCT ...) query shape'
                     )
+        return pre_aggregate_owner
+
+    def _can_pre_aggregate(self, query: QueryIR, selected: list[SelectItem], joins: list,
+                           item: SelectItem) -> bool:
+        """Allow only a scalar parent-grain SUM/AVG with unchanged join/filter semantics."""
+        if item.aggregation not in (Aggregation.SUM, Aggregation.AVG) or item.distinct:
+            return False
+        if len(selected) != 1 or selected[0] is not item:
+            return False
+        if query.group_by or query.having or query.order_by or query.top_k is not None or query.intent == Intent.TOP_N:
+            return False
+        if any(getattr(join, 'is_outer', False) for join in joins):
+            return False
+        owner = item.column.rsplit('.', 1)[0]
+        return any(column.primary_key for column in self.registry.tables[owner].columns)
 
     def plan(self, query: QueryIR | dict) -> QueryPlan:
         """Resolve identifiers, aggregate semantics, filters and unique FK paths.
@@ -237,13 +255,16 @@ class QueryPlanner:
                 j.model_copy(update={'is_outer': True}) if j.target.rsplit('.', 1)[0] in outer_set else j
                 for j in joins
             ]
-        self._validate_fanout_risk(selected, joins)
+        pre_aggregate_owner = self._validate_fanout_risk(validated, selected, joins)
         normalized = validated.model_copy(update={
             'tables': tables, 'select': selected, 'filters': filters, 'having': having,
             'group_by': groups, 'order_by': order,
         })
         physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
-        return QueryPlan(query=normalized, tables=physical_tables, joins=joins)
+        return QueryPlan(
+            query=normalized, tables=physical_tables, joins=joins,
+            pre_aggregate_owner=pre_aggregate_owner,
+        )
 
 
 

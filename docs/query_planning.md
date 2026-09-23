@@ -115,7 +115,7 @@ invent a join condition. Without that evidence ambiguity still fails closed.
 
 Metadata and the compiler support composite FK predicates through `SchemaRelationship.composite_keys`: every registered endpoint pair is emitted in one `ON ... AND ...` condition. The checked-in production schema has no composite FK record yet, so this is metadata/compiler support rather than a current NLP/API feature.
 
-`COUNT(*)` counts joined rows and `COUNT(column)` excludes nulls. When a one-to-many child can duplicate the owner of an explicit `COUNT(column)`, the planner automatically emits `COUNT(DISTINCT column)`. `SUM` and `AVG` continue to fail closed with `FanoutRiskError` in that shape: safe pre-aggregation would require a new aggregate-grain/subquery IR contract and is intentionally not inferred.
+`COUNT(*)` counts joined rows and `COUNT(column)` excludes nulls. When a one-to-many child can duplicate the owner of an explicit `COUNT(column)`, the planner automatically emits `COUNT(DISTINCT column)`. For one selected scalar `SUM` or `AVG` over an INNER join, the planner can use a derived subquery grouped by the aggregate owner's primary key and value before applying the outer aggregate. All validated user and permission filters remain in that inner query, so the original join/filter semantics are preserved while duplicate child rows are removed. Grouped aggregates, HAVING/order/TOP-K, outer joins, multiple aggregate projections, missing owner primary keys, and other shapes remain fail-closed with `FanoutRiskError`.
 
 The SQL compiler can render a `target_role` alias supplied on a validated relationship, but the normal IR/planner/resolver flow cannot yet represent two roles of the same table. Consequently self-join aliases are compiler-only support, not an end-to-end feature.
 
@@ -211,9 +211,11 @@ semantics remain: SUM/AVG of empty input are NULL, COUNT is zero.
 - The legacy permission adapter discovers HAVING table references using its existing allowlist checks. No permission policies are added to the SQL planner.
 
 Arbitrary/correlated subqueries, UNION, CTEs, window functions, raw SQL,
-arbitrary expressions, OR trees, aggregate DISTINCT, outer/self joins and
-automatic fan-out correction remain unsupported. An ambiguous FK path still
-fails with `AmbiguousJoinPathError`; there is no first-path fallback.
+arbitrary expressions, OR trees, outer/self joins and complex automatic
+fan-out correction remain unsupported. `COUNT(DISTINCT column)` is supported
+only when the planner detects parent-row fan-out, and scalar INNER-join
+`SUM`/`AVG` can use the documented owner-grain derived query. An ambiguous FK
+path still fails with `AmbiguousJoinPathError`; there is no first-path fallback.
 
 ## Tests
 
