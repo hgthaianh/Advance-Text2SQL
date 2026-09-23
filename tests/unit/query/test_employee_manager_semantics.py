@@ -26,6 +26,7 @@ def build(question: str):
     'List each employee and their manager',
     'List each employee with their manager',
     'employees and their managers',
+    'List all employees and their managers, including employees without managers',
 ])
 def test_explicit_employee_manager_evidence_builds_the_fixed_logical_query(question):
     query = build(question)

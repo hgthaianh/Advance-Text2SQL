@@ -127,8 +127,8 @@ class QueryIRBuilder:
         """
         text = preprocessed.accent_stripped_text
         patterns = (
-            r'\b(?:list|show)\s+(?:each\s+)?employees?\s+(?:and|with)\s+(?:their\s+)?managers?\b',
-            r'\bemployees?\s+(?:and|with)\s+(?:their\s+)?managers?\b',
+            r'\b(?:list|show)\s+(?:(?:each|all)\s+)?employees?\s+(?:and|with)\s+their\s+managers?\b',
+            r'\bemployees?\s+(?:and|with)\s+their\s+managers?\b',
             r'\b(?:liet ke|danh sach)\s+(?:tung\s+)?nhan vien\s+(?:va|voi)\s+(?:quan ly|nguoi quan ly)\b',
         )
         if any(re.search(pattern, text) for pattern in patterns):
