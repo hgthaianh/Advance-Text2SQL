@@ -83,7 +83,6 @@ class SQLBuilder:
             else:
                 condition = (sql_column(edge.source) == sql_column(edge.target))
             from_clause = from_clause.join(target_table, condition, isouter=is_outer)
-        statement = select(*projections).select_from(from_clause)
         counter = 0
 
         def _cast_value_if_needed(val: Scalar, col_name: str | None) -> Scalar:
@@ -120,15 +119,36 @@ class SQLBuilder:
             val: Scalar = condition.value if not isinstance(condition.value, list) else None
             return comparisons[condition.operator](expression, parameter(val, col_name))
 
-        for condition in query.filters:
-            statement = statement.where(predicate(condition, sql_column(condition.column)))
-        if query.group_by:
-            statement = statement.group_by(*(sql_column(c) for c in query.group_by))
-        for condition in query.having:
-            statement = statement.having(predicate(condition, sql_expression(condition.column, condition.aggregation)))
-        for item in query.order_by:
-            expression = sql_expression(item.column, item.aggregation)
-            statement = statement.order_by(expression.desc() if item.direction == SortDirection.DESC else expression.asc())
+        if plan.pre_aggregate_owner:
+            # Keep every validated join and every user/permission filter in the
+            # inner query. Grouping at the aggregate owner's PK grain removes
+            # only one-to-many duplicates before the outer SUM/AVG.
+            item = query.select[0]
+            if not isinstance(item, SelectItem) or not item.column or not item.aggregation:
+                raise MalformedQueryIRError('Invalid pre-aggregation plan')
+            primary_keys = [
+                sql_column(f'{plan.pre_aggregate_owner}.{column.name}').label(f'_preagg_key_{index}')
+                for index, column in enumerate(self.registry.tables[plan.pre_aggregate_owner].columns)
+                if column.primary_key
+            ]
+            value = sql_column(item.column).label('_preagg_value')
+            inner = select(*primary_keys, value).select_from(from_clause)
+            for condition in query.filters:
+                inner = inner.where(predicate(condition, sql_column(condition.column)))
+            inner = inner.group_by(*primary_keys, value)
+            derived = inner.subquery('pre_aggregated')
+            statement = select(aggregation_functions[item.aggregation](derived.c._preagg_value)).select_from(derived)
+        else:
+            statement = select(*projections).select_from(from_clause)
+            for condition in query.filters:
+                statement = statement.where(predicate(condition, sql_column(condition.column)))
+            if query.group_by:
+                statement = statement.group_by(*(sql_column(c) for c in query.group_by))
+            for condition in query.having:
+                statement = statement.having(predicate(condition, sql_expression(condition.column, condition.aggregation)))
+            for item in query.order_by:
+                expression = sql_expression(item.column, item.aggregation)
+                statement = statement.order_by(expression.desc() if item.direction == SortDirection.DESC else expression.asc())
         # Explicit aggregate TOP-K limits groups only, after aggregation/HAVING.
         has_aggregation = any(isinstance(item, SelectItem) and item.aggregation for item in query.select)
         if not has_aggregation or query.top_k is not None or query.intent == Intent.TOP_N:

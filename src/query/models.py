@@ -17,6 +17,10 @@ class QueryPlan(BaseModel):
     query: QueryIR
     tables: list[str]
     joins: list[SchemaRelationship]
+    # An internal compilation strategy for a scalar SUM/AVG whose owner is
+    # repeated by an INNER one-to-many join. It is derived by QueryPlanner,
+    # never accepted from QueryIR/user input.
+    pre_aggregate_owner: str | None = None
 
 
 @dataclass(frozen=True)
