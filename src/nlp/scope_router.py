@@ -23,7 +23,7 @@ _DATA_ENTITIES = frozenset((
     'doanh thu', 'ngan sach', 'but toan', 'vai tro', 'nguoi dung', 'luong',
     'yeu cau mua hang', 'giao dich kho', 'ticket ho tro', 'thuong hieu',
     'don nghi phep', 'don mua hang', 'lo hang', 'dieu chuyen kho', 'team',
-    'contact', 'quotation',
+    'contact', 'quotation', 'chuyen vien',
     'salary', 'so dien thoai', 'email', 'ton kho', 'gia ban',
     'tai khoan', 'department', 'branch', 'employee', 'customer',
     'employees', 'customers', 'product', 'products', 'order', 'orders',

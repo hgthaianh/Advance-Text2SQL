@@ -18,6 +18,7 @@ def linker():
 @pytest.mark.parametrize('question, table', [
     ('khách hàng', 'customer.customers'), ('khach hang', 'customer.customers'),
     ('nhân viên', 'hr.employees'), ('nhan vien', 'hr.employees'),
+    ('chuyên viên', 'hr.employees'),
     ('customer', 'customer.customers'), ('employee', 'hr.employees'),
     ('DOANH THU', 'sales.orders'), ('nhà cung cấp', 'procurement.suppliers'),
     ('ngân sách', 'finance.budgets'), ('yêu cầu hỗ trợ', 'support.support_tickets'),
@@ -48,6 +49,12 @@ def test_column_linking(linker, question, column):
     assert result[0].name == column
     assert result[0].matched_text
     assert result[0].matched_alias
+
+
+def test_employee_specialist_context_resolves_salary_owner(linker):
+    result = linker.link('chuyên viên 1 lương thấp nhất là bao nhiêu')
+    assert result.tables[0].name == 'hr.employees'
+    assert result.columns[0].name == 'hr.employees.base_salary'
 
 
 def test_multiple_tables_and_noise(linker):

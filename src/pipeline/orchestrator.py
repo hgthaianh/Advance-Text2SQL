@@ -88,7 +88,7 @@ class Text2SQLPipeline:
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'entity_extraction')
             entities = self.entity_extractor.extract(preprocessed.normalized_text)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'ir_construction')
-            query = self.ir_builder.build(preprocessed, links, entities)
+            query = self.ir_builder.build(preprocessed, links, entities, user_context)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'permission_resolution')
             permissions = self.permission_resolver.resolve(user_context)
             query = self.row_policy.apply(query, permissions)

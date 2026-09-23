@@ -6,7 +6,8 @@ from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
-from src.shared.enums import Aggregation, FilterOperator
+from src.shared.enums import Aggregation, FilterOperator, SortDirection
+from src.shared.models import UserContext
 
 
 def _build(question: str):
@@ -63,6 +64,32 @@ def test_top_k_roots_joins_at_the_aggregate_fact_table():
 
     assert query.tables[0] == 'sales.order_items'
     assert BasicQueryHandler(SchemaRegistry()).handle(query).sql
+
+
+def test_lowest_employee_salary_ranks_employees_ascending():
+    registry, query = _build('chuyen vien 1 luong thap nhat la bao nhieu')
+
+    assert query.top_k == 1
+    assert query.group_by == ['hr.employees.full_name']
+    assert query.select[1].column == 'hr.employees.base_salary'
+    assert query.order_by[0].direction == SortDirection.ASC
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'ORDER BY sum("hr"."employees"."base_salary") ASC' in compiled.sql
+
+
+def test_self_department_uses_trusted_employee_identity():
+    registry = SchemaRegistry()
+    preprocessed = NLPRobustnessProcessor().process_query('toi thuoc phong ban nao', date(2026, 9, 20))
+    query = QueryIRBuilder(registry).build(
+        preprocessed,
+        SchemaLinker(registry).link(preprocessed),
+        [],
+        UserContext(user_id='161', role='admin', tenant_id='1', employee_id='161'),
+    )
+
+    assert query.select == ['org.departments.name']
+    assert [(item.column, item.value) for item in query.filters] == [('hr.employees.id', 161)]
+    assert query.join_hints == [('hr.employees.department_id', 'org.departments.id')]
 
 
 def test_role_specific_catalog_filter_selects_the_corresponding_fk():
