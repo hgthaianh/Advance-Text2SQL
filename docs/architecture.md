@@ -1,20 +1,19 @@
-# Ranh giới module
+# Architecture
 
-Luồng dự kiến: API → chuẩn hóa → intent/entity/date → schema linking → QueryIR
-→ permission resolver/policies → planner/join resolver → SQL builder
-→ SQL validator → executor → formatter → QueryResult.
+The request path is deterministic:
 
-- Developer 1: `nlp/`, `schema/`, dữ liệu đánh giá.
-- Developer 2: `query/`, `permission/`, `database/`, `validation/`, API.
-- Thống nhất thay đổi contract trong `shared/models.py`, `query/ir.py`,
-  `permission/models.py` trước khi thay đổi interface của bên còn lại.
+`API → authenticated identity → normalization/date/number parsing → scope routing → schema linking → entity extraction → QueryIR → permission resolution and row policy → join planning → SQL compilation → SQL validation → read-only execution → QueryResult`
 
-Các class ABC chỉ định contract, chưa có implementation. Tên bảng/cột trong IR
-phải kiểm tra bằng schema và quyền truy cập; giá trị filter phải bind qua
-SQLAlchemy. SQL builder trả SQLAlchemy Select để tránh ghép raw SQL.
-PermissionContext mặc định có allowlist rỗng (không cấp quyền).
+`schema/schema_spec.yaml` is the schema source of truth. The registry validates
+all table and column references before planning. The linker and QueryIR builder
+do not execute SQL or make authorization decisions.
 
-TODO trước khi xử lý dữ liệu thật: xác thực UserContext từ danh tính đáng tin,
-áp dụng column/row policy, kiểm tra truy vấn read-only, dùng tài khoản database
-chỉ đọc và statement timeout, ánh xạ domain error sang HTTP, thêm migration
-khi có ORM models. Mock API chưa chạy bất kỳ bước nào trong pipeline này.
+Permission identity comes from authenticated middleware, not the request body.
+The pipeline resolves table/column policies and injects row scope before SQL is
+compiled. The builder emits parameterized SQLAlchemy `Select` statements only;
+the validator rejects raw SQL and the executor runs PostgreSQL queries in a
+read-only transaction with a statement timeout.
+
+The API converts controlled failures into stable 403, 422, or 503 responses
+without exposing SQL, parameters, identities, or internal exception details.
+Observability records only a bounded set of safe terminal metadata.
