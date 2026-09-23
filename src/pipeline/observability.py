@@ -52,8 +52,11 @@ class PersistedPipelineObserver(PipelineObserver):
     existing ``audit`` namespace; SQLite uses a plain table for test support.
     """
 
-    def __init__(self, engine: Engine) -> None:
+    def __init__(self, engine: Engine, *, max_records: int = 10_000) -> None:
+        if type(max_records) is not int or max_records < 1:
+            raise ValueError('max_records must be a positive integer')
         self.engine = engine
+        self.max_records = max_records
         # Do not connect during application import/construction: API route
         # modules must remain importable while PostgreSQL is temporarily down.
         self._table_ready = False
@@ -99,6 +102,15 @@ class PersistedPipelineObserver(PipelineObserver):
                 'error_code': event.error_code,
                 'stage_durations_json': json.dumps(event.stage_durations_ms, separators=(',', ':'), sort_keys=True),
             })
+            # The dashboard is operational history, not an immutable event
+            # archive. Retention bounds table growth and Python aggregation.
+            limit_clause = 'OFFSET :max_records' if self.engine.dialect.name == 'postgresql' else 'LIMIT -1 OFFSET :max_records'
+            connection.execute(text(
+                f'''DELETE FROM {self._table} WHERE query_id IN (
+                    SELECT query_id FROM {self._table}
+                    ORDER BY recorded_at DESC, query_id DESC {limit_clause}
+                )'''
+            ), {'max_records': self.max_records})
 
     def aggregate(self) -> dict[str, Any]:
         """Return bounded-label trend data suitable for a future dashboard."""

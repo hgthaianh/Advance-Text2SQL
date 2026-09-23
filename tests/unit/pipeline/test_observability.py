@@ -22,3 +22,13 @@ def test_persisted_audit_keeps_safe_fields_and_aggregates_stage_failures():
     assert summary['failure_by_stage'] == {'sql_validation': 1}
     assert summary['error_categories'] == {'SQL_VALIDATION_ERROR': 1}
     assert summary['stage_latency_ms']['preprocess']['average'] == 1.0
+
+
+def test_persisted_audit_retains_only_the_configured_recent_records():
+    observer = PersistedPipelineObserver(create_engine('sqlite://'), max_records=2)
+    for index in range(3):
+        observer.record(PipelineEvent(
+            query_id=f'id-{index}', outcome='success', stage='execution', duration_ms=float(index),
+        ))
+
+    assert observer.aggregate()['total_requests'] == 2
