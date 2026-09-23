@@ -72,9 +72,10 @@ Every pipeline request emits a terminal event with `query_id`, terminal stage,
 outcome, total latency, per-stage latency and optional error code. The default
 observer also persists exactly those safe fields to `audit.text2sql_query_audits`.
 It deliberately excludes question text, identity, SQL, bind values, headers,
-tokens and exception payloads. `GET /observability/summary` is authenticated
-and exposes only bounded aggregate latency, error-category and failed-stage
-trends.
+tokens and exception payloads. The operational audit retains the most recent
+10,000 records. `GET /observability/summary` requires an `admin` or
+`superuser` identity and exposes only bounded aggregate latency, error-category
+and failed-stage trends.
 
 Run an execution evaluation against the dedicated seeded database, then render
 its metric-only trend dashboard:

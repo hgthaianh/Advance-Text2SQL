@@ -38,3 +38,19 @@ def get_authenticated_user(request: Request) -> UserContext:
 
 
 AuthenticatedUser = Annotated[UserContext, Depends(get_authenticated_user)]
+
+
+def require_observability_admin(user: AuthenticatedUser) -> UserContext:
+    """Allow global operational metrics only to trusted administrative roles."""
+    if user.role.lower() not in {'admin', 'superuser'}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                'error_code': 'PERMISSION_DENIED',
+                'message': 'Observability access requires an administrator role.',
+            },
+        )
+    return user
+
+
+ObservabilityAdmin = Annotated[UserContext, Depends(require_observability_admin)]

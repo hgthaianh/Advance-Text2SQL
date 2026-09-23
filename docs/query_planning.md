@@ -111,13 +111,13 @@ example `employee.department_id -> departments.id` for “mã phòng ban D1”.
 Hints rank only equally short paths; they cannot select a longer path or
 invent a join condition. Without that evidence ambiguity still fails closed.
 
-`JoinResolver` merges unique shortest paths from the first requested table to every other required table, preserving intermediate tables and deduplicating shared edges. This is a rooted shortest-path tree, not a global minimum-cost join optimizer. INNER JOIN remains the default. `QueryIR.outer_joins` can mark a validated destination table for a LEFT OUTER JOIN; the deterministic NLP/API input does not currently express that choice, and RIGHT/FULL joins are unsupported.
+`JoinResolver` merges unique shortest paths from the first requested table to every other required table, preserving intermediate tables and deduplicating shared edges. This is a rooted shortest-path tree, not a global minimum-cost join optimizer. INNER JOIN remains the default. The IR builder recognizes explicit Vietnamese/English absence wording such as `khách hàng chưa có đơn hàng` / `customers without orders`: it marks the optional related table as a validated LEFT JOIN destination and applies its primary-key `IS NULL` predicate. Inclusive wording such as `bao gồm cả` / `including` retains matching rows as well. Permission predicates for an optional destination are compiled in its `ON` clause; RIGHT/FULL joins are unsupported.
 
 Metadata and the compiler support composite FK predicates through `SchemaRelationship.composite_keys`: every registered endpoint pair is emitted in one `ON ... AND ...` condition. The checked-in production schema has no composite FK record yet, so this is metadata/compiler support rather than a current NLP/API feature.
 
-`COUNT(*)` counts joined rows and `COUNT(column)` excludes nulls. When a one-to-many child can duplicate the owner of an explicit `COUNT(column)`, the planner automatically emits `COUNT(DISTINCT column)`. For one selected scalar `SUM` or `AVG` over an INNER join, the planner can use a derived subquery grouped by the aggregate owner's primary key and value before applying the outer aggregate. All validated user and permission filters remain in that inner query, so the original join/filter semantics are preserved while duplicate child rows are removed. Grouped aggregates, HAVING/order/TOP-K, outer joins, multiple aggregate projections, missing owner primary keys, and other shapes remain fail-closed with `FanoutRiskError`.
+`COUNT(*)` counts joined rows and `COUNT(column)` excludes nulls. When a one-to-many child can duplicate the owner of an explicit `COUNT(column)`, the planner automatically emits `COUNT(DISTINCT column)`. For one `SUM` or `AVG` over an INNER join, the planner can use a derived subquery grouped by the aggregate owner's primary key and value before applying the outer aggregate. It also supports grouping by owner columns or a many-to-one dimension of that owner. All validated user and permission filters remain in that inner query, so the original join/filter semantics are preserved while duplicate child rows are removed. HAVING/order/TOP-K, outer joins, multiple aggregate projections, child-grain dimensions, missing owner primary keys, and other shapes remain fail-closed with `FanoutRiskError`.
 
-The SQL compiler can render a `target_role` alias supplied on a validated relationship, but the normal IR/planner/resolver flow cannot yet represent two roles of the same table. Consequently self-join aliases are compiler-only support, not an end-to-end feature.
+The normal pipeline supports one end-to-end self-join contract: explicit employee-with-manager wording creates the backend-owned `employee_instance -> manager_instance` relationship over `hr.employees.manager_id -> hr.employees.id`. The planner, row policy and compiler carry those two logical instances together, and manager permission predicates remain in the LEFT JOIN `ON` clause. General user-defined aliases or arbitrary self-join roles are intentionally unsupported.
 
 Ambiguous joins always raise `AmbiguousJoinPathError`. Metadata insertion order,
 edge traversal order and query direction must never select an arbitrary first
@@ -211,11 +211,12 @@ semantics remain: SUM/AVG of empty input are NULL, COUNT is zero.
 - The legacy permission adapter discovers HAVING table references using its existing allowlist checks. No permission policies are added to the SQL planner.
 
 Arbitrary/correlated subqueries, UNION, CTEs, window functions, raw SQL,
-arbitrary expressions, OR trees, outer/self joins and complex automatic
-fan-out correction remain unsupported. `COUNT(DISTINCT column)` is supported
-only when the planner detects parent-row fan-out, and scalar INNER-join
-`SUM`/`AVG` can use the documented owner-grain derived query. An ambiguous FK
-path still fails with `AmbiguousJoinPathError`; there is no first-path fallback.
+arbitrary expressions, OR trees, RIGHT/FULL joins, arbitrary self-join roles
+and complex automatic fan-out correction remain unsupported. `COUNT(DISTINCT
+column)` is supported only when the planner detects parent-row fan-out, and
+the documented INNER-join `SUM`/`AVG` owner-grain derived query supports scalar
+and safe owner/dimension-grouped shapes. An ambiguous FK path still fails with
+`AmbiguousJoinPathError`; there is no first-path fallback.
 
 ## Tests
 

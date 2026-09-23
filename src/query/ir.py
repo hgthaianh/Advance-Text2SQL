@@ -23,8 +23,9 @@ class TableInstance(BaseModel):
 
     This is deliberately not a general SQL table alias.  The physical table is
     fixed by the role, so callers cannot substitute a table or supply an alias.
-    The instance is inert in Phase 1: existing planning and SQL compilation do
-    not consume it yet.
+    The employee-manager pair is compiled by the dedicated instance-aware
+    planning path.  Other relationships remain physical-table joins until they
+    have an equally explicit, permission-aware role contract.
     """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
@@ -200,7 +201,8 @@ class QueryIR(BaseModel):
     # They narrow an otherwise ambiguous shortest path; they never permit a
     # caller to supply arbitrary SQL join conditions.
     join_hints: list[tuple[str, str]] = Field(default_factory=list)
-    # Optional Phase-1 foundation only.  Legacy physical-table queries do not
+    # Logical instances are deliberately limited to the backend-owned
+    # employee-manager capability. Legacy physical-table queries do not
     # populate this and continue through the unchanged planning path.
     table_instances: list[TableInstance] = Field(default_factory=list)
     # Optional Phase-2A logical join requests.  These are validated by the
@@ -211,6 +213,10 @@ class QueryIR(BaseModel):
     instance_base_filters: list[InstancePermissionFilter] = Field(default_factory=list)
     instance_join_filters: dict[str, list[InstancePermissionFilter]] = Field(default_factory=dict)
     instance_filters: list[InstanceQueryFilter] = Field(default_factory=list)
+    # Trusted permission predicates for an optional LEFT-joined destination.
+    # They compile into the JOIN ON clause so row scope cannot turn the LEFT
+    # join into an INNER join. User predicates always remain in ``filters``.
+    outer_join_filters: dict[str, list[QueryFilter]] = Field(default_factory=dict)
 
     @field_validator('intent', mode='before')
     @classmethod

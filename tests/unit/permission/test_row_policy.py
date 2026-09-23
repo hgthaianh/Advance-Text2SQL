@@ -171,3 +171,36 @@ def test_department_scope_reaches_related_employee_table_and_tenant_filters_path
         'hr.employees.department_id', 'sales.orders.tenant_id',
         'sales.sales_reps.tenant_id', 'hr.employees.tenant_id',
     }
+
+
+def test_outer_join_permission_scope_is_compiled_in_on_clause():
+    registry = SchemaRegistry(
+        tables=[
+            SchemaTable(name='customers', schema_name='sales', columns=[
+                SchemaColumn(name='id', data_type='integer', primary_key=True),
+                SchemaColumn(name='tenant_id', data_type='text'),
+                SchemaColumn(name='name', data_type='text'),
+            ]),
+            SchemaTable(name='orders', schema_name='sales', columns=[
+                SchemaColumn(name='id', data_type='integer', primary_key=True),
+                SchemaColumn(name='tenant_id', data_type='text'),
+                SchemaColumn(name='customer_id', data_type='integer'),
+            ]),
+        ],
+        relationships=[SchemaRelationship(
+            source='sales.orders.customer_id', target='sales.customers.id',
+        )],
+    )
+    query = QueryIR(
+        intent=Intent.LOOKUP,
+        tables=['sales.customers', 'sales.orders'],
+        select=['sales.customers.name'],
+        outer_joins=['sales.orders'],
+    )
+    scoped = ScopedRowPolicy(registry).apply(query, PermissionContext(tenant_id='T1'))
+
+    assert [filter_.column for filter_ in scoped.filters] == ['sales.customers.tenant_id']
+    assert [filter_.column for filter_ in scoped.outer_join_filters['sales.orders']] == ['sales.orders.tenant_id']
+    compiled = BasicQueryHandler(registry).handle(scoped)
+    assert 'LEFT OUTER JOIN "sales"."orders" ON "sales"."customers"."id" = "sales"."orders"."customer_id" AND "sales"."orders"."tenant_id" = :p0' in compiled.sql
+    assert 'WHERE "sales"."customers"."tenant_id" = :p1' in compiled.sql

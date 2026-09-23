@@ -161,9 +161,9 @@ def test_employee_manager_self_join_executes_through_public_pipeline(pipeline: T
 
     assert result.success
     assert result.rows == [
-        {'full_name': 'An', 'full_name_1': 'Binh'},
-        {'full_name': 'Binh', 'full_name_1': None},
-        {'full_name': 'Chi', 'full_name_1': 'Binh'},
+        {'employee_full_name': 'An', 'manager_full_name': 'Binh'},
+        {'employee_full_name': 'Binh', 'manager_full_name': None},
+        {'employee_full_name': 'Chi', 'manager_full_name': 'Binh'},
     ]
 
 
@@ -174,9 +174,9 @@ def test_explicit_include_without_manager_intent_reaches_public_left_join(pipeli
 
     assert result.success
     assert result.rows == [
-        {'full_name': 'An', 'full_name_1': 'Binh'},
-        {'full_name': 'Binh', 'full_name_1': None},
-        {'full_name': 'Chi', 'full_name_1': 'Binh'},
+        {'employee_full_name': 'An', 'manager_full_name': 'Binh'},
+        {'employee_full_name': 'Binh', 'manager_full_name': None},
+        {'employee_full_name': 'Chi', 'manager_full_name': 'Binh'},
     ]
 
 
@@ -204,7 +204,7 @@ def test_employee_manager_self_join_keeps_employee_when_manager_is_outside_depar
     ))
 
     assert result.success
-    assert result.rows == [{'full_name': 'Chi', 'full_name_1': None}]
+    assert result.rows == [{'employee_full_name': 'Chi', 'manager_full_name': None}]
 
 
 def test_unsupported_question_is_controlled(pipeline: Text2SQLPipeline):

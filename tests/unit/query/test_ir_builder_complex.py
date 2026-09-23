@@ -95,3 +95,33 @@ def test_group_by_uses_the_dimension_after_theo():
 
     assert query.group_by == ['org.branches.name']
     assert BasicQueryHandler(registry).handle(query).sql
+
+
+def test_explicit_absence_language_builds_a_left_anti_join():
+    registry, query = _build('liet ke khach hang chua co don hang')
+
+    assert query.outer_joins == ['sales.orders']
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('sales.orders.id', None),
+    ]
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'LEFT OUTER JOIN "sales"."orders"' in compiled.sql
+    assert '"sales"."orders"."id" IS NULL' in compiled.sql
+
+
+def test_inclusive_absence_language_keeps_matching_rows_with_a_left_join():
+    registry, query = _build('liet ke khach hang bao gom ca khach chua co don hang')
+
+    assert query.outer_joins == ['sales.orders']
+    assert not query.filters
+    assert 'LEFT OUTER JOIN "sales"."orders"' in BasicQueryHandler(registry).handle(query).sql
+
+
+def test_absence_language_supports_an_optional_fk_parent():
+    registry, query = _build('liet ke don hang khong co khach hang')
+
+    assert query.outer_joins == ['customer.customers']
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('customer.customers.id', None),
+    ]
+    assert 'LEFT OUTER JOIN "customer"."customers"' in BasicQueryHandler(registry).handle(query).sql
