@@ -48,7 +48,11 @@ class JoinPathNotFoundError(QueryValidationError):
 
 
 class AmbiguousJoinPathError(QueryValidationError):
-    pass
+    """A shortest-path search found multiple equally valid FK paths."""
+
+    def __init__(self, message: str, *, candidate_paths: list[list[str]] | None = None) -> None:
+        super().__init__(message)
+        self.candidate_paths = candidate_paths or []
 
 
 class MalformedQueryIRError(QueryValidationError):

@@ -1,4 +1,4 @@
-﻿from datetime import date
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -180,7 +180,7 @@ def test_aggregates_use_more_than_100_input_rows(planner, builder):
         engine.dispose()
 
 
-def test_count_customer_after_join_counts_duplicates_in_v1():
+def test_count_customer_after_join_uses_distinct_to_prevent_fanout():
     from src.query.handlers.basic import BasicQueryHandler
     from tests.unit.query.conftest import make_registry
 
@@ -190,7 +190,7 @@ def test_count_customer_after_join_counts_duplicates_in_v1():
     result = BasicQueryHandler(registry).handle(dict(
         intent='COUNT', tables=['customers', 'order_items'], select=['customers.id'],
     ))
-    assert 'DISTINCT' not in result.sql.upper()
+    assert 'DISTINCT' in result.sql.upper()
     engine = create_engine('sqlite://')
     try:
         with engine.begin() as connection:
@@ -201,6 +201,6 @@ def test_count_customer_after_join_counts_duplicates_in_v1():
             connection.exec_driver_sql('INSERT INTO public.customers VALUES (1)')
             connection.exec_driver_sql('INSERT INTO public.orders VALUES (10, 1), (20, 1)')
             connection.exec_driver_sql('INSERT INTO public.order_items VALUES (100, 10), (101, 10), (102, 20)')
-            assert connection.execute(result.statement).scalar_one() == 3
+            assert connection.execute(result.statement).scalar_one() == 1
     finally:
         engine.dispose()

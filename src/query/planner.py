@@ -60,20 +60,20 @@ class QueryPlanner:
             raise MalformedQueryIRError('LIKE requires a string')
 
     def _validate_fanout_risk(self, selected: list[SelectItem], joins: list) -> None:
-        """Reject a SUM/AVG after any one-to-many expansion in its join tree.
+        """Reject a SUM/AVG after any one-to-many expansion in its join tree, and auto-protect COUNT.
 
         COUNT(*) deliberately retains documented SQL row semantics. An explicit
         aggregate of a parent table column is unsafe once a joined FK child can
-        repeat that parent row. The IR has no DISTINCT or pre-aggregation
-        construct yet, so the only result-preserving behavior is to fail.
+        repeat that parent row. For COUNT(parent.col), DISTINCT is applied to eliminate
+        fan-out duplicates. SUM/AVG cannot be safely converted to DISTINCT and fail closed.
         """
-        aggregate_owners = {
-            item.column.rsplit('.', 1)[0]
+        aggregate_items = [
+            item
             for item in selected
-            if item.aggregation in (Aggregation.SUM, Aggregation.AVG)
+            if item.aggregation in (Aggregation.SUM, Aggregation.AVG, Aggregation.COUNT)
             and item.column not in (None, '*')
-        }
-        if not aggregate_owners:
+        ]
+        if not aggregate_items:
             return
         physical = {
             frozenset((relation.source, relation.target)): relation
@@ -87,7 +87,8 @@ class QueryPlanner:
             child, parent = relation.source.rsplit('.', 1)[0], relation.target.rsplit('.', 1)[0]
             adjacency.setdefault(child, []).append((parent, relation))
             adjacency.setdefault(parent, []).append((child, relation))
-        for owner in aggregate_owners:
+
+        def _has_child_fanout(owner: str) -> tuple[bool, str | None]:
             seen, queue = {owner}, [owner]
             while queue:
                 current = queue.pop()
@@ -96,12 +97,22 @@ class QueryPlanner:
                         continue
                     child, parent = relation.source.rsplit('.', 1)[0], relation.target.rsplit('.', 1)[0]
                     if current == parent and neighbor == child:
-                        raise FanoutRiskError(
-                            f'Aggregate on {owner} may be duplicated by child table {child}; '
-                            'use a pre-aggregate or a future COUNT(DISTINCT ...) query shape'
-                        )
+                        return True, child
                     seen.add(neighbor)
                     queue.append(neighbor)
+            return False, None
+
+        for item in aggregate_items:
+            owner = item.column.rsplit('.', 1)[0]
+            has_fanout, child = _has_child_fanout(owner)
+            if has_fanout:
+                if item.aggregation == Aggregation.COUNT:
+                    item.distinct = True
+                else:
+                    raise FanoutRiskError(
+                        f'Aggregate on {owner} may be duplicated by child table {child}; '
+                        'use a pre-aggregate or a future COUNT(DISTINCT ...) query shape'
+                    )
 
     def plan(self, query: QueryIR | dict) -> QueryPlan:
         """Resolve identifiers, aggregate semantics, filters and unique FK paths.
@@ -206,10 +217,6 @@ class QueryPlanner:
             effective_limit = validated.top_k if validated.top_k is not None else validated.limit
             if effective_limit > self.max_limit:
                 raise MalformedQueryIRError(f'LIMIT exceeds configured maximum {self.max_limit}')
-        normalized = validated.model_copy(update={
-            'tables': tables, 'select': selected, 'filters': filters, 'having': having,
-            'group_by': groups, 'order_by': order,
-        })
         relationship_keys = {frozenset((relation.source, relation.target)) for relation in self.registry.relationships}
         hints = {
             frozenset((self.registry.resolve_column(source), self.registry.resolve_column(target)))
@@ -224,7 +231,17 @@ class QueryPlanner:
             expected = {frozenset((j.source, j.target)) for j in joins}
             if supplied != expected:
                 raise MalformedQueryIRError('Supplied joins differ from validated FK paths')
+        if validated.outer_joins:
+            outer_set = {self.registry.resolve_table(t) for t in validated.outer_joins}
+            joins = [
+                j.model_copy(update={'is_outer': True}) if j.target.rsplit('.', 1)[0] in outer_set else j
+                for j in joins
+            ]
         self._validate_fanout_risk(selected, joins)
+        normalized = validated.model_copy(update={
+            'tables': tables, 'select': selected, 'filters': filters, 'having': having,
+            'group_by': groups, 'order_by': order,
+        })
         physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
         return QueryPlan(query=normalized, tables=physical_tables, joins=joins)
 

@@ -18,13 +18,15 @@ _UNPROCESSABLE_CODES = {
 
 def service_unavailable_response() -> JSONResponse:
     """Return the stable public response for an unavailable backing service."""
+    body = ErrorResponse(
+        query_id=None,
+        error_code='SERVICE_UNAVAILABLE',
+        message='The service is temporarily unavailable. Please try again later.',
+    ).model_dump()
+    body.pop('ambiguity', None)
     return JSONResponse(
         status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-        content=ErrorResponse(
-            query_id=None,
-            error_code='SERVICE_UNAVAILABLE',
-            message='The service is temporarily unavailable. Please try again later.',
-        ).model_dump(),
+        content=body,
     )
 
 
@@ -39,5 +41,9 @@ def error_response(result: QueryResult) -> JSONResponse:
         query_id=result.query_id,
         error_code=result.error_code,
         message=result.message or 'The query could not be completed.',
+        ambiguity=result.ambiguity,
     )
-    return JSONResponse(status_code=status_code, content=body.model_dump())
+    content = body.model_dump()
+    if body.ambiguity is None:
+        content.pop('ambiguity', None)
+    return JSONResponse(status_code=status_code, content=content)

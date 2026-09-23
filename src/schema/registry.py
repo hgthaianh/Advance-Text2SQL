@@ -81,9 +81,19 @@ class SchemaRegistry:
         for relation in [*relationships, *inline]:
             source = self.resolve_column(relation.source)
             target = self.resolve_column(relation.target)
+            resolved_composite = [
+                (self.resolve_column(s), self.resolve_column(t))
+                for s, t in getattr(relation, 'composite_keys', [])
+            ]
             key = tuple(sorted((source, target)))
             if key not in seen:
-                self.relationships.append(SchemaRelationship(source=source, target=target))
+                self.relationships.append(SchemaRelationship(
+                    source=source,
+                    target=target,
+                    composite_keys=resolved_composite,
+                    is_outer=getattr(relation, 'is_outer', False),
+                    target_role=getattr(relation, 'target_role', None),
+                ))
                 seen.add(key)
 
     def resolve_table(self, name: str) -> str:

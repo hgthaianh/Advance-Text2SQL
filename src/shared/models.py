@@ -76,10 +76,20 @@ class SchemaLinkResult(BaseModel):
 
 
 class SchemaRelationship(BaseModel):
-    """Single-column foreign key, expressed as schema.table.column endpoints."""
+    """Foreign key relationship, expressed as schema.table.column endpoints."""
 
     source: str
     target: str
+    composite_keys: list[tuple[str, str]] = Field(default_factory=list)
+    is_outer: bool = False
+    target_role: str | None = None
+
+
+class JoinAmbiguity(BaseModel):
+    """Safe, optional guidance for a join path that needs clarification."""
+
+    candidate_paths: list[list[str]] = Field(default_factory=list)
+    hints: list[str] = Field(default_factory=list)
 
 
 class QueryResult(BaseModel):
@@ -95,6 +105,7 @@ class QueryResult(BaseModel):
     is_mock: bool = False
     error_code: str | None = None
     message: str | None = None
+    ambiguity: JoinAmbiguity | None = None
 
 
 class QueryRequest(BaseModel):
@@ -109,6 +120,7 @@ class ErrorResponse(BaseModel):
     query_id: str | None = None
     error_code: str
     message: str
+    ambiguity: JoinAmbiguity | None = None
 
 
 class DateRange(BaseModel):
