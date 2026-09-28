@@ -1513,7 +1513,7 @@ FROM generate_series(1,1800) gs;
 -- ------------------------------------------------------------
 INSERT INTO iam.users(id, tenant_id, branch_id, department_id, team_id, employee_id, username, full_name, email, password_hash, status, created_at)
 SELECT gs, e.tenant_id, e.branch_id, e.department_id, e.team_id, e.id,
-       format('user%04s',gs), e.full_name, format('user%04s@app.test',gs), crypt('Passw0rd!', gen_salt('bf')),
+       format('user%s', lpad(gs::text, 4, '0')), e.full_name, format('user%s@app.test', lpad(gs::text, 4, '0')), crypt('Passw0rd!', gen_salt('bf')),
        'ACTIVE', '2025-01-01+07'
 FROM hr.employees e JOIN generate_series(1,450) gs ON e.id=gs;
 

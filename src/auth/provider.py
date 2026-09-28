@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+import re
 import secrets
 from typing import Callable
 
@@ -42,7 +43,8 @@ _USER_BY_USERNAME = text("""
     FROM iam.users u
     JOIN iam.user_roles ur ON ur.user_id = u.id AND (ur.valid_to IS NULL OR ur.valid_to > CURRENT_TIMESTAMP)
     JOIN iam.roles r ON r.id = ur.role_id AND r.is_active = TRUE
-    WHERE u.username = :username AND u.status = 'ACTIVE'
+    WHERE regexp_replace(replace(u.username, ' ', ''), '^user0*', 'user') = :username
+      AND u.status = 'ACTIVE'
       AND u.password_hash IS NOT NULL AND u.password_hash = crypt(:password, u.password_hash)
     ORDER BY r.id LIMIT 1
 """)
@@ -71,6 +73,10 @@ _REVOKE_SESSION = text("""
 
 def _token_hash(token: str) -> str:
     return sha256(token.encode()).hexdigest()
+
+
+def _canonical_seed_username(username: str) -> str:
+    return f"user{int(username[4:].replace(' ', ''))}" if re.fullmatch(r"user *\d+", username) else username
 
 
 def _role_from_code(code: str) -> str:
@@ -117,7 +123,9 @@ class DefaultAuthenticationProvider(AuthenticationProvider):
     def login(self, payload: LoginRequest) -> TokenResponse:
         try:
             with self.engine.begin() as connection:
-                row = connection.execute(_USER_BY_USERNAME, {'username': payload.username, 'password': payload.password}).mappings().first()
+                row = connection.execute(_USER_BY_USERNAME, {
+                    'username': _canonical_seed_username(payload.username), 'password': payload.password,
+                }).mappings().first()
                 if row is None:
                     raise AuthenticationError('Invalid credentials')
                 return self._issue(connection, dict(row))

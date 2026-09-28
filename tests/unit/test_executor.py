@@ -20,6 +20,7 @@ def test_executor_marks_a_capped_result_as_truncated():
     assert result.rows == [{'id': 1}, {'id': 2}]
     assert result.row_count == 2
     assert result.truncated is True
+    assert result.sql == 'SELECT id FROM records'
 
 
 def test_postgresql_execution_starts_a_read_only_transaction_before_selecting():
