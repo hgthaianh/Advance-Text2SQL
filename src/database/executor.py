@@ -39,4 +39,4 @@ class ReadOnlyExecutor:
             raise QueryExecutionError('Read-only query execution failed') from exc
         scalar: Any | None = rows[0][columns[0]] if len(rows) == 1 and len(columns) == 1 else None
         return QueryResult(success=True, columns=columns, rows=rows, row_count=len(rows), scalar=scalar,
-                           truncated=truncated)
+                           truncated=truncated, sql=query.sql, params=query.params)
