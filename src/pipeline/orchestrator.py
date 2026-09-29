@@ -22,6 +22,7 @@ from src.pipeline.observability import (
 )
 from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir_builder import QueryIRBuilder
+from src.response.ollama import NaturalLanguageResponder, OllamaNaturalLanguageResponder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
 from src.shared.exceptions import (
@@ -43,7 +44,8 @@ class Text2SQLPipeline:
                  entity_extractor: EntityExtractor | None = None, ir_builder: QueryIRBuilder | None = None,
                  permission_resolver: PermissionResolver | None = None,
                  validator: SQLValidator | None = None, executor: ReadOnlyExecutor | None = None,
-                 observer: PipelineObserver | None = None) -> None:
+                 observer: PipelineObserver | None = None,
+                 responder: NaturalLanguageResponder | None = None) -> None:
         self.registry = registry or SchemaRegistry()
         self.nlp = nlp or NLPRobustnessProcessor()
         self.scope_router = scope_router or ScopeRouter()
@@ -61,6 +63,7 @@ class Text2SQLPipeline:
             engine = engine or create_engine(get_settings().database_url, pool_pre_ping=True)
             executor = ReadOnlyExecutor(engine, timeout_ms=get_settings().query_timeout_ms)
         self.executor = executor
+        self.responder = responder or OllamaNaturalLanguageResponder()
         # A caller-provided observer remains untouched for tests/integrations.
         # The default combines existing logs with durable, redacted audit data.
         self.observer = observer or CompositePipelineObserver(
@@ -75,6 +78,7 @@ class Text2SQLPipeline:
         stage_started_at = started_at
         stage_durations: dict[str, float] = {}
         permissions = None
+        compiled = None
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'scope_routing')
@@ -104,16 +108,21 @@ class Text2SQLPipeline:
             self.validator.validate(compiled.statement, permissions)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'execution')
             result = self.executor.execute(compiled).model_copy(update={'query_id': query_id})
+            answer = self._generate_response(question, result)
+            if answer:
+                result = result.model_copy(update={'natural_language_response': answer})
             stage_durations[stage] = elapsed_ms(stage_started_at)
             self._record(PipelineEvent(query_id=query_id, outcome='success', stage=stage,
-                                       duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations))
+                                       duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations,
+                                       sql=compiled.sql, row_count=result.row_count, truncated=result.truncated))
             return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
             stage_durations[stage] = elapsed_ms(stage_started_at)
             error_code = self._error_code(exc)
             self._record(PipelineEvent(query_id=query_id, outcome='failure', stage=stage,
                                        duration_ms=elapsed_ms(started_at), error_code=error_code,
-                                       stage_durations_ms=stage_durations))
+                                       stage_durations_ms=stage_durations,
+                                       sql=compiled.sql if compiled is not None else None))
             return QueryResult(
                 success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
                 ambiguity=self._safe_ambiguity(exc, permissions),
@@ -149,6 +158,15 @@ class Text2SQLPipeline:
             self.observer.record(event)
         except Exception:
             logging.getLogger('text2sql.pipeline').exception('pipeline observer failed')
+
+    def _generate_response(self, question: str, result: QueryResult) -> str | None:
+        """A response-provider outage can never turn successful execution into failure."""
+        try:
+            return self.responder.generate(question, result)
+        except Exception:
+            # Provider exceptions may include transport details; never log them.
+            logging.getLogger('text2sql.response').warning('natural-language response generation failed')
+            return None
 
     def _validate_table_access(self, tables: list[str], allowed_tables: list[str]) -> None:
         """Fail closed for requested and planner-added bridge tables."""

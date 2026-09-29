@@ -6,7 +6,9 @@ from sqlalchemy import URL
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # Support the repository-level local environment file while preserving a
+    # service-local .env for deployments (the latter takes precedence).
+    model_config = SettingsConfigDict(env_file=("../.env", ".env"), env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Vietnamese Text2SQL"
     query_max_limit: int = Field(default=1000, ge=1, le=1000)
@@ -22,6 +24,9 @@ class Settings(BaseSettings):
     auth_access_token_expire_minutes: int = Field(default=30, ge=1)
     auth_refresh_token_expire_minutes: int = Field(default=60 * 24 * 7, ge=1)
     cors_allowed_origins: str = ""
+    ollama_base_url: str = "http://host.docker.internal:11434"
+    ollama_model: str = "gemma4:31b-cloud"
+    ollama_timeout_seconds: float = Field(default=10, ge=1, le=60)
 
     @field_validator("auth_secret_key")
     @classmethod
