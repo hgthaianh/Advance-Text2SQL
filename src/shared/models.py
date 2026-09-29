@@ -109,14 +109,25 @@ class QueryResult(BaseModel):
     error_code: str | None = None
     message: str | None = None
     ambiguity: JoinAmbiguity | None = None
+    natural_language_response: str | None = None
 
 
-class QueryResponse(QueryResult):
-    """Public success response without internal SQL or bind parameters."""
+class PublicQueryResult(BaseModel):
+    """The safe business result returned by ``POST /query``.
 
-    sql: str | None = Field(default=None, exclude=True)
-    params: dict[str, Any] = Field(default_factory=dict, exclude=True)
-    is_mock: bool = Field(default=False, exclude=True)
+    SQL text, bound values, execution internals, and authorization data never
+    cross this API boundary.  Administrators inspect retained SQL through the
+    separately authorized observability endpoints.
+    """
+
+    success: bool = True
+    query_id: str | None = None
+    columns: list[str] = Field(default_factory=list)
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+    row_count: int = Field(default=0, ge=0)
+    truncated: bool = False
+    scalar: Any | None = None
+    natural_language_response: str | None = None
 
 
 class QueryRequest(BaseModel):
