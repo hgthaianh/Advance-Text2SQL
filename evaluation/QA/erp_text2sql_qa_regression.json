@@ -1,0 +1,3027 @@
+{
+  "metadata": {
+    "suite_name": "ERP Text2SQL QA Regression Set",
+    "case_count": 114,
+    "design": "semantic + permission + robustness; numeric expected results intentionally omitted until validated against seed DB",
+    "date_policy": "prefer absolute dates",
+    "validation_stages": [
+      "scope_router",
+      "intent",
+      "entity_extraction",
+      "schema_linking",
+      "permission",
+      "sql_validation",
+      "execution_result"
+    ],
+    "important_note": "expected_table_concepts uses inferred table names from the provided overview; validate names against 01_schema.sql/table_manifest.csv before making exact-table assertions."
+  },
+  "cases": [
+    {
+      "id": "QA-HR-001",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Phòng nhân sự hiện có bao nhiêu nhân viên?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-002",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Liệt kê nhân viên đang ACTIVE trong phòng nhân sự.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR",
+        "employee_status=ACTIVE"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-003",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Cho tôi thông tin nhân viên có mã EMP000120.",
+      "expected_intent": "DETAIL",
+      "expected_entities": [
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "hr.employees"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "employee_code=EMP000120"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "row",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-004",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Lương cơ bản trung bình của phòng nhân sự là bao nhiêu?",
+      "expected_intent": "AVG",
+      "expected_entities": [
+        "employee",
+        "payroll",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "hr.payroll_details",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "payroll -> employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "DENY_SENSITIVE_COLUMN",
+      "paraphrase_group": null,
+      "notes": "Aligned with seeded iam.column_access_policies: base_salary is denied to every non-admin role."
+    },
+    {
+      "id": "QA-HR-005",
+      "category": "HR",
+      "username": "user0161",
+      "question": "Lương cơ bản trung bình theo phòng ban của tenant 1.",
+      "expected_intent": "AVG",
+      "expected_entities": [
+        "payroll",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.payroll_details",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "payroll -> employee -> department"
+      ],
+      "expected_filters": [
+        "tenant_id=1"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "GROUP BY department",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-006",
+      "category": "HR",
+      "username": "user0161",
+      "question": "Số nhân viên được tuyển theo năm từ 2021 đến 2025.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "hr.employees"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "hire_date between 2021-01-01 and 2025-12-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "time_series",
+      "expected_sql_shape": "GROUP BY year(hire_date)",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-007",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Có bao nhiêu đơn nghỉ phép APPROVED của phòng nhân sự?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "leave",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.leave_requests",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "leave -> employee -> department"
+      ],
+      "expected_filters": [
+        "status=APPROVED",
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-008",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Liệt kê nhân viên đi làm ngày 2026-09-15.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "attendance",
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "hr.attendance_records",
+        "hr.employees"
+      ],
+      "expected_join_path": [
+        "attendance -> employee"
+      ],
+      "expected_filters": [
+        "date=2026-09-15"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-009",
+      "category": "HR",
+      "username": "user0161",
+      "question": "Top 5 phòng ban có nhiều nhân viên ACTIVE nhất.",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "employee_status=ACTIVE"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "COUNT + GROUP BY + ORDER BY DESC + LIMIT 5",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-010",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Các nhân viên phòng nhân sự có hợp đồng còn hiệu lực.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "employee",
+        "contract",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "hr.employment_contracts",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "contract -> employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR",
+        "contract_active=true"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-011",
+      "category": "HR",
+      "username": "user0161",
+      "question": "Điểm đánh giá trung bình theo phòng ban.",
+      "expected_intent": "AVG",
+      "expected_entities": [
+        "performance_review",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.performance_reviews",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "review -> employee -> department"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "AVG + GROUP BY department",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-HR-012",
+      "category": "HR",
+      "username": "user0001",
+      "question": "Những ai thuộc team của phòng nhân sự?",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "employee",
+        "team",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.teams",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> team -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-001",
+      "category": "SALES",
+      "username": "user0111",
+      "question": "Có bao nhiêu đơn hàng CONFIRMED trong tháng 8/2026?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "sales_order"
+      ],
+      "expected_table_concepts": [
+        "sales.orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=CONFIRMED",
+        "order_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-002",
+      "category": "SALES",
+      "username": "user0111",
+      "question": "Tổng giá trị đơn hàng trong tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order"
+      ],
+      "expected_table_concepts": [
+        "sales.orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "order_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "SUM",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-003",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Tổng giá trị đơn hàng theo chi nhánh trong tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order",
+        "employee",
+        "branch"
+      ],
+      "expected_table_concepts": [
+        "sales.orders",
+        "hr.employees",
+        "org.branches"
+      ],
+      "expected_join_path": [
+        "order -> sales_rep/employee -> branch"
+      ],
+      "expected_filters": [
+        "order_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY branch",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-004",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Top 5 khách hàng có doanh số cao nhất từ 2026-01-01 đến 2026-09-17.",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "sales_order",
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "sales.orders",
+        "customer.customers"
+      ],
+      "expected_join_path": [
+        "order -> customer"
+      ],
+      "expected_filters": [
+        "order_date between 2026-01-01 and 2026-09-17"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "SUM + GROUP BY customer + ORDER BY DESC + LIMIT 5",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-005",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "10 sản phẩm bán nhiều nhất từ 2026-01-01 đến 2026-09-17.",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "order_item",
+        "product"
+      ],
+      "expected_table_concepts": [
+        "sales.order_items",
+        "product.products"
+      ],
+      "expected_join_path": [
+        "order_item -> product"
+      ],
+      "expected_filters": [
+        "order_date between 2026-01-01 and 2026-09-17"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "SUM(quantity) + GROUP BY product + ORDER BY DESC + LIMIT 10",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-006",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Doanh thu theo thương hiệu sản phẩm trong tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "invoice_item",
+        "product",
+        "brand"
+      ],
+      "expected_table_concepts": [
+        "sales.invoice_items",
+        "product.products",
+        "product.brands"
+      ],
+      "expected_join_path": [
+        "invoice_item -> product -> brand"
+      ],
+      "expected_filters": [
+        "invoice_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY brand",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-007",
+      "category": "SALES",
+      "username": "user0111",
+      "question": "Cho tôi thông tin đơn hàng SO000123.",
+      "expected_intent": "DETAIL",
+      "expected_entities": [
+        "sales_order"
+      ],
+      "expected_table_concepts": [
+        "sales.orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "order_code=SO000123"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "row",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-008",
+      "category": "SALES",
+      "username": "user0111",
+      "question": "Liệt kê hóa đơn OVERDUE.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "invoice"
+      ],
+      "expected_table_concepts": [
+        "sales.invoices"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=OVERDUE"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-009",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Doanh thu từng tháng từ tháng 1 đến tháng 9/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "invoice"
+      ],
+      "expected_table_concepts": [
+        "sales.invoices"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "invoice_date between 2026-01-01 and 2026-09-30"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "time_series",
+      "expected_sql_shape": "SUM + GROUP BY month",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-010",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Tổng thanh toán POSTED theo tháng từ 2026-01-01 đến 2026-09-19.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "payment"
+      ],
+      "expected_table_concepts": [
+        "sales.payments"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=POSTED",
+        "payment_date between 2026-01-01 and 2026-09-19"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "time_series",
+      "expected_sql_shape": "SUM + GROUP BY month",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-011",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Số đơn hàng CANCELLED theo chi nhánh.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "sales_order",
+        "employee",
+        "branch"
+      ],
+      "expected_table_concepts": [
+        "sales.orders",
+        "hr.employees",
+        "org.branches"
+      ],
+      "expected_join_path": [
+        "order -> sales_rep/employee -> branch"
+      ],
+      "expected_filters": [
+        "status=CANCELLED"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY branch",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SALES-012",
+      "category": "SALES",
+      "username": "user0161",
+      "question": "Doanh số theo phân khúc khách hàng.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order",
+        "customer",
+        "customer_segment"
+      ],
+      "expected_table_concepts": [
+        "sales.orders",
+        "customer.customers",
+        "customer.customer_segments"
+      ],
+      "expected_join_path": [
+        "order -> customer -> segment"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY segment",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-001",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Tổng tồn kho khả dụng theo sản phẩm.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "inventory_balance",
+        "product"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_balances",
+        "product.products"
+      ],
+      "expected_join_path": [
+        "balance -> product"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM(available_qty) + GROUP BY product",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-002",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Tồn kho theo kho và sản phẩm.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "inventory_balance",
+        "warehouse",
+        "product"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_balances",
+        "inventory.warehouses",
+        "product.products"
+      ],
+      "expected_join_path": [
+        "balance -> warehouse",
+        "balance -> product"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY warehouse, product",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-003",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Số giao dịch kho ngày 2026-01-03.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "inventory_transaction"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_transactions"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "transaction_date=2026-01-03"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-004",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Sản phẩm nào có tồn kho khả dụng thấp nhất?",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "inventory_balance",
+        "product"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_balances",
+        "product.products"
+      ],
+      "expected_join_path": [
+        "balance -> product"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "SUM + GROUP BY product + ORDER BY ASC",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-005",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Tổng tồn kho theo chi nhánh.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "inventory_balance",
+        "warehouse",
+        "branch"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_balances",
+        "inventory.warehouses",
+        "org.branches"
+      ],
+      "expected_join_path": [
+        "balance -> warehouse -> branch"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY branch",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-006",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Liệt kê các lô hàng trong kho.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "inventory_lot",
+        "warehouse"
+      ],
+      "expected_table_concepts": [
+        "inventory.stock_lots",
+        "inventory.warehouses"
+      ],
+      "expected_join_path": [
+        "lot -> warehouse"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-007",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Có bao nhiêu serial đang được quản lý trong tenant 1?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "serial"
+      ],
+      "expected_table_concepts": [
+        "inventory.stock_serials"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "tenant_id=1"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-INV-008",
+      "category": "INVENTORY",
+      "username": "user0161",
+      "question": "Tổng số lượng điều chuyển kho theo chi nhánh.",
+      "expected_intent": "AMBIGUOUS",
+      "expected_entities": [
+        "inventory_transfer",
+        "warehouse",
+        "branch"
+      ],
+      "expected_table_concepts": [
+        "inventory.stock_transfers",
+        "inventory.warehouses",
+        "org.branches"
+      ],
+      "expected_join_path": [
+        "transfer -> warehouse -> branch"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Source versus destination warehouse is not specified, so branch attribution is ambiguous."
+    },
+    {
+      "id": "QA-PROC-001",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Nhà cung cấp có tổng giá trị PO cao nhất.",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "purchase_order",
+        "supplier"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_orders",
+        "procurement.suppliers"
+      ],
+      "expected_join_path": [
+        "purchase_order -> supplier"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "SUM + GROUP BY supplier + ORDER BY DESC + LIMIT 1",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-002",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Tổng giá trị PO theo nhà cung cấp từ 2026-01-01 đến 2026-09-16.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "purchase_order",
+        "supplier"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_orders",
+        "procurement.suppliers"
+      ],
+      "expected_join_path": [
+        "purchase_order -> supplier"
+      ],
+      "expected_filters": [
+        "po_date between 2026-01-01 and 2026-09-16"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY supplier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-003",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Có bao nhiêu PO trạng thái PARTIAL?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=PARTIAL"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-004",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Số lượng hàng đã nhận theo nhà cung cấp.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "goods_receipt",
+        "purchase_order",
+        "supplier"
+      ],
+      "expected_table_concepts": [
+        "procurement.goods_receipts",
+        "procurement.purchase_orders",
+        "procurement.suppliers"
+      ],
+      "expected_join_path": [
+        "goods_receipt -> purchase_order -> supplier"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY supplier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-005",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Giá trị hàng đã nhận theo warehouse.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "goods_receipt",
+        "warehouse"
+      ],
+      "expected_table_concepts": [
+        "procurement.goods_receipts",
+        "inventory.warehouses"
+      ],
+      "expected_join_path": [
+        "goods_receipt -> warehouse"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY warehouse",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-006",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Liệt kê PO RECEIVED trong tháng 8/2026.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=RECEIVED",
+        "po_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-007",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "Tổng số item đặt mua theo sản phẩm.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "purchase_order_item",
+        "product"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_order_items",
+        "product.products"
+      ],
+      "expected_join_path": [
+        "purchase_order_item -> product"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM(quantity) + GROUP BY product",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PROC-008",
+      "category": "PROCUREMENT",
+      "username": "user0161",
+      "question": "So sánh số PO RECEIVED và PARTIAL.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status in (RECEIVED,PARTIAL)"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY status",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-001",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Tổng phát sinh bút toán theo tài khoản từ 2026-01-01 đến 2026-09-17.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "journal_entry_line",
+        "account"
+      ],
+      "expected_table_concepts": [
+        "finance.journal_entry_lines",
+        "finance.chart_of_accounts",
+        "finance.journal_entries"
+      ],
+      "expected_join_path": [
+        "journal_line -> journal_entry",
+        "journal_line -> account"
+      ],
+      "expected_filters": [
+        "entry_date between 2026-01-01 and 2026-09-17"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY account",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-002",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Tổng chi phí theo cost center.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "journal_entry_line",
+        "cost_center"
+      ],
+      "expected_table_concepts": [
+        "finance.journal_entry_lines",
+        "org.cost_centers"
+      ],
+      "expected_join_path": [
+        "journal_line -> cost_center"
+      ],
+      "expected_filters": [],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY cost_center",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-003",
+      "category": "FINANCE",
+      "username": "user0161",
+      "question": "Tổng chi phí theo phòng ban.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "journal_entry_line",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "finance.journal_entry_lines",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "journal_line -> department"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY department",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-004",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Liệt kê vendor bill OVERDUE.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "vendor_bill"
+      ],
+      "expected_table_concepts": [
+        "finance.vendor_bills"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=OVERDUE"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY", "expected_result_type": "none", "expected_sql_shape": null, "expected_permission": "DENY_UNRESOLVABLE_DEPARTMENT_SCOPE",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-005",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Tổng vendor bill OPEN theo nhà cung cấp.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "vendor_bill",
+        "supplier"
+      ],
+      "expected_table_concepts": [
+        "finance.vendor_bills",
+        "procurement.suppliers"
+      ],
+      "expected_join_path": [
+        "vendor_bill -> supplier"
+      ],
+      "expected_filters": [
+        "status=OPEN"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY", "expected_result_type": "none", "expected_sql_shape": null, "expected_permission": "DENY_UNRESOLVABLE_DEPARTMENT_SCOPE",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-006",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Vendor bill nào liên quan đến PO có giá trị lớn nhất?",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "vendor_bill",
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "finance.vendor_bills",
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [
+        "vendor_bill -> purchase_order"
+      ],
+      "expected_filters": [],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY", "expected_result_type": "none", "expected_sql_shape": null, "expected_permission": "DENY_UNRESOLVABLE_DEPARTMENT_SCOPE",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-007",
+      "category": "FINANCE",
+      "username": "user0161",
+      "question": "Ngân sách theo phòng ban của tenant 1.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "budget",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "finance.budgets",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "budget -> department"
+      ],
+      "expected_filters": [
+        "tenant_id=1"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY department",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-FIN-008",
+      "category": "FINANCE",
+      "username": "user0081",
+      "question": "Số bút toán theo tháng từ 2026-01-01 đến 2026-09-17.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "journal_entry"
+      ],
+      "expected_table_concepts": [
+        "finance.journal_entries"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "entry_date between 2026-01-01 and 2026-09-17"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY", "expected_result_type": "none", "expected_sql_shape": null, "expected_permission": "DENY_UNRESOLVABLE_DEPARTMENT_SCOPE",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-001",
+      "category": "SUPPORT",
+      "username": "user0141",
+      "question": "Có bao nhiêu ticket OPEN?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=OPEN"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-002",
+      "category": "SUPPORT",
+      "username": "user0141",
+      "question": "Liệt kê ticket URGENT đang OPEN.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "ticket"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "priority=URGENT",
+        "status=OPEN"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-003",
+      "category": "SUPPORT",
+      "username": "user0161",
+      "question": "Số ticket theo ngày từ 2026-06-01 đến 2026-06-07.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "created_at between 2026-06-01 and 2026-06-07"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "time_series",
+      "expected_sql_shape": "COUNT + GROUP BY day",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-004",
+      "category": "SUPPORT",
+      "username": "user0161",
+      "question": "Ticket theo phân hạng khách hàng.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket",
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "customer.customers"
+      ],
+      "expected_join_path": [
+        "ticket -> customer"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY customer_tier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-005",
+      "category": "SUPPORT",
+      "username": "user0141",
+      "question": "Số ticket RESOLVED theo SLA.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket",
+        "sla"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "support.ticket_sla_events", "support.sla_policies"
+      ],
+      "expected_join_path": [
+        "ticket -> sla"
+      ],
+      "expected_filters": [
+        "status=RESOLVED"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY sla",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-006",
+      "category": "SUPPORT",
+      "username": "user0161",
+      "question": "Top 5 khách hàng có nhiều ticket nhất.",
+      "expected_intent": "TOP_N",
+      "expected_entities": [
+        "ticket",
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "customer.customers"
+      ],
+      "expected_join_path": [
+        "ticket -> customer"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "ranked_rows",
+      "expected_sql_shape": "COUNT + GROUP BY customer + ORDER BY DESC + LIMIT 5",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-007",
+      "category": "SUPPORT",
+      "username": "user0141",
+      "question": "Lịch sử trạng thái của ticket TKT000123.",
+      "expected_intent": "DETAIL",
+      "expected_entities": [
+        "ticket",
+        "ticket_status_history"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "support.ticket_status_history"
+      ],
+      "expected_join_path": [
+        "status_history -> ticket"
+      ],
+      "expected_filters": [
+        "ticket_code=TKT000123"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-SUP-008",
+      "category": "SUPPORT",
+      "username": "user0141",
+      "question": "Có bao nhiêu comment của ticket TKT000123?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket",
+        "ticket_comment"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "support.ticket_comments"
+      ],
+      "expected_join_path": [
+        "comment -> ticket"
+      ],
+      "expected_filters": [
+        "ticket_code=TKT000123"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-001",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Liệt kê khách hàng PLATINUM.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "customer.customers"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "tier=PLATINUM"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-002",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Có bao nhiêu khách hàng GOLD?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "customer.customers"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "tier=GOLD"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-003",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Số khách hàng theo phân khúc.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "customer",
+        "segment"
+      ],
+      "expected_table_concepts": [
+        "customer.customers",
+        "customer.customer_segments"
+      ],
+      "expected_join_path": [
+        "customer -> segment"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY segment",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-004",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Liệt kê địa chỉ của khách hàng CUST000120.",
+      "expected_intent": "DETAIL",
+      "expected_entities": [
+        "customer",
+        "customer_address"
+      ],
+      "expected_table_concepts": [
+        "customer.customers",
+        "customer.addresses"
+      ],
+      "expected_join_path": [
+        "address -> customer"
+      ],
+      "expected_filters": [
+        "customer_code=CUST000120"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-005",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Có bao nhiêu sản phẩm theo thương hiệu?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "product",
+        "brand"
+      ],
+      "expected_table_concepts": [
+        "product.products",
+        "product.brands"
+      ],
+      "expected_join_path": [
+        "product -> brand"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY brand",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-006",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Số sản phẩm theo danh mục.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "product",
+        "category"
+      ],
+      "expected_table_concepts": [
+        "product.products",
+        "product.categories"
+      ],
+      "expected_join_path": [
+        "product -> category"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY category",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-007",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Liệt kê các biến thể của sản phẩm PROD000100.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "product",
+        "variant"
+      ],
+      "expected_table_concepts": [
+        "product.products",
+        "product.product_variants"
+      ],
+      "expected_join_path": [
+        "variant -> product"
+      ],
+      "expected_filters": [
+        "product_code=PROD000100"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-CP-008",
+      "category": "CUSTOMER_PRODUCT",
+      "username": "user0161",
+      "question": "Giá hiện tại của các biến thể sản phẩm PROD000100.",
+      "expected_intent": "DETAIL",
+      "expected_entities": [
+        "product",
+        "variant",
+        "price"
+      ],
+      "expected_table_concepts": [
+        "product.products",
+        "product.product_variants",
+        "product.price_list_items"
+      ],
+      "expected_join_path": [
+        "price -> variant -> product"
+      ],
+      "expected_filters": [
+        "product_code=PROD000100"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-001",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Doanh thu theo thương hiệu sản phẩm trong tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "invoice_item",
+        "product",
+        "brand"
+      ],
+      "expected_table_concepts": [
+        "sales.invoice_items",
+        "product.products",
+        "product.brands"
+      ],
+      "expected_join_path": [
+        "invoice_item -> product -> brand"
+      ],
+      "expected_filters": [
+        "invoice_date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY brand",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-002",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Doanh thu theo danh mục sản phẩm từ 2026-01-01 đến 2026-09-19.",
+      "expected_intent": "AMBIGUOUS",
+      "expected_entities": [
+        "invoice_item",
+        "product",
+        "category"
+      ],
+      "expected_table_concepts": [
+        "sales.invoice_items",
+        "product.products",
+        "product.categories"
+      ],
+      "expected_join_path": [
+        "invoice_item -> product -> category"
+      ],
+      "expected_filters": [
+        "invoice_date between 2026-01-01 and 2026-09-19"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Product-category is many-to-many and is_primary is not uniquely constrained, so revenue allocation is unsafe."
+    },
+    {
+      "id": "QA-XD-003",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Doanh số theo phân khúc khách hàng.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order",
+        "customer",
+        "segment"
+      ],
+      "expected_table_concepts": [
+        "sales.orders",
+        "customer.customers",
+        "customer.customer_segments"
+      ],
+      "expected_join_path": [
+        "order -> customer -> segment"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY segment",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-004",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Doanh thu theo sales representative.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "invoice",
+        "sales_order",
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "sales.invoices",
+        "sales.orders",
+        "hr.employees"
+      ],
+      "expected_join_path": [
+        "invoice -> order -> sales_rep/employee"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY employee",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-005",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Doanh thu theo phòng ban của sales representative.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "invoice",
+        "sales_order",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "sales.invoices",
+        "sales.orders",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "invoice -> order -> employee -> department"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY department",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-006",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Số lượng hàng đã nhận theo nhà cung cấp.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "goods_receipt",
+        "purchase_order",
+        "supplier"
+      ],
+      "expected_table_concepts": [
+        "procurement.goods_receipts",
+        "procurement.purchase_orders",
+        "procurement.suppliers"
+      ],
+      "expected_join_path": [
+        "goods_receipt -> purchase_order -> supplier"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY supplier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-007",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Số lượng hàng đã nhận theo warehouse và supplier.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "goods_receipt",
+        "purchase_order",
+        "supplier",
+        "warehouse"
+      ],
+      "expected_table_concepts": [
+        "procurement.goods_receipts",
+        "procurement.purchase_orders",
+        "procurement.suppliers",
+        "inventory.warehouses"
+      ],
+      "expected_join_path": [
+        "goods_receipt -> purchase_order -> supplier",
+        "goods_receipt -> warehouse"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY warehouse,supplier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-008",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Tồn kho theo sản phẩm và chi nhánh.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "inventory_balance",
+        "product",
+        "warehouse",
+        "branch"
+      ],
+      "expected_table_concepts": [
+        "inventory.inventory_balances",
+        "product.products",
+        "inventory.warehouses",
+        "org.branches"
+      ],
+      "expected_join_path": [
+        "balance -> product",
+        "balance -> warehouse -> branch"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY product,branch",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-009",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Tổng vendor bill theo supplier và PO.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "vendor_bill",
+        "supplier",
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "finance.vendor_bills",
+        "procurement.suppliers",
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [
+        "vendor_bill -> supplier",
+        "vendor_bill -> purchase_order"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY supplier,PO",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-010",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Chi phí mua hàng theo cost center.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "journal_entry_line",
+        "cost_center",
+        "purchase_order"
+      ],
+      "expected_table_concepts": [
+        "finance.journal_entry_lines",
+        "org.cost_centers",
+        "procurement.purchase_orders"
+      ],
+      "expected_join_path": [
+        "journal_line -> cost_center",
+        "journal_line -> purchasing reference"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "SUM + GROUP BY cost_center",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-011",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Ticket theo phân hạng khách hàng.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket",
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "customer.customers"
+      ],
+      "expected_join_path": [
+        "ticket -> customer"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY customer_tier",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-XD-012",
+      "category": "CROSS_DOMAIN",
+      "username": "user0161",
+      "question": "Ticket theo phòng ban được assign và SLA.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "ticket",
+        "department",
+        "sla"
+      ],
+      "expected_table_concepts": [
+        "support.support_tickets",
+        "org.departments",
+        "support.ticket_sla_events", "support.sla_policies"
+      ],
+      "expected_join_path": [
+        "ticket -> assigned_department",
+        "ticket -> sla"
+      ],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "grouped_rows",
+      "expected_sql_shape": "COUNT + GROUP BY department,sla",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-001",
+      "category": "PERMISSION",
+      "username": "user0161",
+      "question": "Có bao nhiêu nhân viên ACTIVE trong tenant của tôi?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "hr.employees"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=ACTIVE"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-002",
+      "category": "PERMISSION",
+      "username": "user0001",
+      "question": "Có bao nhiêu nhân viên ACTIVE trong tenant của tôi?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee"
+      ],
+      "expected_table_concepts": [
+        "hr.employees"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "status=ACTIVE"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "FILTER_TO_DEPARTMENT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-003",
+      "category": "PERMISSION",
+      "username": "user0081",
+      "question": "Liệt kê lương chi tiết của phòng Sales.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "payroll",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.payroll_details",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "payroll -> employee -> department"
+      ],
+      "expected_filters": [
+        "department=Sales"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY_OR_MASK",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "DENY_SENSITIVE_CROSS_DEPARTMENT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-004",
+      "category": "PERMISSION",
+      "username": "user0111",
+      "question": "Cho tôi lương cơ bản của nhân viên phòng nhân sự.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "payroll",
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.payroll_details",
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "payroll -> employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY_OR_MASK",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "DENY_SENSITIVE_CROSS_DEPARTMENT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-005",
+      "category": "PERMISSION",
+      "username": "user0141",
+      "question": "Doanh thu phòng Sales tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order"
+      ],
+      "expected_table_concepts": [
+        "sales.orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY_OR_FILTER",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "DENY_OR_FILTER_CROSS_DEPARTMENT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-006",
+      "category": "PERMISSION",
+      "username": "user0161",
+      "question": "Doanh thu phòng Sales tháng 8/2026.",
+      "expected_intent": "SUM",
+      "expected_entities": [
+        "sales_order"
+      ],
+      "expected_table_concepts": [
+        "sales.orders"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [
+        "date between 2026-08-01 and 2026-08-31"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "SUM",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-007",
+      "category": "PERMISSION",
+      "username": "user0253",
+      "question": "Có bao nhiêu nhân viên của tenant 1?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "tenant"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.tenants"
+      ],
+      "expected_join_path": [
+        "employee -> department -> branch -> tenant"
+      ],
+      "expected_filters": [
+        "tenant_id=1"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "DENY_OR_EMPTY",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "BLOCK_OTHER_TENANT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-008",
+      "category": "PERMISSION",
+      "username": "user0161",
+      "question": "Có bao nhiêu nhân viên của tenant 2?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "tenant"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.tenants"
+      ],
+      "expected_join_path": [
+        "employee -> department -> branch -> tenant"
+      ],
+      "expected_filters": [
+        "tenant_id=2"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "DENY_OR_EMPTY",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "BLOCK_OTHER_TENANT",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-009",
+      "category": "PERMISSION",
+      "username": "user0251",
+      "question": "Có bao nhiêu nhân viên phòng HR?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "FILTER_TO_TENANT_2_HR",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-010",
+      "category": "PERMISSION",
+      "username": "user0001",
+      "question": "Có bao nhiêu nhân viên phòng HR?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "FILTER_TO_TENANT_1_HR",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-011",
+      "category": "PERMISSION",
+      "username": "user0161",
+      "question": "Liệt kê audit log Text2SQL gần nhất.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "text2sql_query_log"
+      ],
+      "expected_table_concepts": [
+        "audit.text2sql_query_logs"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW_ADMIN",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PERM-012",
+      "category": "PERMISSION",
+      "username": "user0111",
+      "question": "Liệt kê audit log Text2SQL gần nhất.",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "text2sql_query_log"
+      ],
+      "expected_table_concepts": [
+        "audit.text2sql_query_logs"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "DENY",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "ADMIN_ONLY",
+      "paraphrase_group": null,
+      "notes": null
+    },
+    {
+      "id": "QA-PARA-001",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Phòng HR đang có bao nhiêu người?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-002",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Có bao nhiêu nhân viên phòng HR?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-003",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Phòng nhân sự có mấy người?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-004",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Headcount phòng nhân sự là bao nhiêu?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-005",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Đếm nhân sự thuộc bộ phận HR.",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-006",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Số người phòng HR",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-007",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Bên HR hiện có bao nhiêu người vậy?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-008",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "hr co bao nhieu nguoi",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-009",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "phong nhan su co may nguoi",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-010",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "phòng hr có bao nhieu nhan vien",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-011",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "HR headcount",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-012",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "count nhân viên HR",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-013",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Cho mình biết tổng số nhân sự bên HR",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-014",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Hiện tại tổng cộng HR đang có mấy người?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-015",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "Có bn nhân viên phòng hr?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-PARA-016",
+      "category": "PARAPHRASE",
+      "username": "user0001",
+      "question": "phog HR có bao nhiêu ngừoi?",
+      "expected_intent": "COUNT",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "scalar",
+      "expected_sql_shape": "COUNT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": "hr_department_headcount",
+      "notes": "All paraphrases should resolve to the same semantic query."
+    },
+    {
+      "id": "QA-AMB-001",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Doanh thu hiện tại",
+      "expected_intent": "AMBIGUOUS",
+      "expected_entities": [
+        "revenue"
+      ],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Need revenue basis and time window."
+    },
+    {
+      "id": "QA-AMB-002",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0081",
+      "question": "Tài khoản tháng này",
+      "expected_intent": "AMBIGUOUS",
+      "expected_entities": [
+        "account"
+      ],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "DEPARTMENT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Could mean IAM account or finance account."
+    },
+    {
+      "id": "QA-AMB-003",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Cho tôi báo cáo",
+      "expected_intent": "UNKNOWN",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Missing entity and operation."
+    },
+    {
+      "id": "QA-AMB-004",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Top 5",
+      "expected_intent": "UNKNOWN",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Missing ranking entity/metric."
+    },
+    {
+      "id": "QA-AMB-005",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Có bao nhiêu?",
+      "expected_intent": "COUNT",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Action known, entity missing."
+    },
+    {
+      "id": "QA-AMB-006",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Dịch câu này sang tiếng Anh",
+      "expected_intent": "UNSUPPORTED",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "UNSUPPORTED",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Outside Text2SQL domain."
+    },
+    {
+      "id": "QA-AMB-007",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Hôm nay thời tiết thế nào?",
+      "expected_intent": "UNSUPPORTED",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "UNSUPPORTED",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Outside ERP domain."
+    },
+    {
+      "id": "QA-AMB-008",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Cho tôi dữ liệu tốt nhất",
+      "expected_intent": "UNKNOWN",
+      "expected_entities": [],
+      "expected_table_concepts": [],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Undefined metric/entity."
+    },
+    {
+      "id": "QA-AMB-009",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Khách hàng nhiều nhất",
+      "expected_intent": "AMBIGUOUS",
+      "expected_entities": [
+        "customer"
+      ],
+      "expected_table_concepts": [
+        "customer.customers"
+      ],
+      "expected_join_path": [],
+      "expected_filters": [],
+      "expected_scope": "TENANT",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
+      "paraphrase_group": null,
+      "notes": "Most by revenue, orders, tickets, or another metric?"
+    },
+    {
+      "id": "QA-AMB-010",
+      "category": "AMBIGUOUS_UNSUPPORTED",
+      "username": "user0161",
+      "question": "Nhân viên của phòng HR",
+      "expected_intent": "LIST",
+      "expected_entities": [
+        "employee",
+        "department"
+      ],
+      "expected_table_concepts": [
+        "hr.employees",
+        "org.departments"
+      ],
+      "expected_join_path": [
+        "employee -> department"
+      ],
+      "expected_filters": [
+        "department=HR"
+      ],
+      "expected_scope": "TENANT",
+      "expected_behavior": "SUCCESS",
+      "expected_result_type": "rows",
+      "expected_sql_shape": "SELECT",
+      "expected_permission": "ALLOW",
+      "paraphrase_group": null,
+      "notes": "Must not be forced to COUNT."
+    }
+  ]
+}

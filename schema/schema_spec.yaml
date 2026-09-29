@@ -1,4 +1,4192 @@
-# TODO: Vietnamese aliases, columns and foreign-key relationships.
+# Bootstrapped from dataset_v2/sql/01_schema.sql; runtime source of truth.
 version: 1
-tables: []
-relationships: []
+tables:
+- name: tenants
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: code
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: tax_code
+    data_type: varchar(50)
+    nullable: true
+    primary_key: false
+  - name: country
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: locations
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: address_line
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: city
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: province
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: country
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: latitude
+    data_type: numeric(9,6)
+    nullable: true
+    primary_key: false
+  - name: longitude
+    data_type: numeric(9,6)
+    nullable: true
+    primary_key: false
+- name: branches
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: location_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: manager_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: departments
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: parent_department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: manager_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: teams
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: cost_centers
+  schema_name: org
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: manager_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: annual_budget
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: positions
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: job_level
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+  - name: employment_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: min_salary
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: max_salary
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: employees
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: team_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: position_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: manager_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: employee_code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: full_name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: email
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: phone
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: hire_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: employment_status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: base_salary
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: employee_job_history
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: old_department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: new_department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: old_position_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: new_position_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: effective_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: change_type
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: reason
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: approved_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+- name: employment_contracts
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: contract_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: contract_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: end_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: base_salary
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: working_hours_per_week
+    data_type: numeric(6,2)
+    nullable: true
+    primary_key: false
+  - name: signed_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: attendance_records
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: work_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: check_in_time
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: check_out_time
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: working_hours
+    data_type: numeric(6,2)
+    nullable: true
+    primary_key: false
+  - name: overtime_hours
+    data_type: numeric(6,2)
+    nullable: true
+    primary_key: false
+  - name: attendance_status
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: source
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+- name: leave_types
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: annual_entitlement_days
+    data_type: numeric(6,2)
+    nullable: true
+    primary_key: false
+  - name: is_paid
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: requires_approval
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: carry_forward_allowed
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: leave_balances
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: leave_type_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: fiscal_year
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: entitled_days
+    data_type: numeric(6,2)
+    nullable: false
+    primary_key: false
+  - name: used_days
+    data_type: numeric(6,2)
+    nullable: false
+    primary_key: false
+  - name: remaining_days
+    data_type: numeric(6,2)
+    nullable: true
+    primary_key: false
+- name: leave_requests
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: leave_type_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: end_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: total_days
+    data_type: numeric(6,2)
+    nullable: false
+    primary_key: false
+  - name: reason
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: approved_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: requested_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: payroll_runs
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: payroll_period
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: end_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: payment_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: total_gross
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: total_deductions
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: total_net
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: payroll_details
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: payroll_run_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: base_salary
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: allowances
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: overtime_pay
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: bonus
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: deductions
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: tax_amount
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: net_salary
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+- name: performance_reviews
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: reviewer_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: review_period
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: performance_score
+    data_type: numeric(5,2)
+    nullable: true
+    primary_key: false
+  - name: goal_score
+    data_type: numeric(5,2)
+    nullable: true
+    primary_key: false
+  - name: competency_score
+    data_type: numeric(5,2)
+    nullable: true
+    primary_key: false
+  - name: comments
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: review_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: employee_benefits
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: benefit_type
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: provider
+    data_type: varchar(150)
+    nullable: true
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: end_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: employee_contribution
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: employer_contribution
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: training_records
+  schema_name: hr
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: course_name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: provider
+    data_type: varchar(150)
+    nullable: true
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: completion_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: score
+    data_type: numeric(5,2)
+    nullable: true
+    primary_key: false
+  - name: certificate_code
+    data_type: varchar(80)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+- name: users
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: team_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: username
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: full_name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: email
+    data_type: varchar(255)
+    nullable: false
+    primary_key: false
+  - name: password_hash
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: roles
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: is_active
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: permissions
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: code
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: resource_type
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: schema_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: table_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: column_name
+    data_type: varchar(63)
+    nullable: true
+    primary_key: false
+  - name: action
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: user_roles
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: user_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: role_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: assigned_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: valid_to
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+- name: role_permissions
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: role_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: permission_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+- name: user_scopes
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: user_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: team_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: scope_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: table_access_policies
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: role_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: schema_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: table_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: can_select
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: row_scope_mode
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: is_active
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: column_access_policies
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: role_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: schema_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: table_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: column_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: can_select
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: can_filter
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: mask_type
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+- name: login_sessions
+  schema_name: iam
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: user_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: session_token_hash
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: ip_address
+    data_type: inet
+    nullable: true
+    primary_key: false
+  - name: user_agent
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: login_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: expires_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: revoked_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+- name: customer_segments
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: customer_groups
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: customers
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: segment_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: customer_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: industry
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: tax_id
+    data_type: varchar(60)
+    nullable: true
+    primary_key: false
+  - name: email
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: phone
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: customer_tier
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: vip_flag
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: contacts
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: full_name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: email
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: phone
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: job_title
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: addresses
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: line1
+    data_type: varchar(255)
+    nullable: false
+    primary_key: false
+  - name: line2
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: city
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: province
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: country
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: postal_code
+    data_type: varchar(20)
+    nullable: true
+    primary_key: false
+- name: customer_group_members
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: group_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: joined_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: customer_contacts
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: contact_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: contact_type
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+  - name: is_primary
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: customer_addresses
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: address_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: address_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: is_primary
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: customer_owners
+  schema_name: customer
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: assigned_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: is_primary
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: brands
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+- name: categories
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: parent_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: products
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: brand_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: uom
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: standard_cost
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: base_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: reorder_level
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: product_categories
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: category_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: is_primary
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: product_variants
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: sku
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: variant_name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: attributes
+    data_type: jsonb
+    nullable: true
+    primary_key: false
+  - name: cost_price
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: selling_price
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: product_attributes
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: data_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+- name: product_attribute_values
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: attribute_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: value_text
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: value_number
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: value_boolean
+    data_type: boolean
+    nullable: true
+    primary_key: false
+- name: price_lists
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: valid_from
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: valid_to
+    data_type: date
+    nullable: true
+    primary_key: false
+- name: price_list_items
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: price_list_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: variant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+- name: product_tags
+  schema_name: product
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: tag
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+- name: warehouses
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: location_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: warehouse_type
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: manager_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: warehouse_zones
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(120)
+    nullable: false
+    primary_key: false
+  - name: zone_type
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: capacity_qty
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: temperature_min
+    data_type: numeric(8,2)
+    nullable: true
+    primary_key: false
+  - name: temperature_max
+    data_type: numeric(8,2)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: inventory_balances
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: zone_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: qty_on_hand
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: qty_reserved
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: qty_available
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: avg_unit_cost
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: last_counted_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: updated_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: inventory_transactions
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: zone_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: transaction_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_cost
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: reference_type
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: reference_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: transaction_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: stock_lots
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: lot_number
+    data_type: varchar(80)
+    nullable: false
+    primary_key: false
+  - name: manufacture_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: expiry_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: received_qty
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: remaining_qty
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: stock_serials
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: lot_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: serial_number
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: received_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: issued_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+- name: stock_reservations
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: reserved_for_type
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: reserved_for_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: reserved_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: reserved_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: expires_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: stock_adjustments
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: system_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: counted_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: variance_qty
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: reason_code
+    data_type: varchar(50)
+    nullable: true
+    primary_key: false
+  - name: approved_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: adjusted_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: stock_transfers
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: transfer_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: source_warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: destination_warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requested_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: transfer_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: stock_transfer_items
+  schema_name: inventory
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: transfer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requested_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: shipped_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: received_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+- name: suppliers
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: tax_code
+    data_type: varchar(60)
+    nullable: true
+    primary_key: false
+  - name: contact_name
+    data_type: varchar(150)
+    nullable: true
+    primary_key: false
+  - name: contact_email
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: contact_phone
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: payment_terms
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: rating
+    data_type: numeric(5,2)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: purchase_requisitions
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requisition_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requested_by_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: request_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: required_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: purpose
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: priority
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: purchase_requisition_items
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: requisition_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: requested_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: uom
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: estimated_unit_price
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: estimated_total
+    data_type: numeric(18,2)
+    nullable: true
+    primary_key: false
+  - name: required_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: rfqs
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: rfq_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: requisition_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: created_by_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: issue_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: closing_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: delivery_location
+    data_type: varchar(255)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: supplier_quotes
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: rfq_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quote_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: quote_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: valid_until
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: delivery_days
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: supplier_quote_items
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: quote_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requisition_item_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: discount_pct
+    data_type: numeric(7,4)
+    nullable: true
+    primary_key: false
+  - name: tax_pct
+    data_type: numeric(7,4)
+    nullable: true
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: delivery_days
+    data_type: integer
+    nullable: true
+    primary_key: false
+- name: purchase_orders
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: po_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: requisition_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: order_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: expected_delivery_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: buyer_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: purchase_order_items
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: purchase_order_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: ordered_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: received_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: discount_pct
+    data_type: numeric(7,4)
+    nullable: true
+    primary_key: false
+  - name: tax_pct
+    data_type: numeric(7,4)
+    nullable: true
+    primary_key: false
+  - name: line_total
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: goods_receipts
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: receipt_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: purchase_order_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: warehouse_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: receipt_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: received_by_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: delivery_note_no
+    data_type: varchar(80)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: goods_receipt_items
+  schema_name: procurement
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: receipt_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: po_item_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: received_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: accepted_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: rejected_qty
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_cost
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: lot_number
+    data_type: varchar(80)
+    nullable: true
+    primary_key: false
+  - name: quality_status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: sales_teams
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: code
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: manager_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: sales_reps
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: sales_team_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: territory
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: commission_rate
+    data_type: numeric(7,4)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: sales_targets
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: sales_rep_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: target_month
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: revenue_target
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: order_target
+    data_type: integer
+    nullable: false
+    primary_key: false
+- name: quotations
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quotation_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: sales_rep_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: quote_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: valid_until
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: quotation_items
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: quotation_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: discount_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: line_total
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+- name: orders
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: order_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: quotation_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: sales_rep_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: order_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: requested_delivery_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: discount_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+- name: order_items
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: order_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: variant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: discount_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: line_total
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+- name: invoices
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: invoice_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: order_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: branch_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: invoice_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: due_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: invoice_items
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: invoice_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: false
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: false
+    primary_key: false
+  - name: tax_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: line_total
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+- name: payments
+  schema_name: sales
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: payment_no
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: invoice_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: customer_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: payment_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: payment_method
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: chart_of_accounts
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: parent_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: account_code
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: account_name
+    data_type: varchar(180)
+    nullable: false
+    primary_key: false
+  - name: account_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: normal_balance
+    data_type: varchar(10)
+    nullable: false
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: is_active
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: fiscal_periods
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: fiscal_year
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: period_number
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: period_name
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: start_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: end_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: journal_entries
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: entry_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: period_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: entry_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: source_type
+    data_type: varchar(40)
+    nullable: true
+    primary_key: false
+  - name: source_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: created_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: posted_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+- name: journal_entry_lines
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: journal_entry_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: account_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: cost_center_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: debit_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: credit_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: reference_no
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+- name: budgets
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: fiscal_year
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: cost_center_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: account_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: budget_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: actual_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: committed_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: vendor_bills
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: bill_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: purchase_order_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: bill_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: due_date
+    data_type: date
+    nullable: true
+    primary_key: false
+  - name: currency
+    data_type: char(3)
+    nullable: false
+    primary_key: false
+  - name: total_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: vendor_bill_lines
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: vendor_bill_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: account_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: product_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: cost_center_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: quantity
+    data_type: numeric(18,3)
+    nullable: true
+    primary_key: false
+  - name: unit_price
+    data_type: numeric(18,4)
+    nullable: true
+    primary_key: false
+  - name: tax_amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: line_total
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+- name: vendor_payments
+  schema_name: finance
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: payment_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: vendor_bill_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: supplier_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: payment_date
+    data_type: date
+    nullable: false
+    primary_key: false
+  - name: amount
+    data_type: numeric(18,2)
+    nullable: false
+    primary_key: false
+  - name: payment_method
+    data_type: varchar(30)
+    nullable: true
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: support_tickets
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: ticket_number
+    data_type: varchar(60)
+    nullable: false
+    primary_key: false
+  - name: customer_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: created_by_user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: assigned_department_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: subject
+    data_type: varchar(255)
+    nullable: false
+    primary_key: false
+  - name: description
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: priority
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: resolved_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+- name: ticket_comments
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: ticket_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: author_type
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: author_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: comment_text
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: is_internal
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: attachment_count
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: ticket_assignments
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: ticket_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: assigned_employee_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: assigned_team_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: assigned_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: assigned_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: unassigned_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: is_current
+    data_type: boolean
+    nullable: false
+    primary_key: false
+- name: ticket_status_history
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: ticket_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: old_status
+    data_type: varchar(20)
+    nullable: true
+    primary_key: false
+  - name: new_status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: changed_by_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: changed_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: duration_minutes
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: reason
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: sla_policies
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: policy_name
+    data_type: varchar(150)
+    nullable: false
+    primary_key: false
+  - name: customer_tier
+    data_type: varchar(20)
+    nullable: true
+    primary_key: false
+  - name: priority
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: first_response_minutes
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: resolution_minutes
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: escalation_minutes
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: business_hours_only
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: ticket_sla_events
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: ticket_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: sla_policy_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: event_type
+    data_type: varchar(40)
+    nullable: false
+    primary_key: false
+  - name: target_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: actual_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: elapsed_minutes
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: breached
+    data_type: boolean
+    nullable: false
+    primary_key: false
+  - name: breach_minutes
+    data_type: integer
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: knowledge_articles
+  schema_name: support
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: article_title
+    data_type: varchar(255)
+    nullable: false
+    primary_key: false
+  - name: category
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: content
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: author_employee_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: published_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: updated_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: view_count
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: helpful_count
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+- name: api_logs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: method
+    data_type: varchar(10)
+    nullable: false
+    primary_key: false
+  - name: endpoint
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: status_code
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: latency_ms
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: request_metadata
+    data_type: jsonb
+    nullable: true
+    primary_key: false
+  - name: response_metadata
+    data_type: jsonb
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: audit_logs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: action
+    data_type: varchar(50)
+    nullable: false
+    primary_key: false
+  - name: resource_type
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: resource_id
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: changed_fields
+    data_type: jsonb
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: data_access_logs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: schema_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: table_name
+    data_type: varchar(63)
+    nullable: false
+    primary_key: false
+  - name: record_id
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: access_type
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: accessed_columns
+    data_type: text[]
+    nullable: true
+    primary_key: false
+  - name: row_count
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: error_logs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: error_code
+    data_type: varchar(100)
+    nullable: true
+    primary_key: false
+  - name: message
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: stack_trace
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: endpoint
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: job_runs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: job_name
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: status
+    data_type: varchar(30)
+    nullable: false
+    primary_key: false
+  - name: started_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+  - name: completed_at
+    data_type: timestamptz
+    nullable: true
+    primary_key: false
+  - name: rows_processed
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: error_message
+    data_type: text
+    nullable: true
+    primary_key: false
+- name: system_events
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: event_type
+    data_type: varchar(100)
+    nullable: false
+    primary_key: false
+  - name: actor_user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: payload
+    data_type: jsonb
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: text2sql_query_logs
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: tenant_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: natural_language_query
+    data_type: text
+    nullable: false
+    primary_key: false
+  - name: routed_domain
+    data_type: varchar(50)
+    nullable: true
+    primary_key: false
+  - name: linked_tables
+    data_type: text[]
+    nullable: true
+    primary_key: false
+  - name: generated_sql
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: authorized_sql
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: execution_status
+    data_type: varchar(20)
+    nullable: false
+    primary_key: false
+  - name: result_row_count
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: latency_ms
+    data_type: integer
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+- name: text2sql_query_feedback
+  schema_name: audit
+  columns:
+  - name: id
+    data_type: bigint
+    nullable: false
+    primary_key: true
+  - name: query_log_id
+    data_type: bigint
+    nullable: false
+    primary_key: false
+  - name: user_id
+    data_type: bigint
+    nullable: true
+    primary_key: false
+  - name: rating
+    data_type: smallint
+    nullable: true
+    primary_key: false
+  - name: is_correct
+    data_type: boolean
+    nullable: true
+    primary_key: false
+  - name: corrected_sql
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: feedback_text
+    data_type: text
+    nullable: true
+    primary_key: false
+  - name: created_at
+    data_type: timestamptz
+    nullable: false
+    primary_key: false
+relationships:
+- source: org.locations.tenant_id
+  target: org.tenants.id
+- source: org.branches.tenant_id
+  target: org.tenants.id
+- source: org.branches.location_id
+  target: org.locations.id
+- source: org.departments.tenant_id
+  target: org.tenants.id
+- source: org.departments.branch_id
+  target: org.branches.id
+- source: org.departments.parent_department_id
+  target: org.departments.id
+- source: org.teams.tenant_id
+  target: org.tenants.id
+- source: org.teams.branch_id
+  target: org.branches.id
+- source: org.teams.department_id
+  target: org.departments.id
+- source: org.cost_centers.tenant_id
+  target: org.tenants.id
+- source: org.cost_centers.department_id
+  target: org.departments.id
+- source: hr.positions.tenant_id
+  target: org.tenants.id
+- source: hr.positions.department_id
+  target: org.departments.id
+- source: hr.employees.tenant_id
+  target: org.tenants.id
+- source: hr.employees.branch_id
+  target: org.branches.id
+- source: hr.employees.department_id
+  target: org.departments.id
+- source: hr.employees.team_id
+  target: org.teams.id
+- source: hr.employees.position_id
+  target: hr.positions.id
+- source: hr.employees.manager_id
+  target: hr.employees.id
+- source: hr.employee_job_history.employee_id
+  target: hr.employees.id
+- source: hr.employee_job_history.old_department_id
+  target: org.departments.id
+- source: hr.employee_job_history.new_department_id
+  target: org.departments.id
+- source: hr.employee_job_history.old_position_id
+  target: hr.positions.id
+- source: hr.employee_job_history.new_position_id
+  target: hr.positions.id
+- source: hr.employee_job_history.approved_by_employee_id
+  target: hr.employees.id
+- source: hr.employment_contracts.employee_id
+  target: hr.employees.id
+- source: hr.attendance_records.employee_id
+  target: hr.employees.id
+- source: hr.leave_types.tenant_id
+  target: org.tenants.id
+- source: hr.leave_balances.employee_id
+  target: hr.employees.id
+- source: hr.leave_balances.leave_type_id
+  target: hr.leave_types.id
+- source: hr.leave_requests.employee_id
+  target: hr.employees.id
+- source: hr.leave_requests.leave_type_id
+  target: hr.leave_types.id
+- source: hr.leave_requests.approved_by_employee_id
+  target: hr.employees.id
+- source: hr.payroll_runs.tenant_id
+  target: org.tenants.id
+- source: hr.payroll_runs.branch_id
+  target: org.branches.id
+- source: hr.payroll_details.payroll_run_id
+  target: hr.payroll_runs.id
+- source: hr.payroll_details.employee_id
+  target: hr.employees.id
+- source: hr.performance_reviews.employee_id
+  target: hr.employees.id
+- source: hr.performance_reviews.reviewer_employee_id
+  target: hr.employees.id
+- source: hr.employee_benefits.employee_id
+  target: hr.employees.id
+- source: hr.training_records.employee_id
+  target: hr.employees.id
+- source: iam.users.tenant_id
+  target: org.tenants.id
+- source: iam.users.branch_id
+  target: org.branches.id
+- source: iam.users.department_id
+  target: org.departments.id
+- source: iam.users.team_id
+  target: org.teams.id
+- source: iam.users.employee_id
+  target: hr.employees.id
+- source: iam.roles.tenant_id
+  target: org.tenants.id
+- source: iam.user_roles.user_id
+  target: iam.users.id
+- source: iam.user_roles.role_id
+  target: iam.roles.id
+- source: iam.role_permissions.role_id
+  target: iam.roles.id
+- source: iam.role_permissions.permission_id
+  target: iam.permissions.id
+- source: iam.user_scopes.user_id
+  target: iam.users.id
+- source: iam.user_scopes.tenant_id
+  target: org.tenants.id
+- source: iam.user_scopes.branch_id
+  target: org.branches.id
+- source: iam.user_scopes.department_id
+  target: org.departments.id
+- source: iam.user_scopes.team_id
+  target: org.teams.id
+- source: iam.table_access_policies.role_id
+  target: iam.roles.id
+- source: iam.column_access_policies.role_id
+  target: iam.roles.id
+- source: iam.login_sessions.user_id
+  target: iam.users.id
+- source: customer.customer_segments.tenant_id
+  target: org.tenants.id
+- source: customer.customer_groups.tenant_id
+  target: org.tenants.id
+- source: customer.customers.tenant_id
+  target: org.tenants.id
+- source: customer.customers.branch_id
+  target: org.branches.id
+- source: customer.customers.segment_id
+  target: customer.customer_segments.id
+- source: customer.contacts.tenant_id
+  target: org.tenants.id
+- source: customer.addresses.tenant_id
+  target: org.tenants.id
+- source: customer.customer_group_members.customer_id
+  target: customer.customers.id
+- source: customer.customer_group_members.group_id
+  target: customer.customer_groups.id
+- source: customer.customer_contacts.customer_id
+  target: customer.customers.id
+- source: customer.customer_contacts.contact_id
+  target: customer.contacts.id
+- source: customer.customer_addresses.customer_id
+  target: customer.customers.id
+- source: customer.customer_addresses.address_id
+  target: customer.addresses.id
+- source: customer.customer_owners.customer_id
+  target: customer.customers.id
+- source: customer.customer_owners.user_id
+  target: iam.users.id
+- source: product.brands.tenant_id
+  target: org.tenants.id
+- source: product.categories.tenant_id
+  target: org.tenants.id
+- source: product.categories.parent_id
+  target: product.categories.id
+- source: product.products.tenant_id
+  target: org.tenants.id
+- source: product.products.brand_id
+  target: product.brands.id
+- source: product.product_categories.product_id
+  target: product.products.id
+- source: product.product_categories.category_id
+  target: product.categories.id
+- source: product.product_variants.product_id
+  target: product.products.id
+- source: product.product_attributes.tenant_id
+  target: org.tenants.id
+- source: product.product_attribute_values.product_id
+  target: product.products.id
+- source: product.product_attribute_values.attribute_id
+  target: product.product_attributes.id
+- source: product.price_lists.tenant_id
+  target: org.tenants.id
+- source: product.price_list_items.price_list_id
+  target: product.price_lists.id
+- source: product.price_list_items.product_id
+  target: product.products.id
+- source: product.price_list_items.variant_id
+  target: product.product_variants.id
+- source: product.product_tags.product_id
+  target: product.products.id
+- source: inventory.warehouses.tenant_id
+  target: org.tenants.id
+- source: inventory.warehouses.branch_id
+  target: org.branches.id
+- source: inventory.warehouses.location_id
+  target: org.locations.id
+- source: inventory.warehouses.manager_employee_id
+  target: hr.employees.id
+- source: inventory.warehouse_zones.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.inventory_balances.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.inventory_balances.zone_id
+  target: inventory.warehouse_zones.id
+- source: inventory.inventory_balances.product_id
+  target: product.products.id
+- source: inventory.inventory_transactions.tenant_id
+  target: org.tenants.id
+- source: inventory.inventory_transactions.product_id
+  target: product.products.id
+- source: inventory.inventory_transactions.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.inventory_transactions.zone_id
+  target: inventory.warehouse_zones.id
+- source: inventory.stock_lots.product_id
+  target: product.products.id
+- source: inventory.stock_lots.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_serials.product_id
+  target: product.products.id
+- source: inventory.stock_serials.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_serials.lot_id
+  target: inventory.stock_lots.id
+- source: inventory.stock_reservations.product_id
+  target: product.products.id
+- source: inventory.stock_reservations.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_reservations.reserved_by_employee_id
+  target: hr.employees.id
+- source: inventory.stock_adjustments.warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_adjustments.product_id
+  target: product.products.id
+- source: inventory.stock_adjustments.approved_by_employee_id
+  target: hr.employees.id
+- source: inventory.stock_transfers.tenant_id
+  target: org.tenants.id
+- source: inventory.stock_transfers.source_warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_transfers.destination_warehouse_id
+  target: inventory.warehouses.id
+- source: inventory.stock_transfers.requested_by_employee_id
+  target: hr.employees.id
+- source: inventory.stock_transfer_items.transfer_id
+  target: inventory.stock_transfers.id
+- source: inventory.stock_transfer_items.product_id
+  target: product.products.id
+- source: procurement.suppliers.tenant_id
+  target: org.tenants.id
+- source: procurement.purchase_requisitions.tenant_id
+  target: org.tenants.id
+- source: procurement.purchase_requisitions.department_id
+  target: org.departments.id
+- source: procurement.purchase_requisitions.requested_by_employee_id
+  target: hr.employees.id
+- source: procurement.purchase_requisition_items.requisition_id
+  target: procurement.purchase_requisitions.id
+- source: procurement.purchase_requisition_items.product_id
+  target: product.products.id
+- source: procurement.rfqs.tenant_id
+  target: org.tenants.id
+- source: procurement.rfqs.requisition_id
+  target: procurement.purchase_requisitions.id
+- source: procurement.rfqs.created_by_employee_id
+  target: hr.employees.id
+- source: procurement.supplier_quotes.rfq_id
+  target: procurement.rfqs.id
+- source: procurement.supplier_quotes.supplier_id
+  target: procurement.suppliers.id
+- source: procurement.supplier_quote_items.quote_id
+  target: procurement.supplier_quotes.id
+- source: procurement.supplier_quote_items.requisition_item_id
+  target: procurement.purchase_requisition_items.id
+- source: procurement.supplier_quote_items.product_id
+  target: product.products.id
+- source: procurement.purchase_orders.tenant_id
+  target: org.tenants.id
+- source: procurement.purchase_orders.supplier_id
+  target: procurement.suppliers.id
+- source: procurement.purchase_orders.requisition_id
+  target: procurement.purchase_requisitions.id
+- source: procurement.purchase_orders.buyer_employee_id
+  target: hr.employees.id
+- source: procurement.purchase_order_items.purchase_order_id
+  target: procurement.purchase_orders.id
+- source: procurement.purchase_order_items.product_id
+  target: product.products.id
+- source: procurement.goods_receipts.tenant_id
+  target: org.tenants.id
+- source: procurement.goods_receipts.purchase_order_id
+  target: procurement.purchase_orders.id
+- source: procurement.goods_receipts.warehouse_id
+  target: inventory.warehouses.id
+- source: procurement.goods_receipts.supplier_id
+  target: procurement.suppliers.id
+- source: procurement.goods_receipts.received_by_employee_id
+  target: hr.employees.id
+- source: procurement.goods_receipt_items.receipt_id
+  target: procurement.goods_receipts.id
+- source: procurement.goods_receipt_items.po_item_id
+  target: procurement.purchase_order_items.id
+- source: procurement.goods_receipt_items.product_id
+  target: product.products.id
+- source: sales.sales_teams.tenant_id
+  target: org.tenants.id
+- source: sales.sales_teams.branch_id
+  target: org.branches.id
+- source: sales.sales_teams.manager_employee_id
+  target: hr.employees.id
+- source: sales.sales_reps.sales_team_id
+  target: sales.sales_teams.id
+- source: sales.sales_reps.employee_id
+  target: hr.employees.id
+- source: sales.sales_targets.sales_rep_id
+  target: sales.sales_reps.id
+- source: sales.quotations.tenant_id
+  target: org.tenants.id
+- source: sales.quotations.customer_id
+  target: customer.customers.id
+- source: sales.quotations.sales_rep_id
+  target: sales.sales_reps.id
+- source: sales.quotation_items.quotation_id
+  target: sales.quotations.id
+- source: sales.quotation_items.product_id
+  target: product.products.id
+- source: sales.orders.tenant_id
+  target: org.tenants.id
+- source: sales.orders.quotation_id
+  target: sales.quotations.id
+- source: sales.orders.customer_id
+  target: customer.customers.id
+- source: sales.orders.sales_rep_id
+  target: sales.sales_reps.id
+- source: sales.orders.branch_id
+  target: org.branches.id
+- source: sales.order_items.order_id
+  target: sales.orders.id
+- source: sales.order_items.product_id
+  target: product.products.id
+- source: sales.order_items.variant_id
+  target: product.product_variants.id
+- source: sales.invoices.tenant_id
+  target: org.tenants.id
+- source: sales.invoices.order_id
+  target: sales.orders.id
+- source: sales.invoices.customer_id
+  target: customer.customers.id
+- source: sales.invoices.branch_id
+  target: org.branches.id
+- source: sales.invoice_items.invoice_id
+  target: sales.invoices.id
+- source: sales.invoice_items.product_id
+  target: product.products.id
+- source: sales.payments.tenant_id
+  target: org.tenants.id
+- source: sales.payments.invoice_id
+  target: sales.invoices.id
+- source: sales.payments.customer_id
+  target: customer.customers.id
+- source: finance.chart_of_accounts.tenant_id
+  target: org.tenants.id
+- source: finance.chart_of_accounts.parent_id
+  target: finance.chart_of_accounts.id
+- source: finance.fiscal_periods.tenant_id
+  target: org.tenants.id
+- source: finance.journal_entries.tenant_id
+  target: org.tenants.id
+- source: finance.journal_entries.period_id
+  target: finance.fiscal_periods.id
+- source: finance.journal_entries.created_by_employee_id
+  target: hr.employees.id
+- source: finance.journal_entry_lines.journal_entry_id
+  target: finance.journal_entries.id
+- source: finance.journal_entry_lines.account_id
+  target: finance.chart_of_accounts.id
+- source: finance.journal_entry_lines.cost_center_id
+  target: org.cost_centers.id
+- source: finance.journal_entry_lines.department_id
+  target: org.departments.id
+- source: finance.budgets.tenant_id
+  target: org.tenants.id
+- source: finance.budgets.department_id
+  target: org.departments.id
+- source: finance.budgets.cost_center_id
+  target: org.cost_centers.id
+- source: finance.budgets.account_id
+  target: finance.chart_of_accounts.id
+- source: finance.vendor_bills.tenant_id
+  target: org.tenants.id
+- source: finance.vendor_bills.supplier_id
+  target: procurement.suppliers.id
+- source: finance.vendor_bills.purchase_order_id
+  target: procurement.purchase_orders.id
+- source: finance.vendor_bill_lines.vendor_bill_id
+  target: finance.vendor_bills.id
+- source: finance.vendor_bill_lines.account_id
+  target: finance.chart_of_accounts.id
+- source: finance.vendor_bill_lines.product_id
+  target: product.products.id
+- source: finance.vendor_bill_lines.cost_center_id
+  target: org.cost_centers.id
+- source: finance.vendor_payments.tenant_id
+  target: org.tenants.id
+- source: finance.vendor_payments.vendor_bill_id
+  target: finance.vendor_bills.id
+- source: finance.vendor_payments.supplier_id
+  target: procurement.suppliers.id
+- source: support.support_tickets.tenant_id
+  target: org.tenants.id
+- source: support.support_tickets.customer_id
+  target: customer.customers.id
+- source: support.support_tickets.created_by_user_id
+  target: iam.users.id
+- source: support.support_tickets.assigned_department_id
+  target: org.departments.id
+- source: support.ticket_comments.ticket_id
+  target: support.support_tickets.id
+- source: support.ticket_assignments.ticket_id
+  target: support.support_tickets.id
+- source: support.ticket_assignments.assigned_employee_id
+  target: hr.employees.id
+- source: support.ticket_assignments.assigned_team_id
+  target: org.teams.id
+- source: support.ticket_assignments.assigned_by_employee_id
+  target: hr.employees.id
+- source: support.ticket_status_history.ticket_id
+  target: support.support_tickets.id
+- source: support.ticket_status_history.changed_by_employee_id
+  target: hr.employees.id
+- source: support.sla_policies.tenant_id
+  target: org.tenants.id
+- source: support.ticket_sla_events.ticket_id
+  target: support.support_tickets.id
+- source: support.ticket_sla_events.sla_policy_id
+  target: support.sla_policies.id
+- source: support.knowledge_articles.tenant_id
+  target: org.tenants.id
+- source: support.knowledge_articles.author_employee_id
+  target: hr.employees.id
+- source: audit.api_logs.tenant_id
+  target: org.tenants.id
+- source: audit.api_logs.user_id
+  target: iam.users.id
+- source: audit.audit_logs.tenant_id
+  target: org.tenants.id
+- source: audit.audit_logs.user_id
+  target: iam.users.id
+- source: audit.data_access_logs.tenant_id
+  target: org.tenants.id
+- source: audit.data_access_logs.user_id
+  target: iam.users.id
+- source: audit.error_logs.tenant_id
+  target: org.tenants.id
+- source: audit.error_logs.user_id
+  target: iam.users.id
+- source: audit.job_runs.tenant_id
+  target: org.tenants.id
+- source: audit.system_events.tenant_id
+  target: org.tenants.id
+- source: audit.system_events.actor_user_id
+  target: iam.users.id
+- source: audit.text2sql_query_logs.tenant_id
+  target: org.tenants.id
+- source: audit.text2sql_query_logs.user_id
+  target: iam.users.id
+- source: audit.text2sql_query_feedback.query_log_id
+  target: audit.text2sql_query_logs.id
+- source: audit.text2sql_query_feedback.user_id
+  target: iam.users.id
+- source: org.branches.manager_employee_id
+  target: hr.employees.id
+- source: org.departments.manager_employee_id
+  target: hr.employees.id
+- source: org.cost_centers.manager_employee_id
+  target: hr.employees.id
+- source: inventory.stock_lots.supplier_id
+  target: procurement.suppliers.id

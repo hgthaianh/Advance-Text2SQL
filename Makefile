@@ -1,4 +1,4 @@
-.PHONY: install run test up down init-db
+.PHONY: install run test up down init-db provision
 install:
 	python -m pip install -e ".[dev]"
 run:
@@ -10,4 +10,5 @@ up:
 down:
 	docker compose down
 init-db:
-	python -m scripts.init_db
+	python -m scripts.init_db --reset
+provision: init-db

@@ -1,18 +1,31 @@
 from fastapi import APIRouter
 
-from src.shared.models import QueryRequest, QueryResult
+from src.api.dependencies import AuthenticatedUser
+from src.api.errors import error_response
+from src.pipeline.orchestrator import Text2SQLPipeline
+from src.shared.models import ErrorResponse, PublicQueryResult, QueryRequest
 
 router = APIRouter(tags=["query"])
+pipeline = Text2SQLPipeline()
 
 
-@router.post("/query", response_model=QueryResult)
-def query(request: QueryRequest) -> QueryResult:
-    # TODO: authenticate -> NLP -> schema linking -> IR -> permissions
-    # -> planning -> SQL validation -> execution -> formatting.
-    return QueryResult(
-        columns=["question"],
-        rows=[{"question": request.question}],
-        row_count=1,
-        is_mock=True,
-        message="Mock response; NLP and SQL execution are not implemented.",
+@router.post("/query", response_model=PublicQueryResult, responses={
+    403: {'model': ErrorResponse}, 422: {'model': ErrorResponse}, 503: {'model': ErrorResponse},
+})
+def query(request: QueryRequest, user: AuthenticatedUser) -> PublicQueryResult:
+    result = pipeline.execute(request.question, user)
+    if not result.success:
+        return error_response(result)
+    # This is a strict backend boundary: no role calling /query receives SQL,
+    # bound parameters, execution-plan data, or authorization internals.
+    # Admin-only inspection uses the separately authorized observability API.
+    return PublicQueryResult(
+        success=result.success,
+        query_id=result.query_id,
+        columns=result.columns,
+        rows=result.rows,
+        row_count=result.row_count,
+        truncated=result.truncated,
+        scalar=result.scalar,
+        natural_language_response=result.natural_language_response,
     )

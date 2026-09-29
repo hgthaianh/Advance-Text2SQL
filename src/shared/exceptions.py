@@ -8,3 +8,76 @@ class QueryValidationError(Text2SQLError):
 
 class PermissionDeniedError(Text2SQLError):
     pass
+
+
+class AuthenticationError(Text2SQLError):
+    """Caller authentication failed or identity could not be verified."""
+
+
+class ServiceUnavailableError(Text2SQLError):
+    """A required backing service is unavailable without exposing its details."""
+
+
+
+class UnsupportedIntentError(QueryValidationError):
+    pass
+
+
+class InvalidTableError(QueryValidationError, ValueError):
+    pass
+
+
+class InvalidColumnError(QueryValidationError, ValueError):
+    pass
+
+
+class UnsupportedOperatorError(QueryValidationError):
+    pass
+
+
+class UnsupportedAggregationError(QueryValidationError):
+    pass
+
+
+class MissingAggregationColumnError(QueryValidationError):
+    pass
+
+
+class JoinPathNotFoundError(QueryValidationError):
+    pass
+
+
+class AmbiguousJoinPathError(QueryValidationError):
+    """A shortest-path search found multiple equally valid FK paths."""
+
+    def __init__(self, message: str, *, candidate_paths: list[list[str]] | None = None) -> None:
+        super().__init__(message)
+        self.candidate_paths = candidate_paths or []
+
+
+class MalformedQueryIRError(QueryValidationError):
+    pass
+
+
+class FanoutRiskError(QueryValidationError):
+    """An aggregate could be duplicated by a one-to-many join."""
+
+
+class UnsupportedQueryError(QueryValidationError):
+    """The deterministic pipeline cannot support the requested semantics."""
+
+
+class MissingEntityError(QueryValidationError):
+    """A query requires a value that was not present in the question."""
+
+
+class AmbiguousQueryError(QueryValidationError):
+    """Several schema interpretations remain equally plausible."""
+
+
+class SQLValidationError(QueryValidationError):
+    """A compiled statement is not safe for the read-only execution boundary."""
+
+
+class QueryExecutionError(Text2SQLError):
+    """Database execution failed without exposing internal connection details."""

@@ -1,0 +1,10 @@
+version: 1
+tables:
+  public.children:
+    aliases: [child records]
+  public.parents:
+    aliases: [parent records]
+columns:
+  public.children.id:
+    aliases: [child record ids]
+concepts: {}
