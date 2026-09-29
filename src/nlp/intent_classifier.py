@@ -68,7 +68,7 @@ class RuleBasedIntentClassifier(IntentClassifier):
             # 3. TOP_N (ranking, highest, lowest, best selling)
             top_n_patterns = [
                 r"\btop\b", r"ban chay nhat", r"cao nhat", r"nhieu nhat",
-                r"thap nhat", r"it nhat", r"xep hang", r"hang dau", r"lon nhat", r"nho nhat"
+                r"thap nhat", r"it nhat(?!\s+\d)", r"xep hang", r"hang dau", r"lon nhat", r"nho nhat"
             ]
             for pat in top_n_patterns:
                 if re.search(pat, accent_stripped):

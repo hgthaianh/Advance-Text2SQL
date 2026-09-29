@@ -32,6 +32,16 @@ def test_group_having_and_direct_join_are_constructed_from_explicit_semantics():
     assert compiled.sql.count(' JOIN ') == 1
 
 
+def test_at_least_threshold_builds_having_without_top_k_limit():
+    registry, query = _build('doanh thu theo chi nhanh it nhat 300')
+
+    assert query.top_k is None
+    assert query.having[0].operator == FilterOperator.GTE
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'HAVING sum(' in compiled.sql
+    assert 'LIMIT' not in compiled.sql
+
+
 def test_multiple_catalog_code_filters_add_their_fk_owner_tables():
     registry, query = _build('doanh thu khach hang ma khach hang C1 tai ma chi nhanh B1')
 
