@@ -242,6 +242,25 @@ def test_top_dimension_without_measure_is_ambiguous():
     raise AssertionError('Expected an ambiguous ranking measure')
 
 
+def test_lookup_and_count_do_not_add_an_unrequested_metric_fact():
+    _, adjustment = _build('Cho toi xem dieu chinh ton kho')
+    _, supplier = _build('nha cung cap co diem danh gia cao')
+    _, transfers = _build('co bao nhieu dieu chuyen kho')
+
+    assert 'inventory.inventory_balances' not in adjustment.tables
+    assert 'hr.performance_reviews' not in supplier.tables
+    assert 'inventory.stock_transfer_items' not in transfers.tables
+
+
+def test_lookup_grouping_word_does_not_create_a_time_series():
+    registry, contract = _build('hop dong lao dong theo ngay ky')
+    _, leave = _build('don nghi phep theo ngay bat dau')
+
+    assert contract.time_group is None
+    assert leave.time_group is None
+    assert BasicQueryHandler(registry).handle(contract).sql
+
+
 def test_explicit_absence_language_builds_a_left_anti_join():
     registry, query = _build('liet ke khach hang chua co don hang')
 

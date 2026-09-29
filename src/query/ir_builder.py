@@ -108,7 +108,7 @@ class QueryIRBuilder:
             intent = Intent.COUNT
         if intent in {Intent.TREND, Intent.COMPARISON, Intent.AGGREGATE}:
             raise UnsupportedQueryError(f'Intent is not supported by the deterministic builder: {intent}')
-        if semantic_value:
+        if semantic_value and intent in {Intent.SUM, Intent.AVG, Intent.TOP_N}:
             owner = semantic_value.rsplit('.', 1)[0]
             if owner not in tables:
                 tables.append(owner)
@@ -168,7 +168,11 @@ class QueryIRBuilder:
         group_by: list[str] = []
         order_by: list[OrderBy] = []
         top_k = None
-        time_group = self._time_group(preprocessed, tables, anchor=aggregate_owner)
+        time_group = (
+            self._time_group(preprocessed, tables, anchor=aggregate_owner)
+            if intent in {Intent.COUNT, Intent.SUM, Intent.AVG}
+            else None
+        )
         if intent == Intent.COUNT and time_group:
             count_column = self._count_column(tables)
             select = [SelectItem(column=count_column, aggregation=Aggregation.COUNT, distinct=True)]
