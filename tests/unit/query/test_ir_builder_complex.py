@@ -261,6 +261,32 @@ def test_lookup_grouping_word_does_not_create_a_time_series():
     assert BasicQueryHandler(registry).handle(contract).sql
 
 
+def test_explicit_business_relationships_anchor_the_fact_table():
+    registry, ordered_items = _build('Tong so item dat mua theo san pham')
+    _, comments = _build('Co bao nhieu comment cua ticket TKT000123?')
+    _, attendance = _build('Liet ke nhan vien di lam ngay 2026-09-15')
+
+    assert ordered_items.select[-1].aggregation == Aggregation.SUM
+    assert ordered_items.select[-1].column == 'procurement.purchase_order_items.ordered_qty'
+    assert 'product.products.name' in ordered_items.group_by
+    assert 'support.ticket_comments' in comments.tables
+    assert 'COUNT(' in BasicQueryHandler(registry).handle(comments).sql.upper()
+    assert attendance.filters[0].column == 'hr.attendance_records.work_date'
+    assert BasicQueryHandler(registry).handle(attendance).sql
+
+
+def test_implicit_grouped_ticket_and_budget_queries_choose_aggregates():
+    registry, tickets = _build('Ticket theo phan hang khach hang')
+    _, budget = _build('Ngan sach theo phong ban cua tenant 1')
+
+    assert tickets.select[-1].aggregation == Aggregation.COUNT
+    assert tickets.group_by == ['customer.customers.customer_tier']
+    assert budget.select[-1].aggregation == Aggregation.SUM
+    assert budget.select[-1].column == 'finance.budgets.budget_amount'
+    assert budget.group_by == ['org.departments.name']
+    assert BasicQueryHandler(registry).handle(tickets).sql
+
+
 def test_explicit_absence_language_builds_a_left_anti_join():
     registry, query = _build('liet ke khach hang chua co don hang')
 

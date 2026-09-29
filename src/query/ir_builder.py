@@ -43,6 +43,8 @@ class QueryIRBuilder:
             return employee_manager
         intent = _AGGREGATE_INTENTS.get(preprocessed.intent_result.intent, preprocessed.intent_result.intent)
         tables = self._tables(schema_links)
+        semantic_tables = self._semantic_tables(preprocessed)
+        tables = [*semantic_tables, *[table for table in tables if table not in semantic_tables]]
         if (
             re.search(r'\b(?:nhan vien|employees?)\b', preprocessed.accent_stripped_text)
             and any(entity.entity_type in {'department_name', 'department_code'} for entity in entities)
@@ -62,10 +64,12 @@ class QueryIRBuilder:
             tables = [table for table in tables if table not in ambiguous_tables]
         if intent == Intent.UNKNOWN and semantic_value and 'theo' in preprocessed.accent_stripped_text:
             intent = Intent.SUM
+        elif intent == Intent.UNKNOWN and re.search(r'\bticket\s+theo\b', preprocessed.accent_stripped_text):
+            intent = Intent.COUNT
         elif intent == Intent.UNKNOWN and re.search(r'^\s*so\s+', preprocessed.accent_stripped_text):
             intent = Intent.COUNT
         if intent == Intent.COUNT and re.search(
-            r'\b(?:so luong|tong)\s+(?:hang da nhan|dieu chuyen kho)\b',
+            r'\b(?:so luong|tong(?: so)?)\s+(?:item dat mua|hang da nhan|dieu chuyen kho)\b',
             preprocessed.accent_stripped_text,
         ):
             intent = Intent.SUM
@@ -157,7 +161,7 @@ class QueryIRBuilder:
         filters.extend(absence_filters)
         if preprocessed.date_range:
             anchor = next((item.column.rsplit('.', 1)[0] for item in select if isinstance(item, SelectItem) and item.column), None)
-            date_column, date_owner = self._date_column(tables, anchor)
+            date_column, date_owner = self._date_column(preprocessed, tables, anchor)
             if date_owner not in tables:
                 tables.append(date_owner)
             filters.extend((
@@ -232,6 +236,7 @@ class QueryIRBuilder:
             (r'\bthanh toan\b', 'sales.payments.amount'),
             (r'\bphat sinh but toan\b', 'finance.journal_entry_lines.debit_amount'),
             (r'\bchi phi\b', 'finance.journal_entry_lines.debit_amount'),
+            (r'\bngan sach\b', 'finance.budgets.budget_amount'),
             (r'\b(?:doanh thu|doanh so)\b.*\b(?:thuong hieu|danh muc|san pham)\b', 'sales.order_items.line_total'),
             (r'\b(?:doanh thu|doanh so)\b', 'sales.orders.total_amount'),
         )
@@ -271,7 +276,7 @@ class QueryIRBuilder:
         match = re.search(r'\b(?:theo|tung)\s+(ngay|thang|nam)\b', text)
         if not match:
             return None
-        date_column, owner = self._date_column(tables, anchor)
+        date_column, owner = self._date_column(preprocessed, tables, anchor)
         if owner not in tables:
             tables.append(owner)
         return TimeGroup(column=date_column, granularity={
@@ -450,7 +455,19 @@ class QueryIRBuilder:
                     return key
         raise MissingEntityError('No safe display column is available')
 
-    def _date_column(self, tables: list[str], anchor_table: str | None) -> tuple[str, str]:
+    def _date_column(self, preprocessed: PreprocessedQuery, tables: list[str],
+                     anchor_table: str | None) -> tuple[str, str]:
+        text = preprocessed.accent_stripped_text
+        contextual = (
+            (r'\bdi lam\b', 'hr.attendance_records.work_date'),
+            (r'\bgiao dich kho\b', 'inventory.inventory_transactions.transaction_at'),
+            (r'\bthanh toan\b', 'sales.payments.payment_date'),
+            (r'\b(?:purchase order|\bpo\b)', 'procurement.purchase_orders.order_date'),
+        )
+        for pattern, column in contextual:
+            owner = column.rsplit('.', 1)[0]
+            if re.search(pattern, text) and column in self.registry.columns and owner in tables:
+                return column, owner
         ordered_tables = ([anchor_table] if anchor_table in tables else []) + [t for t in tables if t != anchor_table]
         direct_neighbors = []
         if anchor_table:
@@ -464,6 +481,24 @@ class QueryIRBuilder:
             if anchor_table and f'{anchor_table}.{name}' in candidates:
                 return f'{anchor_table}.{name}', anchor_table
         raise MissingEntityError('Missing date column')
+
+    def _semantic_tables(self, preprocessed: PreprocessedQuery) -> list[str]:
+        """Add fact tables stated by ordinary relationship wording."""
+        text = preprocessed.accent_stripped_text
+        rules = (
+            (r'\bnhan vien\b.*\bdi lam\b', ('hr.attendance_records', 'hr.employees')),
+            (r'\bhop dong\b.*\bcon hieu luc\b', ('hr.employment_contracts', 'hr.employees')),
+            (r'\blich su trang thai\b.*\bticket\b', ('support.ticket_status_history', 'support.support_tickets')),
+            (r'\bcomment\b.*\bticket\b|\bticket\b.*\bcomment\b', ('support.ticket_comments', 'support.support_tickets')),
+            (r'\bgia\b.*\bbien the\b.*\bsan pham\b', ('product.price_list_items', 'product.product_variants', 'product.products')),
+            (r'\bbien the\b.*\bsan pham\b', ('product.product_variants', 'product.products')),
+            (r'\bitem dat mua\b', ('procurement.purchase_order_items', 'product.products')),
+        )
+        tables: list[str] = []
+        for pattern, candidates in rules:
+            if re.search(pattern, text):
+                tables.extend(table for table in candidates if table in self.registry.tables)
+        return list(dict.fromkeys(tables))
 
     def _group_column(self, preprocessed: PreprocessedQuery, tables: list[str]) -> str:
         return self._group_columns(preprocessed, tables)[0]
@@ -492,6 +527,8 @@ class QueryIRBuilder:
         # In “X theo Y”, Y is the grouping dimension. Earlier mentions are
         # filters or the aggregate's business subject, not a tie-breaker.
         grouping_text = text.split(' theo ', 1)[1] if ' theo ' in text else text
+        if re.search(r'\bphan hang\s+khach hang\b', grouping_text):
+            return ['customer.customers.customer_tier']
         dimensions = (
             ('sales representative', 'hr.employees.full_name'),
             ('phan khuc', 'customer.customer_segments.name'),
