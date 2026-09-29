@@ -15,13 +15,16 @@ from sqlalchemy import Engine, text
 
 
 class PipelineEvent(BaseModel):
-    """A request summary intentionally excluding question, user ID, SQL and values."""
+    """A request summary excluding question, identity, values, and secrets."""
 
     query_id: str
     outcome: str
     stage: str
     duration_ms: float = Field(ge=0)
     error_code: str | None = None
+    sql: str | None = None
+    row_count: int | None = Field(default=None, ge=0)
+    truncated: bool | None = None
     # A bounded map of pipeline stage names to elapsed milliseconds.  It never
     # contains request text, identities, SQL, or bound values.
     stage_durations_ms: dict[str, float] = Field(default_factory=dict)
@@ -41,11 +44,13 @@ class LoggingPipelineObserver(PipelineObserver):
         self.logger = logger or logging.getLogger('text2sql.pipeline')
 
     def record(self, event: PipelineEvent) -> None:
-        self.logger.info('pipeline_event=%s', json.dumps(event.model_dump(), separators=(',', ':'), sort_keys=True))
+        # SQL persistence is admin-only; ordinary application logs stay redacted.
+        safe_event = event.model_copy(update={'sql': None})
+        self.logger.info('pipeline_event=%s', json.dumps(safe_event.model_dump(), separators=(',', ':'), sort_keys=True))
 
 
 class PersistedPipelineObserver(PipelineObserver):
-    """Persist only safe terminal request metadata and expose aggregate trends.
+    """Persist terminal metadata and admin-only SQL trace information.
 
     The table is deliberately created outside the business schema migrations so
     small deterministic test databases can use it too.  PostgreSQL uses the
@@ -79,20 +84,41 @@ class PersistedPipelineObserver(PipelineObserver):
                     stage VARCHAR(64) NOT NULL,
                     duration_ms DOUBLE PRECISION NOT NULL,
                     error_code VARCHAR(64),
+                    sql_text TEXT,
+                    row_count INTEGER,
+                    truncated BOOLEAN,
                     stage_durations_json TEXT NOT NULL
                 )'''
             )
+            self._ensure_columns(connection)
         self._table_ready = True
 
+    def _ensure_columns(self, connection) -> None:
+        """Upgrade the lightweight audit table without a separate migration system."""
+        expected = {
+            'sql_text': 'TEXT',
+            'row_count': 'INTEGER',
+            'truncated': 'BOOLEAN',
+        }
+        if self.engine.dialect.name == 'sqlite':
+            existing = {row[1] for row in connection.exec_driver_sql(f'PRAGMA table_info({self._table})')}
+            for name, type_ in expected.items():
+                if name not in existing:
+                    connection.exec_driver_sql(f'ALTER TABLE {self._table} ADD COLUMN {name} {type_}')
+            return
+        for name, type_ in expected.items():
+            connection.exec_driver_sql(f'ALTER TABLE {self._table} ADD COLUMN IF NOT EXISTS {name} {type_}')
+
     def record(self, event: PipelineEvent) -> None:
-        # Explicit column selection is the redaction boundary.  Do not add
-        # question, actor, SQL, parameters, headers, exception detail, etc.
+        # Explicit column selection is the redaction boundary. SQL is retained
+        # exclusively for admin trace inspection; never retain question, actor,
+        # parameters, headers, secrets, or exception detail.
         self._ensure_table()
         with self.engine.begin() as connection:
             connection.execute(text(
                 f'''INSERT INTO {self._table}
-                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, stage_durations_json)
-                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :stage_durations_json)'''
+                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, sql_text, row_count, truncated, stage_durations_json)
+                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :sql_text, :row_count, :truncated, :stage_durations_json)'''
             ), {
                 'query_id': event.query_id,
                 'recorded_at': datetime.now(timezone.utc),
@@ -100,6 +126,9 @@ class PersistedPipelineObserver(PipelineObserver):
                 'stage': event.stage,
                 'duration_ms': event.duration_ms,
                 'error_code': event.error_code,
+                'sql_text': event.sql,
+                'row_count': event.row_count,
+                'truncated': event.truncated,
                 'stage_durations_json': json.dumps(event.stage_durations_ms, separators=(',', ':'), sort_keys=True),
             })
             # The dashboard is operational history, not an immutable event
@@ -145,6 +174,40 @@ class PersistedPipelineObserver(PipelineObserver):
                 for stage, values in sorted(stage_values.items())
             },
             'latency_trend': latency_trend[-100:],
+        }
+
+    def history(self, *, query_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        """Return bounded admin trace records; caller authorization lives at the route."""
+        self._ensure_table()
+        limit = max(1, min(limit, 100))
+        statement = (
+            f'''SELECT query_id, recorded_at, outcome, stage, duration_ms, error_code,
+                       sql_text, row_count, truncated, stage_durations_json
+                FROM {self._table}'''
+        )
+        params: dict[str, Any] = {'limit': limit}
+        if query_id:
+            statement += ' WHERE query_id = :query_id'
+            params['query_id'] = query_id
+        statement += ' ORDER BY recorded_at DESC, query_id DESC LIMIT :limit'
+        with self.engine.connect() as connection:
+            records = connection.execute(text(statement), params).mappings().all()
+        return [self._history_record(record) for record in records]
+
+    @staticmethod
+    def _history_record(record: Any) -> dict[str, Any]:
+        recorded_at = record['recorded_at']
+        return {
+            'query_id': record['query_id'],
+            'recorded_at': recorded_at.isoformat() if hasattr(recorded_at, 'isoformat') else str(recorded_at),
+            'outcome': record['outcome'],
+            'stage': record['stage'],
+            'duration_ms': float(record['duration_ms']),
+            'error_code': record['error_code'],
+            'sql': record['sql_text'],
+            'row_count': record['row_count'],
+            'truncated': record['truncated'],
+            'stage_durations_ms': json.loads(record['stage_durations_json']),
         }
 
 

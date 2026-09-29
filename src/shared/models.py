@@ -109,6 +109,25 @@ class QueryResult(BaseModel):
     error_code: str | None = None
     message: str | None = None
     ambiguity: JoinAmbiguity | None = None
+    natural_language_response: str | None = None
+
+
+class PublicQueryResult(BaseModel):
+    """The safe business result returned by ``POST /query``.
+
+    SQL text, bound values, execution internals, and authorization data never
+    cross this API boundary.  Administrators inspect retained SQL through the
+    separately authorized observability endpoints.
+    """
+
+    success: bool = True
+    query_id: str | None = None
+    columns: list[str] = Field(default_factory=list)
+    rows: list[dict[str, Any]] = Field(default_factory=list)
+    row_count: int = Field(default=0, ge=0)
+    truncated: bool = False
+    scalar: Any | None = None
+    natural_language_response: str | None = None
 
 
 class QueryRequest(BaseModel):
