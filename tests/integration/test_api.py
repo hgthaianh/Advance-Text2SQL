@@ -49,6 +49,30 @@ def test_query_rejects_blank_question():
         app.dependency_overrides.pop(get_authentication_provider, None)
 
 
+def test_query_success_does_not_expose_sql_or_params(monkeypatch):
+    app.dependency_overrides[get_authentication_provider] = lambda: MockAuthenticationProvider(
+        AuthenticatedIdentity(user_id='demo', role='viewer', tenant_id='T1')
+    )
+    monkeypatch.setattr(
+        'src.api.routes.query.pipeline.execute',
+        lambda question, user: QueryResult(
+            success=True,
+            scalar=1,
+            sql='SELECT secret FROM private_table WHERE tenant_id = :tenant_id',
+            params={'tenant_id': 'T1'},
+        ),
+    )
+    try:
+        with TestClient(app) as client:
+            response = client.post('/query', json={'question': 'count records'})
+        assert response.status_code == 200
+        assert 'sql' not in response.json()
+        assert 'params' not in response.json()
+        assert 'is_mock' not in response.json()
+    finally:
+        app.dependency_overrides.pop(get_authentication_provider, None)
+
+
 def test_query_rejects_request_body_identity_and_requires_auth_context():
     app.dependency_overrides.pop(get_authentication_provider, None)
     with TestClient(app) as client:

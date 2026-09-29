@@ -111,6 +111,14 @@ class QueryResult(BaseModel):
     ambiguity: JoinAmbiguity | None = None
 
 
+class QueryResponse(QueryResult):
+    """Public success response without internal SQL or bind parameters."""
+
+    sql: str | None = Field(default=None, exclude=True)
+    params: dict[str, Any] = Field(default_factory=dict, exclude=True)
+    is_mock: bool = Field(default=False, exclude=True)
+
+
 class QueryRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 

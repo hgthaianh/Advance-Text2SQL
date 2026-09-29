@@ -115,13 +115,16 @@ def _ratio(matches: list[bool]) -> dict:
 def _filter_evidence(expected_filters: list[str], sql: str | None, params: dict) -> tuple[bool, bool]:
     if not expected_filters:
         return True, True
-    sql_text = (sql or '').lower()
+    # PostgreSQL renders quoted identifiers (``."code"``); normalize those
+    # quotes before matching logical QA field names against compiled SQL.
+    sql_text = (sql or '').lower().replace('"', '')
     parameter_values = [str(value).lower() for value in params.values()]
     column_aliases = {
         'employee_status': 'employment_status', 'department': 'departments',
         'date': '_date', 'tenant_id': 'tenant_id', 'customer_tier': 'customer_tier',
         'ticket_code': 'ticket_number', 'employee_code': 'employee_code',
-        'product_code': '.code', 'customer_code': '.code', 'status': 'status',
+        'order_code': 'order_no', 'product_code': '.code', 'customer_code': '.code',
+        'transaction_date': 'transaction_at', 'po_date': 'order_date', 'status': 'status',
     }
     canonical_values = {'hr': ('nhân sự', 'nhan su'), 'sales': ('kinh doanh',)}
     columns_ok = True
