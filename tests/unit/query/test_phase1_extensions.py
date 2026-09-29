@@ -237,7 +237,7 @@ def test_ambiguous_join_error_message_contains_candidate_paths():
         graph.find_relationship_path('public.a', 'public.c')
 
     msg = str(exc_info.value)
-    assert 'Multiple shortest FK paths between' in msg
+    assert 'Multiple lowest-cost FK paths between' in msg
     assert 'public.a' in msg
     assert 'public.c' in msg
     # Confirms candidate paths details are exposed
