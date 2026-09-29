@@ -7,6 +7,7 @@ from src.nlp.date_parser import DateParser
 from src.nlp.intent_classifier import RuleBasedIntentClassifier
 from src.nlp.normalizer import Normalizer, strip_accents
 from src.nlp.number_parser import NumberParser
+from src.nlp.semantic_normalizer import SemanticNormalizer
 from src.shared.models import PreprocessedQuery
 
 # Common Vietnamese business/Text2SQL typos and abbreviations dictionary
@@ -71,28 +72,19 @@ class NLPRobustnessProcessor:
         date_parser: DateParser | None = None,
         intent_classifier: RuleBasedIntentClassifier | None = None,
         number_parser: NumberParser | None = None,
+        semantic_normalizer: SemanticNormalizer | None = None,
     ) -> None:
         self.normalizer = normalizer or Normalizer()
         self.date_parser = date_parser or DateParser()
         self.intent_classifier = intent_classifier or RuleBasedIntentClassifier(self.normalizer)
         self.number_parser = number_parser or NumberParser()
+        self.semantic_normalizer = semantic_normalizer or SemanticNormalizer(self.normalizer)
 
     def correct_typos_and_abbreviations(self, text: str) -> str:
         """Replace common typos and abbreviations deterministically."""
-        norm = self.normalizer.normalize(text)
-        accentless = norm.accent_stripped_text
-        words = accentless.split()
-
-        corrected_words: list[str] = []
-        for word in words:
-            if word in COMMON_TYPOS_AND_ABBREVIATIONS:
-                corrected_words.append(COMMON_TYPOS_AND_ABBREVIATIONS[word])
-            else:
-                corrected_words.append(word)
-
-        corrected_text = " ".join(corrected_words)
+        corrected_text = self.semantic_normalizer.normalize(text)
         for typo, correction in COMMON_TYPOS_AND_ABBREVIATIONS.items():
-            if " " in typo and typo in accentless:
+            if " " in typo and typo in corrected_text:
                 corrected_text = corrected_text.replace(typo, correction)
 
         return corrected_text

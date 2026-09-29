@@ -85,7 +85,7 @@ def _role_from_code(code: str) -> str:
     if prefix == 'admin':
         return 'admin'
     if prefix in {'hr', 'finance', 'sales', 'support'}:
-        return 'department_manager'
+        return f'{prefix}_manager'
     return 'employee'
 
 

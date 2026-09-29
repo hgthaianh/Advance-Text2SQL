@@ -41,9 +41,44 @@ def test_finance_context_does_not_turn_accounting_into_a_department_filter():
     assert 'department_name' not in {item.entity_type for item in values}
 
 
+def test_erp_enum_values_are_typed_not_dropped():
+    from src.nlp.entity_extractor import DeterministicEntityExtractor
+
+    extractor = DeterministicEntityExtractor()
+    values = extractor.extract('don hang CONFIRMED, hoa don OVERDUE, khach hang GOLD, ticket URGENT')
+
+    assert {(item.entity_type, item.normalized_value) for item in values} >= {
+        ('status', 'CONFIRMED'), ('status', 'OVERDUE'),
+        ('customer_tier', 'GOLD'), ('priority', 'URGENT'),
+    }
+
+
+def test_prefixed_business_codes_are_grounded_without_a_marker():
+    from src.nlp.entity_extractor import DeterministicEntityExtractor
+
+    extractor = DeterministicEntityExtractor()
+    values = extractor.extract('EMP000120 SO000123 TKT000123 CUST000120 PROD000100')
+
+    assert {(item.entity_type, item.normalized_value) for item in values} == {
+        ('employee_code', 'EMP000120'), ('order_code', 'SO000123'),
+        ('ticket_code', 'TKT000123'), ('customer_code', 'CUST000120'),
+        ('product_code', 'PROD000100'),
+    }
+
+
 def test_catalog_rejects_alias_shared_by_different_business_values():
     with pytest.raises(ValueError, match='Ambiguous catalog alias'):
         EntityCatalog((
             CatalogEntry('branch_name', 'North', ('north',)),
             CatalogEntry('department_name', 'North', ('north',)),
         ))
+
+
+def test_tenant_id_is_grounded_but_sales_representative_is_not_a_department_value():
+    extractor = DeterministicEntityExtractor()
+
+    tenant = extractor.extract('co bao nhieu nhan vien cua tenant 2')
+    representative = extractor.extract('doanh thu theo sales representative')
+
+    assert ('tenant_id', '2') in {(item.entity_type, item.normalized_value) for item in tenant}
+    assert 'department_name' not in {item.entity_type for item in representative}

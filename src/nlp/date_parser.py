@@ -8,12 +8,13 @@ from datetime import date, timedelta
 from src.nlp.normalizer import strip_accents
 from src.shared.models import DateRange
 
-_DAY = r"(?:\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4}|\d{1,2}\s+thang\s+\d{1,2}\s+nam\s+\d{4})"
-_MONTH = r"thang\s+\d{1,2}(?:\s+nam\s+\d{4})?"
+_DAY = r"(?:\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4}|\d{1,2}\s+thang\s+\d{1,2}\s+nam\s+\d{4})"
+_MONTH = r"thang\s+\d{1,2}(?:(?:\s+nam\s+|/)\d{4})?"
 _ATOM = rf"(?:{_DAY}|{_MONTH}|quy\s+\d+(?:\s+nam\s+\d{{4}})?|nam\s+\d{{4}}|hom\s+(?:nay|qua)|(?:tuan|thang)\s+(?:nay|truoc)|nam\s+(?:nay|truoc))"
 _EXPRESSION = re.compile(
     rf"(?<![\w/\-])(?:(?:tu\s+)?{_ATOM}\s+den\s+{_ATOM}|{_ATOM})(?![\w/\-])"
 )
+_RECENT_YEARS = re.compile(r"(?<![\w/\-])(?:trong\s+)?(\d+)\s+nam\s+(?:gan\s+(?:day|nhat)|tro\s+lai|qua)(?![\w/\-])")
 
 
 def date_expressions(text: str) -> Iterator[re.Match[str]]:
@@ -29,7 +30,10 @@ def _month_start(year: int, month: int, offset: int = 0) -> date:
 def _interval(expression: str, reference: date) -> tuple[date, date, str]:
     numbers = [int(value) for value in re.findall(r"\d+", expression)]
     if re.fullmatch(_DAY, expression):
-        day, month, year = numbers
+        if re.fullmatch(r"\d{4}-\d{1,2}-\d{1,2}", expression):
+            year, month, day = numbers
+        else:
+            day, month, year = numbers
         start = date(year, month, day)
         return start, start + timedelta(days=1), "day"
     previous = expression.endswith("truoc")
@@ -66,6 +70,16 @@ class DateParser:
         Reversed ranges are invalid; no implicit year rollover is performed.
         """
         text = unicodedata.normalize("NFC", text)
+        recent_years = _RECENT_YEARS.search(strip_accents(text).lower())
+        if recent_years:
+            try:
+                start = reference_date.replace(year=reference_date.year - int(recent_years.group(1)))
+            except ValueError:
+                return None
+            return DateRange(
+                start=start, end=reference_date + timedelta(days=1), granularity="range",
+                raw_text=text[recent_years.start():recent_years.end()],
+            )
         match = next(date_expressions(text), None)
         if match is None:
             return None

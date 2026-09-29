@@ -1,5 +1,6 @@
 import pytest
 
+from src.auth.provider import _role_from_code
 from src.permission.models import PermissionContext
 from src.permission.resolver import DefaultPermissionResolver
 from src.permission.row_policy import ScopedRowPolicy
@@ -204,3 +205,19 @@ def test_outer_join_permission_scope_is_compiled_in_on_clause():
     compiled = BasicQueryHandler(registry).handle(scoped)
     assert 'LEFT OUTER JOIN "sales"."orders" ON "sales"."customers"."id" = "sales"."orders"."customer_id" AND "sales"."orders"."tenant_id" = :p0' in compiled.sql
     assert 'WHERE "sales"."customers"."tenant_id" = :p1' in compiled.sql
+
+
+def test_seed_roles_keep_their_domain_identity_and_table_policy():
+    registry = SchemaRegistry()
+
+    assert _role_from_code('HR_T1') == 'hr_manager'
+    assert _role_from_code('FINANCE_T1') == 'finance_manager'
+    assert _role_from_code('SALES_T1') == 'sales_manager'
+    assert _role_from_code('SUPPORT_T1') == 'support_manager'
+
+    permissions = DefaultPermissionResolver(registry).resolve(UserContext(
+        user_id='support-user', role='support_manager', tenant_id='1', department_id='6',
+    ))
+    assert 'support.support_tickets' in permissions.allowed_tables
+    assert 'sales.orders' not in permissions.allowed_tables
+    assert 'base_salary' in permissions.denied_columns

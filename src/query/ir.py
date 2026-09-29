@@ -180,6 +180,15 @@ class OrderBy(BaseModel):
         return str(value).lower()
 
 
+class TimeGroup(BaseModel):
+    """A validated calendar bucket applied to one schema date column."""
+
+    model_config = ConfigDict(extra='forbid', frozen=True)
+
+    column: str = Field(min_length=1)
+    granularity: Literal['day', 'month', 'year']
+
+
 class QueryIR(BaseModel):
     """Identifiers are untrusted until resolved against registry metadata."""
 
@@ -194,6 +203,7 @@ class QueryIR(BaseModel):
     order_by: list[OrderBy] = Field(default_factory=list)
     limit: int = Field(default=100, ge=1, le=1000, strict=True)
     top_k: int | None = Field(default=None, ge=1, le=1000, strict=True)
+    time_group: TimeGroup | None = None
 
     joins: list[tuple[str, str]] = Field(default_factory=list)
     outer_joins: list[str] = Field(default_factory=list)

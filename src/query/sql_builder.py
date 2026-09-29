@@ -194,6 +194,12 @@ class SQLBuilder:
             )
             for item in query.select
         ]
+        time_expression = None
+        if query.time_group is not None:
+            time_expression = func.date_trunc(
+                query.time_group.granularity, sql_column(query.time_group.column),
+            ).label('period')
+            projections.insert(0, time_expression)
         join_specs = []
         for edge in plan.joins:
             destination = edge.target.rsplit('.', 1)[0]
@@ -296,6 +302,8 @@ class SQLBuilder:
                 statement = statement.where(predicate(condition, sql_column(condition.column)))
             if query.group_by:
                 statement = statement.group_by(*(sql_column(c) for c in query.group_by))
+            if time_expression is not None:
+                statement = statement.group_by(time_expression).order_by(time_expression.asc())
             for condition in query.having:
                 statement = statement.having(predicate(condition, sql_expression(condition.column, condition.aggregation)))
             for item in query.order_by:

@@ -275,6 +275,7 @@ tables:
     - stock lot
   inventory.stock_serials:
     aliases:
+    - serial
     - số sê ri hàng hóa
     - hàng theo số serial
     - stock serial
@@ -388,6 +389,7 @@ tables:
     - order item
   sales.invoices:
     aliases:
+    - hóa đơn
     - hóa đơn bán hàng
     - hóa đơn khách hàng
     - invoice
@@ -399,6 +401,7 @@ tables:
     - invoice item
   sales.payments:
     aliases:
+    - thanh toán
     - thanh toán khách hàng
     - thu tiền khách hàng
     - customer payment
@@ -3104,6 +3107,101 @@ columns:
     - nội dung phản hồi của phản hồi truy vấn text2sql
     - nội dung phản hồi
 concepts:
+  revenue_by_brand:
+    aliases:
+    - doanh thu theo thương hiệu
+    - doanh số theo thương hiệu
+    tables:
+    - sales.order_items
+    - sales.orders
+    - product.products
+    - product.brands
+    columns:
+    - sales.order_items.line_total
+    join_hints:
+    - [sales.order_items.order_id, sales.orders.id]
+    - [sales.order_items.product_id, product.products.id]
+    - [product.products.brand_id, product.brands.id]
+  revenue_by_category:
+    aliases:
+    - doanh thu theo danh mục
+    - doanh số theo danh mục
+    tables:
+    - sales.order_items
+    - sales.orders
+    - product.products
+    - product.product_categories
+    - product.categories
+    columns:
+    - sales.order_items.line_total
+    join_hints:
+    - [sales.order_items.order_id, sales.orders.id]
+    - [sales.order_items.product_id, product.products.id]
+    - [product.product_categories.product_id, product.products.id]
+    - [product.product_categories.category_id, product.categories.id]
+  revenue_by_customer_segment:
+    aliases:
+    - doanh thu theo phân khúc khách hàng
+    - doanh số theo phân khúc khách hàng
+    tables:
+    - sales.orders
+    - customer.customers
+    - customer.customer_segments
+    columns:
+    - sales.orders.total_amount
+    join_hints:
+    - [sales.orders.customer_id, customer.customers.id]
+    - [customer.customers.segment_id, customer.customer_segments.id]
+  revenue_by_sales_representative:
+    aliases:
+    - doanh thu theo sales representative
+    - doanh số theo sales representative
+    tables:
+    - sales.orders
+    - sales.sales_reps
+    - hr.employees
+    columns:
+    - sales.orders.total_amount
+    join_hints:
+    - [sales.orders.sales_rep_id, sales.sales_reps.id]
+    - [sales.sales_reps.employee_id, hr.employees.id]
+  revenue_by_sales_department:
+    aliases:
+    - doanh thu theo phòng ban của sales representative
+    - doanh số theo phòng ban của sales representative
+    tables:
+    - sales.orders
+    - sales.sales_reps
+    - hr.employees
+    - org.departments
+    columns:
+    - sales.orders.total_amount
+    join_hints:
+    - [sales.orders.sales_rep_id, sales.sales_reps.id]
+    - [sales.sales_reps.employee_id, hr.employees.id]
+    - [hr.employees.department_id, org.departments.id]
+  products_by_category:
+    aliases:
+    - số sản phẩm theo danh mục
+    - số lượng sản phẩm theo danh mục
+    tables:
+    - product.products
+    - product.product_categories
+    - product.categories
+    join_hints:
+    - [product.product_categories.product_id, product.products.id]
+    - [product.product_categories.category_id, product.categories.id]
+  tickets_by_sla:
+    aliases:
+    - ticket theo sla
+    - số ticket theo sla
+    tables:
+    - support.support_tickets
+    - support.ticket_sla_events
+    - support.sla_policies
+    join_hints:
+    - [support.ticket_sla_events.ticket_id, support.support_tickets.id]
+    - [support.ticket_sla_events.sla_policy_id, support.sla_policies.id]
   best_sellers:
     aliases:
     - bán chạy

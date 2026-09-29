@@ -8,7 +8,7 @@ import unicodedata
 from src.nlp.entity_extractor import ExtractedEntity
 from src.query.ir import (
     ColumnRef, HavingCondition, InstanceJoinRequest, OrderBy, QueryFilter,
-    QueryIR, SelectItem, TableInstance,
+    QueryIR, SelectItem, TableInstance, TimeGroup,
 )
 from src.schema.registry import SchemaRegistry
 from src.schema.relationship_graph import RelationshipGraph
@@ -19,7 +19,11 @@ from src.shared.models import PreprocessedQuery, SchemaLinkResult, UserContext
 
 _AGGREGATE_INTENTS = {Intent.REVENUE: Intent.SUM, Intent.AVERAGE: Intent.AVG}
 _NUMERIC_NAMES = ('total_amount', 'amount', 'line_total', 'quantity', 'base_salary', 'price', 'cost')
-_DATE_NAMES = ('order_date', 'invoice_date', 'payment_date', 'created_at', 'date')
+_DATE_NAMES = (
+    'order_date', 'invoice_date', 'payment_date', 'entry_date', 'po_date',
+    'receipt_date', 'transfer_date', 'request_date', 'work_date', 'hire_date',
+    'transaction_at', 'created_at', 'date',
+)
 
 
 class QueryIRBuilder:
@@ -69,6 +73,11 @@ class QueryIRBuilder:
             if not tables:
                 raise UnsupportedQueryError('No supported schema concept was found')
             intent = Intent.LOOKUP
+        status_values = [entity.normalized_value for entity in entities if entity.entity_type == 'status']
+        if intent == Intent.COMPARISON and len(set(status_values)) >= 2:
+            # Comparing named lifecycle states is a grouped count, not an
+            # open-ended analytical comparison.
+            intent = Intent.COUNT
         if intent in {Intent.TREND, Intent.COMPARISON, Intent.AGGREGATE}:
             raise UnsupportedQueryError(f'Intent is not supported by the deterministic builder: {intent}')
         if not tables:
@@ -78,15 +87,21 @@ class QueryIRBuilder:
         if intent == Intent.COUNT:
             select: list[str | SelectItem] = []
         elif aggregate:
-            value_column = self._value_column(schema_links, tables)
+            value_column = self._semantic_value_column(preprocessed, tables) or self._value_column(schema_links, tables)
+            owner = value_column.rsplit('.', 1)[0]
+            if owner not in tables:
+                tables.append(owner)
             select = [SelectItem(column=value_column, aggregation=aggregate)]
         elif intent == Intent.TOP_N:
-            value_column = self._value_column(schema_links, tables)
+            value_column, ranking_aggregation = self._ranking_measure(preprocessed, schema_links, tables)
             group_column = self._group_column(preprocessed, tables)
             group_owner = group_column.rsplit('.', 1)[0]
             if group_owner not in tables:
                 tables.append(group_owner)
-            select = [group_column, SelectItem(column=value_column, aggregation=Aggregation.SUM)]
+            value_owner = value_column.rsplit('.', 1)[0]
+            if value_owner not in tables:
+                tables.append(value_owner)
+            select = [group_column, SelectItem(column=value_column, aggregation=ranking_aggregation)]
         else:
             select = [self._lookup_column(schema_links, tables)]
 
@@ -120,6 +135,7 @@ class QueryIRBuilder:
         group_by: list[str] = []
         order_by: list[OrderBy] = []
         top_k = None
+        time_group = self._time_group(preprocessed, tables, anchor=aggregate_owner)
         if intent == Intent.TOP_N:
             group_column = select[0]
             assert isinstance(group_column, str)
@@ -128,11 +144,25 @@ class QueryIRBuilder:
             assert isinstance(value_column, SelectItem)
             order_by = [OrderBy(
                 column=value_column.column,
-                aggregation=Aggregation.SUM,
+                aggregation=value_column.aggregation,
                 direction=self._ranking_direction(preprocessed),
             )]
             top_k = self._top_k(preprocessed)
-        elif aggregate and 'theo' in preprocessed.accent_stripped_text:
+        elif intent == Intent.COUNT and (
+            'theo' in preprocessed.accent_stripped_text or len(set(status_values)) >= 2
+        ) and not time_group:
+            group_column = (
+                filters[0].column if len(set(status_values)) >= 2
+                else self._group_column(preprocessed, tables)
+            )
+            group_by = [group_column]
+            owner = group_column.rsplit('.', 1)[0]
+            if owner not in tables:
+                tables.append(owner)
+            count_column = self._count_column(tables)
+            select = [group_column, SelectItem(column=count_column, aggregation=Aggregation.COUNT, distinct=True)]
+            order_by = [OrderBy(column=count_column, aggregation=Aggregation.COUNT, direction=SortDirection.DESC)]
+        elif aggregate and 'theo' in preprocessed.accent_stripped_text and not time_group:
             group_column = self._group_column(preprocessed, tables)
             group_by = [group_column]
             select.insert(0, group_column)
@@ -145,7 +175,66 @@ class QueryIRBuilder:
                               aggregate or (Aggregation.SUM if intent == Intent.TOP_N else None), group_by)
         return QueryIR(intent=intent, tables=tables, select=select, filters=filters,
                        having=having, group_by=group_by, order_by=order_by, top_k=top_k,
-                       join_hints=join_hints, outer_joins=outer_joins)
+                       time_group=time_group, join_hints=join_hints, outer_joins=outer_joins)
+
+    def _semantic_value_column(self, preprocessed: PreprocessedQuery, tables: list[str]) -> str | None:
+        """Resolve explicit business measures before falling back to column rank."""
+        text = preprocessed.accent_stripped_text
+        rules = (
+            (r'\bluong co ban\b', 'hr.employees.base_salary'),
+            (r'\bdiem danh gia\b', 'hr.performance_reviews.performance_score'),
+            (r'\bton kho kha dung\b', 'inventory.inventory_balances.qty_available'),
+            (r'\bton kho\b', 'inventory.inventory_balances.qty_on_hand'),
+            (r'\b(?:gia tri|tong gia tri)\s+(?:po|purchase order)\b', 'procurement.purchase_orders.total_amount'),
+            (r'\bvendor bill\b', 'finance.vendor_bills.total_amount'),
+            (r'\bitem dat mua\b', 'procurement.purchase_order_items.ordered_qty'),
+            (r'\bhang da nhan\b', 'procurement.goods_receipt_items.received_qty'),
+            (r'\bdieu chuyen kho\b', 'inventory.stock_transfer_items.received_qty'),
+            (r'\bthanh toan\b', 'sales.payments.amount'),
+            (r'\bphat sinh but toan\b', 'finance.journal_entry_lines.debit_amount'),
+            (r'\bchi phi\b', 'finance.journal_entry_lines.debit_amount'),
+            (r'\b(?:doanh thu|doanh so)\b.*\b(?:thuong hieu|danh muc|san pham)\b', 'sales.order_items.line_total'),
+            (r'\b(?:doanh thu|doanh so)\b', 'sales.orders.total_amount'),
+        )
+        for pattern, column in rules:
+            if re.search(pattern, text) and column in self.registry.columns:
+                return column
+        return None
+
+    def _ranking_measure(self, preprocessed: PreprocessedQuery, links: SchemaLinkResult,
+                         tables: list[str]) -> tuple[str, Aggregation]:
+        text = preprocessed.accent_stripped_text
+        count_rules = (
+            (r'\bnhieu nhan vien\b', 'hr.employees.id'),
+            (r'\bnhieu ticket\b', 'support.support_tickets.id'),
+        )
+        for pattern, column in count_rules:
+            if re.search(pattern, text) and column in self.registry.columns:
+                return column, Aggregation.COUNT
+        if re.search(r'\bsan pham ban (?:chay|nhieu) nhat\b', text):
+            return 'sales.order_items.quantity', Aggregation.SUM
+        column = self._semantic_value_column(preprocessed, tables) or self._value_column(links, tables)
+        return column, Aggregation.SUM
+
+    def _count_column(self, tables: list[str]) -> str:
+        for table in tables:
+            primary = next((column for column in self.registry.tables[table].columns if column.primary_key), None)
+            if primary:
+                return f'{table}.{primary.name}'
+        return '*'
+
+    def _time_group(self, preprocessed: PreprocessedQuery, tables: list[str],
+                    anchor: str | None) -> TimeGroup | None:
+        text = preprocessed.accent_stripped_text
+        match = re.search(r'\b(?:theo|tung)\s+(ngay|thang|nam)\b', text)
+        if not match:
+            return None
+        date_column, owner = self._date_column(tables, anchor)
+        if owner not in tables:
+            tables.append(owner)
+        return TimeGroup(column=date_column, granularity={
+            'ngay': 'day', 'thang': 'month', 'nam': 'year',
+        }[match.group(1)])
 
     def _outer_join_semantics(self, preprocessed: PreprocessedQuery, links: SchemaLinkResult,
                               tables: list[str]) -> tuple[list[str], list[QueryFilter], list[str]]:
@@ -339,9 +428,14 @@ class QueryIRBuilder:
         preferred = []
         # "top N <dimension>" states the output dimension directly, even
         # when later phrases mention filters such as customer or branch.
-        top_dimension = re.search(r'\btop\s+\d+\s+(san pham|khach hang|chi nhanh|nhan vien|chuyen vien)\b', text)
+        top_dimension = re.search(
+            r'\btop\s+\d+\s+(phong ban|nha cung cap|san pham|khach hang|chi nhanh|nhan vien|chuyen vien)\b',
+            text,
+        )
         if top_dimension:
             column = {
+                'phong ban': 'org.departments.name',
+                'nha cung cap': 'procurement.suppliers.name',
                 'san pham': 'product.products.name',
                 'khach hang': 'customer.customers.name',
                 'chi nhanh': 'org.branches.name',
@@ -353,25 +447,33 @@ class QueryIRBuilder:
         # In “X theo Y”, Y is the grouping dimension. Earlier mentions are
         # filters or the aggregate's business subject, not a tie-breaker.
         grouping_text = text.split(' theo ', 1)[1] if ' theo ' in text else text
-        for phrase, column in (
+        dimensions = (
+            ('sales representative', 'hr.employees.full_name'),
+            ('phan khuc', 'customer.customer_segments.name'),
+            ('thuong hieu', 'product.brands.name'),
+            ('danh muc', 'product.categories.name'),
+            ('cost center', 'org.cost_centers.name'),
+            ('nha cung cap', 'procurement.suppliers.name'),
+            ('supplier', 'procurement.suppliers.name'),
+            ('warehouse', 'inventory.warehouses.name'),
+            ('phong ban', 'org.departments.name'),
             ('chi nhanh', 'org.branches.name'),
             ('khach hang', 'customer.customers.name'),
             ('san pham', 'product.products.name'),
             ('nhan vien', 'hr.employees.full_name'),
             ('chuyen vien', 'hr.employees.full_name'),
-        ):
+            ('tai khoan', 'finance.chart_of_accounts.account_name'),
+            ('sla', 'support.sla_policies.policy_name'),
+        )
+        for phrase, column in dimensions:
             if phrase in grouping_text:
-                preferred.append(column)
+                if column in self.registry.columns:
+                    return column
         if not preferred:
-            for phrase, column in (
-                ('chi nhanh', 'org.branches.name'),
-                ('khach hang', 'customer.customers.name'),
-                ('san pham', 'product.products.name'),
-                ('nhan vien', 'hr.employees.full_name'),
-                ('chuyen vien', 'hr.employees.full_name'),
-            ):
+            for phrase, column in dimensions:
                 if phrase in text:
-                    preferred.append(column)
+                    if column in self.registry.columns:
+                        return column
         candidates = [column for column in preferred if column in self.registry.columns]
         if not candidates:
             candidates = [f'{table}.name' for table in tables if f'{table}.name' in self.registry.columns]
@@ -383,19 +485,33 @@ class QueryIRBuilder:
         all_tables = list(tables)
         join_hints: list[tuple[str, str]] = []
         targets = {
+            'tenant_id': 'org.tenants.id',
             'customer_type': 'customer.customers.customer_type',
+            'customer_tier': 'customer.customers.customer_tier',
+            'priority': 'support.support_tickets.priority',
             'department_name': 'org.departments.name',
             'department_code': 'org.departments.code',
             'branch_name': 'org.branches.name',
             'branch_code': 'org.branches.code',
             'product_code': 'product.products.code',
             'customer_code': 'customer.customers.code',
+            'employee_code': 'hr.employees.employee_code',
+            'order_code': 'sales.orders.order_no',
+            'invoice_code': 'sales.invoices.invoice_no',
+            'purchase_order_code': 'procurement.purchase_orders.po_number',
+            'ticket_code': 'support.support_tickets.ticket_number',
         }
+        status_entities = [entity for entity in entities if entity.entity_type == 'status']
+        grouped_status_values = list(dict.fromkeys(entity.normalized_value for entity in status_entities))
+        emitted_status_filter = False
         for entity in entities:
             target = targets.get(entity.entity_type)
             if entity.entity_type == 'status':
+                if emitted_status_filter:
+                    continue
                 status_columns = self._status_columns(preprocessed, all_tables)
                 target = self._one(status_columns, 'status column')
+                emitted_status_filter = True
             if not target:
                 continue
             if target not in self.registry.columns:
@@ -404,7 +520,14 @@ class QueryIRBuilder:
             if owner not in all_tables:
                 all_tables.append(owner)
             join_hints.extend(self._role_hints(tables, owner, entity.entity_type))
-            filters.append(QueryFilter(column=target, operator=FilterOperator.EQ, value=entity.normalized_value))
+            operator = FilterOperator.LIKE if entity.entity_type == 'department_name' else FilterOperator.EQ
+            value = f'{entity.normalized_value}%' if operator == FilterOperator.LIKE else entity.normalized_value
+            if entity.entity_type == 'tenant_id':
+                value = int(value)
+            if entity.entity_type == 'status' and len(grouped_status_values) >= 2:
+                operator = FilterOperator.IN
+                value = grouped_status_values
+            filters.append(QueryFilter(column=target, operator=operator, value=value))
         return filters, all_tables, list(dict.fromkeys(join_hints))
 
     def _status_columns(self, preprocessed: PreprocessedQuery, tables: list[str]) -> list[str]:
@@ -413,8 +536,13 @@ class QueryIRBuilder:
         for phrase, table in (
             ('don hang', 'sales.orders'), ('san pham', 'product.products'),
             ('khach hang', 'customer.customers'), ('nhan vien', 'hr.employees'),
+            ('don nghi phep', 'hr.leave_requests'),
+            ('purchase order', 'procurement.purchase_orders'), (' po ', 'procurement.purchase_orders'),
+            ('vendor bill', 'finance.vendor_bills'), ('hoa don', 'sales.invoices'),
+            ('thanh toan', 'sales.payments'), ('ticket', 'support.support_tickets'),
         ):
-            column = f'{table}.status'
+            field = 'employment_status' if table == 'hr.employees' else 'status'
+            column = f'{table}.{field}'
             if phrase in text and column in self.registry.columns:
                 contextual.append(column)
         return contextual or [f'{table}.status' for table in tables if f'{table}.status' in self.registry.columns]
@@ -461,10 +589,18 @@ class QueryIRBuilder:
 
     @staticmethod
     def _top_k(preprocessed: PreprocessedQuery) -> int:
-        values = [int(number.value) for number in preprocessed.numbers if number.value == int(number.value) and number.value > 0]
-        if len(values) != 1:
-            raise MissingEntityError('TOP-K requires exactly one positive integer')
-        return values[0]
+        text = preprocessed.accent_stripped_text
+        explicit = re.search(r'\btop\s+(\d+)\b', text)
+        if explicit:
+            return int(explicit.group(1))
+        leading = re.match(r'\s*(\d+)\s+', text)
+        if leading:
+            return int(leading.group(1))
+        # A singular superlative has an unambiguous cardinality even when a
+        # date range contributes other numeric tokens.
+        if re.search(r'\b(?:cao nhat|thap nhat|nhieu nhat|it nhat|lon nhat|nho nhat|best[- ]selling)\b', text):
+            return 1
+        raise MissingEntityError('TOP-K requires a positive result count')
 
     @staticmethod
     def _ranking_direction(preprocessed: PreprocessedQuery) -> SortDirection:

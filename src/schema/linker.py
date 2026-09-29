@@ -162,6 +162,7 @@ def alias_coverage(registry: SchemaRegistry, aliases: dict) -> dict[str, int | f
 
 _AliasKind = Literal["table", "column", "concept"]
 _AliasSource = Literal["manual", "schema", "automatic"]
+MatchType = Literal["exact", "accent_insensitive", "token", "prefix", "fuzzy", "related_business_concept"]
 
 
 @dataclass(frozen=True)
@@ -247,8 +248,6 @@ class SchemaLinker:
         surfaces = [m.group() for m in tokens]
         folded = [strip_accents(word) for word in surfaces]
         hits: list[_Hit] = []
-
-        MatchType = Literal["exact", "accent_insensitive", "token", "prefix", "fuzzy", "related_business_concept"]
 
         def add(key: str, start: int, end: int, mode: MatchType, cap: float) -> None:
             for entry in self.index[key]:

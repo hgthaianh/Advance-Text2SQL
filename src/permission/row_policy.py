@@ -147,6 +147,8 @@ class ScopedRowPolicy(RowPolicy):
             column = item if isinstance(item, str) else item.column
             if column and '.' in column and column != '*':
                 references.append(column.rsplit('.', 1)[0])
+        if query.time_group is not None:
+            references.append(query.time_group.column.rsplit('.', 1)[0])
         for item in [*query.filters, *query.having]:
             if '.' in item.column:
                 references.append(item.column.rsplit('.', 1)[0])

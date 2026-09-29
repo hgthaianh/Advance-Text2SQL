@@ -8,6 +8,7 @@ cannot send general conversation into the schema linker.
 import re
 
 from src.nlp.normalizer import Normalizer
+from src.nlp.semantic_normalizer import SemanticNormalizer
 from src.shared.enums import ScopeDecision
 from src.shared.models import PreprocessedQuery, ScopeRoutingResult
 
@@ -30,7 +31,7 @@ _DATA_ENTITIES = frozenset((
     'invoice', 'invoices', 'status',
 ))
 _OUT_OF_SCOPE = frozenset((
-    'thoi tiet', 'du bao thoi tiet', 'tin tuc', 'dich status', 'dich giup',
+    'thoi tiet', 'du bao thoi tiet', 'tin tuc', 'dich status', 'dich cau', 'dich giup',
     'viet giup', 'huong dan', 'cach lam', 'tai sao', 'giai thich',
     'dinh nghia', 'la gi', 'nghia la gi', 'cong thuc', 'bai hat',
     'am nhac', 'nau an', 'suc khoe', 'phim',
@@ -51,9 +52,11 @@ class ScopeRouter:
 
     def __init__(self, normalizer: Normalizer | None = None) -> None:
         self.normalizer = normalizer or Normalizer()
+        self.semantic_normalizer = SemanticNormalizer(self.normalizer)
 
     def route(self, text: str | PreprocessedQuery) -> ScopeRoutingResult:
-        normalized = text.accent_stripped_text if isinstance(text, PreprocessedQuery) else self.normalizer.normalize(text).accent_stripped_text
+        raw = text.accent_stripped_text if isinstance(text, PreprocessedQuery) else text
+        normalized = self.semantic_normalizer.normalize(raw)
         normalized = f' {normalized.strip()} '
         if not normalized.strip():
             return ScopeRoutingResult(decision=ScopeDecision.AMBIGUOUS, confidence=0.0, reasons=['EMPTY_REQUEST'])
@@ -64,6 +67,11 @@ class ScopeRouter:
         identifiers = self._matches(normalized, _IDENTIFIER_MARKERS)
         statuses = self._matches(normalized, _STATUS_VALUES)
         temporal = self._matches(normalized, _TEMPORAL_FILTERS)
+        candidate_domains, candidate_entities = self.semantic_normalizer.concepts(normalized)
+        scope_hints = [hint for phrase, hint in (
+            ('phong ban', 'department'), ('chi nhanh', 'branch'), ('team', 'team'),
+            ('tenant', 'tenant'),
+        ) if re.search(rf'(?<!\w){re.escape(phrase)}(?!\w)', normalized)]
         if _IDENTIFIER.search(normalized):
             identifiers.append('record_identifier')
         signals = [*(f'NEG:{value}' for value in negative), *(f'ACTION:{value}' for value in actions),
@@ -75,10 +83,14 @@ class ScopeRouter:
         # contains a business noun such as account, manager, or HCM.
         if negative:
             return ScopeRoutingResult(decision=ScopeDecision.OUT_OF_SCOPE, confidence=0.97,
-                                      reasons=['NON_DATA_REQUEST'], matched_signals=signals)
-        if actions and entities:
+                                      reasons=['NON_DATA_REQUEST'], matched_signals=signals,
+                                      candidate_domains=candidate_domains, candidate_entities=candidate_entities,
+                                      scope_hints=scope_hints)
+        if actions and (entities or candidate_entities):
             return ScopeRoutingResult(decision=ScopeDecision.IN_SCOPE, confidence=0.96,
-                                      reasons=['QUERY_ACTION_AND_ENTITY'], matched_signals=signals)
+                                      reasons=['QUERY_ACTION_AND_ENTITY'], matched_signals=signals,
+                                      candidate_domains=candidate_domains, candidate_entities=candidate_entities,
+                                      scope_hints=scope_hints)
         if entities and identifiers:
             return ScopeRoutingResult(decision=ScopeDecision.IN_SCOPE, confidence=0.90,
                                       reasons=['ENTITY_WITH_IDENTIFIER'], matched_signals=signals)
@@ -93,9 +105,18 @@ class ScopeRouter:
                                       reasons=['DIRECT_RECORD_SUBJECT'], matched_signals=signals)
         if len(entities) >= 2:
             return ScopeRoutingResult(decision=ScopeDecision.IN_SCOPE, confidence=0.82,
-                                      reasons=['MULTIPLE_BUSINESS_ENTITIES'], matched_signals=signals)
+                                      reasons=['MULTIPLE_BUSINESS_ENTITIES'], matched_signals=signals,
+                                      candidate_domains=candidate_domains, candidate_entities=candidate_entities,
+                                      scope_hints=scope_hints)
+        if len(candidate_entities) >= 2:
+            return ScopeRoutingResult(decision=ScopeDecision.IN_SCOPE, confidence=0.82,
+                                      reasons=['MULTIPLE_BUSINESS_ENTITIES'], matched_signals=signals,
+                                      candidate_domains=candidate_domains, candidate_entities=candidate_entities,
+                                      scope_hints=scope_hints)
         return ScopeRoutingResult(decision=ScopeDecision.AMBIGUOUS, confidence=0.45,
-                                  reasons=['INSUFFICIENT_DATABASE_EVIDENCE'], matched_signals=signals)
+                                  reasons=['INSUFFICIENT_DATABASE_EVIDENCE'], matched_signals=signals,
+                                  candidate_domains=candidate_domains, candidate_entities=candidate_entities,
+                                  scope_hints=scope_hints)
 
     @staticmethod
     def _matches(text: str, phrases: frozenset[str]) -> list[str]:

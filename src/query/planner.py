@@ -315,6 +315,9 @@ class QueryPlanner:
             return name
 
         groups = list(dict.fromkeys(resolve(c) for c in validated.group_by))
+        time_group = validated.time_group
+        if time_group is not None:
+            time_group = time_group.model_copy(update={'column': resolve(time_group.column)})
         expected_aggregation = _AGGREGATES.get(validated.intent)
         raw_select = validated.select
         if instance_joins:
@@ -361,6 +364,8 @@ class QueryPlanner:
         aggregate_query = any(s.aggregation for s in selected)
         if expected_aggregation and not aggregate_query:
             raise MissingAggregationColumnError('An aggregate projection is required')
+        if time_group is not None and not aggregate_query:
+            raise MalformedQueryIRError('Time grouping requires an aggregate projection')
         if aggregate_query and any(s.aggregation is None and s.column not in groups for s in selected):
             raise MalformedQueryIRError('Non-aggregate projections must appear in group_by')
         if not aggregate_query and groups:
@@ -453,6 +458,7 @@ class QueryPlanner:
             # queries retain the canonical SelectItem representation.
             'select': validated.select if instance_joins else selected, 'filters': filters, 'having': having,
             'group_by': groups, 'order_by': order,
+            'time_group': time_group,
             'outer_joins': sorted(outer_set), 'outer_join_filters': outer_join_filters,
         })
         physical_tables = [tables[0]] + [j.target.rsplit('.', 1)[0] for j in joins]
