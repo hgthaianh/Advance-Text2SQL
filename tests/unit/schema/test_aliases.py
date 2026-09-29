@@ -138,10 +138,11 @@ def test_graph_and_reverse_path(registry):
     graph = RelationshipGraph(registry)
     assert graph.find_path('orders', 'customers') == [('sales.orders', 'customer.customers')]
     assert graph.find_path('customers', 'orders') == [('customer.customers', 'sales.orders')]
-    # Both tenant and membership bridges are shortest: do not silently choose.
-    from src.shared.exceptions import AmbiguousJoinPathError
-    with pytest.raises(AmbiguousJoinPathError):
-        graph.find_path('customer_groups', 'customers')
+    # Membership outranks the generic tenant-scope shortcut.
+    assert graph.find_path('customer_groups', 'customers') == [
+        ('customer.customer_groups', 'customer.customer_group_members'),
+        ('customer.customer_group_members', 'customer.customers'),
+    ]
     assert graph.find_path('orders', 'orders') == []
 
 

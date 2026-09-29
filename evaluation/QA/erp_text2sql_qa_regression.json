@@ -125,7 +125,7 @@
       "expected_sql_shape": null,
       "expected_permission": "DENY_SENSITIVE_COLUMN",
       "paraphrase_group": null,
-      "notes": null
+      "notes": "Aligned with seeded iam.column_access_policies: base_salary is denied to every non-admin role."
     },
     {
       "id": "QA-HR-005",
@@ -865,7 +865,7 @@
       "category": "INVENTORY",
       "username": "user0161",
       "question": "Tổng số lượng điều chuyển kho theo chi nhánh.",
-      "expected_intent": "SUM",
+      "expected_intent": "AMBIGUOUS",
       "expected_entities": [
         "inventory_transfer",
         "warehouse",
@@ -881,12 +881,12 @@
       ],
       "expected_filters": [],
       "expected_scope": "TENANT",
-      "expected_behavior": "SUCCESS",
-      "expected_result_type": "grouped_rows",
-      "expected_sql_shape": "SUM + GROUP BY branch",
-      "expected_permission": "ALLOW",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
       "paraphrase_group": null,
-      "notes": null
+      "notes": "Source versus destination warehouse is not specified, so branch attribution is ambiguous."
     },
     {
       "id": "QA-PROC-001",
@@ -1751,7 +1751,7 @@
       "category": "CROSS_DOMAIN",
       "username": "user0161",
       "question": "Doanh thu theo danh mục sản phẩm từ 2026-01-01 đến 2026-09-19.",
-      "expected_intent": "SUM",
+      "expected_intent": "AMBIGUOUS",
       "expected_entities": [
         "invoice_item",
         "product",
@@ -1769,12 +1769,12 @@
         "invoice_date between 2026-01-01 and 2026-09-19"
       ],
       "expected_scope": "TENANT",
-      "expected_behavior": "SUCCESS",
-      "expected_result_type": "grouped_rows",
-      "expected_sql_shape": "SUM + GROUP BY category",
-      "expected_permission": "ALLOW",
+      "expected_behavior": "AMBIGUOUS",
+      "expected_result_type": "none",
+      "expected_sql_shape": null,
+      "expected_permission": "N/A",
       "paraphrase_group": null,
-      "notes": null
+      "notes": "Product-category is many-to-many and is_primary is not uniquely constrained, so revenue allocation is unsafe."
     },
     {
       "id": "QA-XD-003",

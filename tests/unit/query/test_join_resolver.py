@@ -77,6 +77,29 @@ def test_shorter_path_wins_over_longer_alternative():
     assert RelationshipGraph(registry).find_path('a','b') == [('public.a','public.b')]
 
 
+def test_complete_role_evidence_can_beat_an_unrelated_shortcut():
+    registry = make_registry(
+        ['fact', 'shortcut', 'role', 'person', 'dimension'],
+        [
+            ('fact', 'shortcut_id', 'shortcut'), ('shortcut', 'dimension_id', 'dimension'),
+            ('fact', 'role_id', 'role'), ('role', 'person_id', 'person'),
+            ('person', 'dimension_id', 'dimension'),
+        ],
+    )
+    graph = RelationshipGraph(registry)
+    hints = {
+        frozenset(('public.fact.role_id', 'public.role.id')),
+        frozenset(('public.role.person_id', 'public.person.id')),
+        frozenset(('public.person.dimension_id', 'public.dimension.id')),
+    }
+
+    path = graph.find_relationship_path('fact', 'dimension', hints)
+
+    assert [edge.target.rsplit('.', 1)[0] for edge in path] == [
+        'public.role', 'public.person', 'public.dimension',
+    ]
+
+
 def test_resolver_delegates_path_search(graph, monkeypatch):
     seen = []
     original = graph.find_relationship_path

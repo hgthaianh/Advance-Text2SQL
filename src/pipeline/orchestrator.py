@@ -25,7 +25,7 @@ from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
 from src.shared.exceptions import (
-    AmbiguousJoinPathError, AmbiguousQueryError, InvalidTableError, MissingEntityError,
+    AmbiguousJoinPathError, AmbiguousQueryError, FanoutRiskError, InvalidTableError, MissingEntityError,
     PermissionDeniedError, QueryExecutionError, QueryValidationError,
     SQLValidationError, UnsupportedQueryError,
 )
@@ -168,7 +168,7 @@ class Text2SQLPipeline:
     def _error_code(exc: Exception) -> str:
         if isinstance(exc, PermissionDeniedError):
             return 'PERMISSION_DENIED'
-        if isinstance(exc, (AmbiguousQueryError, AmbiguousJoinPathError)):
+        if isinstance(exc, (AmbiguousQueryError, AmbiguousJoinPathError, FanoutRiskError)):
             return 'AMBIGUOUS_QUERY'
         if isinstance(exc, MissingEntityError):
             return 'MISSING_ENTITY'

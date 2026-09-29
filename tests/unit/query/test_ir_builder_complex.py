@@ -7,6 +7,7 @@ from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
 from src.shared.enums import Aggregation, FilterOperator, SortDirection
+from src.shared.exceptions import AmbiguousQueryError
 from src.shared.models import UserContext
 
 
@@ -205,6 +206,59 @@ def test_group_by_uses_the_dimension_after_theo():
 
     assert query.group_by == ['org.branches.name']
     assert BasicQueryHandler(registry).handle(query).sql
+
+
+def test_count_by_year_has_an_aggregate_projection():
+    registry, query = _build('So nhan vien duoc tuyen theo nam tu 2021 den 2025')
+
+    assert query.time_group.granularity == 'year'
+    assert query.select[0].aggregation == Aggregation.COUNT
+    assert 'COUNT(' in BasicQueryHandler(registry).handle(query).sql.upper()
+
+
+def test_aggregate_supports_multiple_group_dimensions():
+    registry, query = _build('So luong hang da nhan theo warehouse va supplier')
+
+    assert query.group_by == [
+        'inventory.warehouses.name', 'procurement.suppliers.name',
+    ]
+    sql = BasicQueryHandler(registry).handle(query).sql
+    assert 'SUM(' in sql.upper() and 'GROUP BY' in sql.upper()
+
+
+def test_passive_managed_wording_is_not_an_employee_manager_query():
+    registry, query = _build('Co bao nhieu serial dang duoc quan ly trong tenant 1')
+
+    assert query.select == []
+    assert query.intent.value == 'count'
+    assert 'COUNT(' in BasicQueryHandler(registry).handle(query).sql.upper()
+
+
+def test_top_dimension_without_measure_is_ambiguous():
+    try:
+        _build('Khach hang nhieu nhat')
+    except AmbiguousQueryError:
+        return
+    raise AssertionError('Expected an ambiguous ranking measure')
+
+
+def test_lookup_and_count_do_not_add_an_unrequested_metric_fact():
+    _, adjustment = _build('Cho toi xem dieu chinh ton kho')
+    _, supplier = _build('nha cung cap co diem danh gia cao')
+    _, transfers = _build('co bao nhieu dieu chuyen kho')
+
+    assert 'inventory.inventory_balances' not in adjustment.tables
+    assert 'hr.performance_reviews' not in supplier.tables
+    assert 'inventory.stock_transfer_items' not in transfers.tables
+
+
+def test_lookup_grouping_word_does_not_create_a_time_series():
+    registry, contract = _build('hop dong lao dong theo ngay ky')
+    _, leave = _build('don nghi phep theo ngay bat dau')
+
+    assert contract.time_group is None
+    assert leave.time_group is None
+    assert BasicQueryHandler(registry).handle(contract).sql
 
 
 def test_explicit_absence_language_builds_a_left_anti_join():

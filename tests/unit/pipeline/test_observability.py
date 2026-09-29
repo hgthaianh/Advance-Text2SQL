@@ -1,6 +1,12 @@
 from sqlalchemy import create_engine, text
 
 from src.pipeline.observability import PersistedPipelineObserver, PipelineEvent
+from src.pipeline.orchestrator import Text2SQLPipeline
+from src.shared.exceptions import FanoutRiskError
+
+
+def test_fanout_risk_is_exposed_as_a_controlled_ambiguity():
+    assert Text2SQLPipeline._error_code(FanoutRiskError('unsafe allocation')) == 'AMBIGUOUS_QUERY'
 
 
 def test_persisted_audit_keeps_safe_fields_and_aggregates_stage_failures():

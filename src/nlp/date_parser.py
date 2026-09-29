@@ -15,6 +15,7 @@ _EXPRESSION = re.compile(
     rf"(?<![\w/\-])(?:(?:tu\s+)?{_ATOM}\s+den\s+{_ATOM}|{_ATOM})(?![\w/\-])"
 )
 _RECENT_YEARS = re.compile(r"(?<![\w/\-])(?:trong\s+)?(\d+)\s+nam\s+(?:gan\s+(?:day|nhat)|tro\s+lai|qua)(?![\w/\-])")
+_BARE_YEAR_RANGE = re.compile(r"(?<![\w/\-])tu\s+(\d{4})\s+den\s+(\d{4})(?![\w/\-])")
 
 
 def date_expressions(text: str) -> Iterator[re.Match[str]]:
@@ -70,7 +71,17 @@ class DateParser:
         Reversed ranges are invalid; no implicit year rollover is performed.
         """
         text = unicodedata.normalize("NFC", text)
-        recent_years = _RECENT_YEARS.search(strip_accents(text).lower())
+        stripped = strip_accents(text).lower()
+        bare_year_range = _BARE_YEAR_RANGE.search(stripped)
+        if bare_year_range:
+            start_year, end_year = map(int, bare_year_range.groups())
+            if start_year >= end_year:
+                return None
+            return DateRange(
+                start=date(start_year, 1, 1), end=date(end_year + 1, 1, 1), granularity="range",
+                raw_text=text[bare_year_range.start():bare_year_range.end()],
+            )
+        recent_years = _RECENT_YEARS.search(stripped)
         if recent_years:
             try:
                 start = reference_date.replace(year=reference_date.year - int(recent_years.group(1)))

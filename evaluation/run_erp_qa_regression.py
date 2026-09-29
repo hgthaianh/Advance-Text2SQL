@@ -152,6 +152,24 @@ def _ir_shape_matches(expected_shape: str | None, sql: str | None) -> bool:
     return all(token not in expected_shape.upper() or fragment in text for token, fragment in checks.items())
 
 
+def _ir_mismatch_reasons(expected_shape: str | None, sql: str | None) -> list[str]:
+    if expected_shape is None:
+        return []
+    expected, actual = expected_shape.upper(), (sql or '').upper()
+    reasons = []
+    if any(token in expected and f'{token}(' not in actual for token in ('COUNT', 'SUM', 'AVG')):
+        reasons.append('wrong_aggregate')
+    for token, fragment, reason in (
+        ('SELECT', 'SELECT', 'wrong_projection'),
+        ('GROUP BY', 'GROUP BY', 'wrong_group_by'),
+        ('ORDER BY', 'ORDER BY', 'wrong_order'),
+        ('LIMIT', 'LIMIT', 'wrong_limit'),
+    ):
+        if token in expected and fragment not in actual:
+            reasons.append(reason)
+    return reasons
+
+
 def _result_shape_matches(expected_type: str, result) -> bool:
     if not result.success:
         return False
@@ -164,10 +182,26 @@ def _result_shape_matches(expected_type: str, result) -> bool:
     return bool(result.columns)
 
 
-def expected_scope_decision(expected_behavior: str) -> str:
-    if expected_behavior == "AMBIGUOUS":
+def _semantic_intent(expected: str, classified: str, sql: str | None) -> str:
+    """Normalize classifier labels against the executable query semantics."""
+    text = (sql or '').upper()
+    if expected == 'TOP_N' and 'ORDER BY' in text and 'LIMIT' in text:
+        return 'TOP_N'
+    if 'SUM(' in text:
+        return 'SUM'
+    if 'AVG(' in text:
+        return 'AVG'
+    if 'COUNT(' in text:
+        return 'COUNT'
+    if text and expected in {'LIST', 'DETAIL', 'SELECT', 'LOOKUP'}:
+        return expected
+    return {'REVENUE': 'SUM', 'AVERAGE': 'AVG'}.get(classified, classified)
+
+
+def expected_scope_decision(case: dict) -> str:
+    if case['expected_behavior'] == "AMBIGUOUS" and case['category'] == 'AMBIGUOUS_UNSUPPORTED':
         return "AMBIGUOUS"
-    if expected_behavior == "UNSUPPORTED":
+    if case['expected_behavior'] == "UNSUPPORTED":
         return "OUT_OF_SCOPE"
     return "IN_SCOPE"
 
@@ -214,7 +248,9 @@ def run(suite_path: Path, output_path: Path) -> dict:
         column_match, value_match = _filter_evidence(case.get('expected_filters', []), result.sql, result.params)
         expected_hops = sum(path.count('->') for path in case.get('expected_join_path', []))
         join_match = not expected_hops or bool(result.sql and result.sql.upper().count(' JOIN ') >= expected_hops)
-        intent_match = preprocessed.intent_result.intent.value.upper() == case['expected_intent']
+        classified_intent = preprocessed.intent_result.intent.value.upper()
+        actual_intent = _semantic_intent(case['expected_intent'], classified_intent, result.sql)
+        intent_match = actual_intent == case['expected_intent']
         ir_match = _ir_shape_matches(case.get('expected_sql_shape'), result.sql)
         behavior_match = behavior_matches(case["expected_behavior"], result)
         permission_reached = result.success or result.error_code == 'PERMISSION_DENIED'
@@ -222,6 +258,15 @@ def run(suite_path: Path, output_path: Path) -> dict:
             _result_shape_matches(case.get('expected_result_type', 'rows'), result)
             if case['expected_behavior'] == 'SUCCESS' else behavior_match
         )
+        mismatch_reasons = []
+        if not behavior_match:
+            mismatch_reasons.append('behavior')
+        if case['expected_behavior'] == 'SUCCESS':
+            mismatch_reasons.extend(name for name, matched in (
+                ('wrong_intent', intent_match), ('missing_filter', column_match and value_match),
+                ('wrong_join', join_match), ('wrong_result_shape', result_shape_match),
+            ) if not matched)
+            mismatch_reasons.extend(_ir_mismatch_reasons(case.get('expected_sql_shape'), result.sql))
         records.append({
             "id": case["id"],
             "category": case["category"],
@@ -230,10 +275,11 @@ def run(suite_path: Path, output_path: Path) -> dict:
             "expected_behavior": case["expected_behavior"],
             "behavior_match": behavior_match,
             "expected_intent": case["expected_intent"],
-            "actual_intent": preprocessed.intent_result.intent.value.upper(),
+            "actual_intent": actual_intent,
+            "classified_intent": classified_intent,
             "intent_match": intent_match,
             "actual_scope_decision": scope.decision.value,
-            "scope_match": scope.decision.value == expected_scope_decision(case["expected_behavior"]),
+            "scope_match": scope.decision.value == expected_scope_decision(case),
             "scope_signals": scope.matched_signals,
             "linked_tables": linked_tables,
             "valid_expected_tables": valid_expected_tables,
@@ -254,6 +300,7 @@ def run(suite_path: Path, output_path: Path) -> dict:
             "join_planning_match": join_match,
             "sql_validity_match": bool(result.sql) if result.success else case['expected_behavior'] != 'SUCCESS',
             "result_shape_match": result_shape_match,
+            "semantic_mismatches": mismatch_reasons,
             "extracted_entities": [
                 {"type": entity.entity_type, "value": entity.normalized_value}
                 for entity in entities
@@ -354,6 +401,9 @@ def run(suite_path: Path, output_path: Path) -> dict:
         "by_category": dict(sorted(by_category.items())),
         "actual_error_codes": dict(sorted(Counter(record["error_code"] or "SUCCESS" for record in records).items())),
         "failure_stages": dict(sorted(Counter(record["failure_stage"] for record in records if record["failure_stage"]).items())),
+        "semantic_mismatch_summary": dict(sorted(Counter(
+            reason for record in records for reason in record['semantic_mismatches']
+        ).items())),
         "metrics": metrics,
         "invalid_expected_table_labels": invalid_table_labels,
         "uncovered_cases": failures,
@@ -375,6 +425,7 @@ def main() -> None:
         "by_category": report["by_category"],
         "actual_error_codes": report["actual_error_codes"],
         "failure_stages": report["failure_stages"],
+        "semantic_mismatch_summary": report["semantic_mismatch_summary"],
         "metrics": report["metrics"],
         "output": str(args.output),
     }, ensure_ascii=False, indent=2))

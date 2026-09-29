@@ -1,6 +1,7 @@
-"""Foreign-key graph with unique shortest-path resolution, shared by planners."""
+"""Foreign-key graph with unique semantic-cost path resolution, shared by planners."""
 
-from collections import defaultdict, deque
+from collections import defaultdict
+from heapq import heappop, heappush
 from typing import Self
 
 from src.schema.registry import SchemaRegistry
@@ -44,50 +45,52 @@ class RelationshipGraph:
 
     def find_relationship_path(self, source: str, target: str,
                                preferred_edges: set[frozenset[str]] | None = None) -> list[SchemaRelationship]:
-        """Return the unique shortest FK path, oriented from source to target.
+        """Return the unique lowest-cost FK path, oriented source to target.
 
-        Parallel foreign keys are distinct paths. Equal-length alternatives fail
-        closed. Counts saturate at two, so ambiguous graphs do not explode.
+        Normal edges cost 10, explicit semantic-role hints cost 6, and generic
+        tenant-scope edges cost 14. This preserves shortest-path behavior in the
+        absence of evidence while allowing a fully evidenced business path to
+        beat an unrelated scope shortcut. Equal-cost alternatives fail closed.
         """
         if self.registry is not None:
             source, target = self.registry.resolve_table(source), self.registry.resolve_table(target)
         if source not in self.adjacency or target not in self.adjacency:
             raise JoinPathNotFoundError(f'No FK path between {source} and {target}')
-        # Find the shortest-path DAG first. A hint can then select a unique
-        # best path within the same distance without ever preferring a longer
-        # route or falling back to traversal order.
+        hints = preferred_edges or set()
         distance = {source: 0}
         predecessors: dict[str, list[SchemaRelationship]] = defaultdict(list)
-        queue = deque([source])
+        queue: list[tuple[int, str]] = [(0, source)]
         while queue:
-            current = queue.popleft()
+            current_distance, current = heappop(queue)
+            if current_distance != distance[current]:
+                continue
             for edge in self._edges.get(current, []):
                 neighbor = edge.target.rsplit('.', 1)[0]
-                next_distance = distance[current] + 1
-                if neighbor not in distance:
+                edge_key = frozenset((edge.source, edge.target))
+                edge_cost = 6 if edge_key in hints else 10
+                if '.tenant_id' in edge.source or '.tenant_id' in edge.target:
+                    edge_cost += 4
+                next_distance = current_distance + edge_cost
+                if next_distance < distance.get(neighbor, 10**9):
                     distance[neighbor] = next_distance
-                    queue.append(neighbor)
-                if distance.get(neighbor) == next_distance:
+                    predecessors[neighbor] = [edge]
+                    heappush(queue, (next_distance, neighbor))
+                elif distance.get(neighbor) == next_distance:
                     predecessors[neighbor].append(edge)
         if target not in distance:
             raise JoinPathNotFoundError(f'No FK path between {source} and {target}')
-        hints = preferred_edges or set()
-        best_score = {source: 0}
         counts = {source: 1}
         parents: dict[str, SchemaRelationship] = {}
         for node, _ in sorted(distance.items(), key=lambda item: (item[1], item[0])):
             if node == source:
                 continue
-            score, count, parent = -1, 0, None
+            count, parent = 0, None
             for edge in predecessors[node]:
                 previous = edge.source.rsplit('.', 1)[0]
-                edge_key = frozenset((edge.source, edge.target))
-                candidate_score = best_score[previous] + int(edge_key in hints)
-                if candidate_score > score:
-                    score, count, parent = candidate_score, counts[previous], edge
-                elif candidate_score == score:
-                    count = min(2, count + counts[previous])
-            best_score[node], counts[node] = score, count
+                count = min(2, count + counts[previous])
+                if parent is None:
+                    parent = edge
+            counts[node] = count
             if parent is not None:
                 parents[node] = parent
         if counts[target] > 1:
@@ -108,9 +111,9 @@ class RelationshipGraph:
             for cp in candidate_paths:
                 chain = [source] + [e.target.rsplit('.', 1)[0] for e in cp]
                 candidate_strs.append(' -> '.join(chain))
-            details = f": {'; '.join(candidate_strs)}" if candidate_strs else ""
+            details = f" at semantic cost {distance[target]}: {'; '.join(candidate_strs)}" if candidate_strs else ""
             raise AmbiguousJoinPathError(
-                f"Multiple shortest FK paths between {source} and {target}{details}. "
+                f"Multiple lowest-cost FK paths between {source} and {target}{details}. "
                 "Please specify clarifying join hints or intermediate tables.",
                 candidate_paths=[
                     [source, *[edge.target.rsplit('.', 1)[0] for edge in candidate_path]]
