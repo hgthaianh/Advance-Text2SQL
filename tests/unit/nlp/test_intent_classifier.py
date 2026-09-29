@@ -78,4 +78,18 @@ def test_classifier_exception_safety(monkeypatch, classifier):
     assert result.intent == Intent.UNKNOWN
     assert result.confidence == 0.0
     assert result.reason == "Intent classification failed."
-    assert "Simulated normalization error" not in result.reason
+
+
+@pytest.mark.parametrize('query', [
+    'Headcount phòng nhân sự',
+    'Số người phòng HR',
+    'Phòng nhân sự có mấy người',
+    'Tổng số nhân sự bên HR',
+])
+def test_headcount_semantics_are_count_not_sum(classifier, query):
+    assert classifier.classify(query).intent == Intent.COUNT
+
+
+def test_minimum_numeric_threshold_is_not_top_n(classifier):
+    assert classifier.classify('doanh thu theo chi nhanh it nhat 300').intent == Intent.REVENUE
+    assert classifier.classify('san pham co doanh thu it nhat').intent == Intent.TOP_N

@@ -139,6 +139,9 @@ class DefaultColumnPolicy(ColumnPolicy):
             if gb:
                 columns.append(self._parse_col(gb))
 
+        if query.time_group is not None:
+            columns.append(self._parse_col(query.time_group.column))
+
         for ob in query.order_by:
             col_str = ob.column if hasattr(ob, "column") else str(ob)
             if col_str:

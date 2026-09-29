@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 from src.permission.models import PermissionContext
 from src.permission.row_policy import ScopedRowPolicy
+from src.query.ir import QueryFilter
 from src.schema.registry import SchemaRegistry
-from src.shared.enums import PermissionScope
+from src.shared.enums import FilterOperator, PermissionScope
 from src.shared.exceptions import PermissionDeniedError
 from src.shared.models import UserContext
 
@@ -55,7 +56,10 @@ class DefaultPermissionResolver(PermissionResolver):
             scope = PermissionScope.BRANCH
             required_identity = user.branch_id
             identity_name = 'branch'
-        elif role in ("department_manager", "hr_manager", "hr"):
+        elif role in (
+            "department_manager", "hr_manager", "hr", "finance_manager",
+            "sales_manager", "support_manager",
+        ):
             scope = PermissionScope.DEPARTMENT
             required_identity = user.department_id
             identity_name = 'department'
@@ -80,16 +84,61 @@ class DefaultPermissionResolver(PermissionResolver):
             user, scope, self_column=self._self_scope_column() if scope == PermissionScope.SELF else 'employee_id',
         )
 
-        # Column allowlists by role (HR/Payroll can view sensitive salary/PII data)
-        if role in ("hr", "hr_manager", "payroll_admin", "admin"):
+        # The seeded domain policies inherit a department assignment, while
+        # several fact tables expose that assignment through a domain-specific
+        # anchor. Keep that mapping in policy code instead of asking the join
+        # planner to choose among unrelated department paths.
+        if role in ('hr_manager', 'hr'):
+            scope_filters = [QueryFilter(
+                column='hr.employees.department_id', operator=FilterOperator.EQ,
+                value=user.department_id, source='permission',
+            )]
+        elif role == 'support_manager':
+            scope_filters = [QueryFilter(
+                column='support.support_tickets.assigned_department_id', operator=FilterOperator.EQ,
+                value=user.department_id, source='permission',
+            )]
+        elif role == 'sales_manager' and user.branch_id:
+            scope_filters = [QueryFilter(
+                column='branch_id', operator=FilterOperator.EQ,
+                value=user.branch_id, source='permission',
+            )]
+
+        domain_schemas = {
+            'hr_manager': {'hr', 'org'},
+            'hr': {'hr', 'org'},
+            'finance_manager': {'finance', 'org', 'procurement'},
+            'sales_manager': {'sales', 'customer', 'product', 'org'},
+            'support_manager': {'support', 'customer', 'org'},
+        }
+        if role in domain_schemas:
+            allowed_tables = (["*"] if self.registry is None else sorted(
+                table for table in self.registry.tables
+                if table.split('.', 1)[0] in domain_schemas[role]
+            ))
+            # Table policies grant ordinary business columns. Seeded column
+            # policies independently deny salary and credentials to all
+            # non-admin roles.
             allowed_cols = {"*": ["*"]}
+            denied_cols = [
+                'base_salary', 'gross_salary', 'net_salary', 'password_hash',
+                'bank_account', 'bank_account_number', 'national_id',
+                'passport_number', 'ssn', 'social_security_number',
+            ]
+        elif role == 'payroll_admin':
+            allowed_tables = ["*"]
+            allowed_cols = {"*": ["*"]}
+            denied_cols = []
         else:
+            allowed_tables = ["*"]
             # General users have standard columns allowed; sensitive columns remain restricted
             allowed_cols = {"*": ["id", "name", "department_id", "branch_id", "team_id", "title", "role", "email"]}
+            denied_cols = []
 
         return PermissionContext(
-            allowed_tables=["*"],
+            allowed_tables=allowed_tables,
             allowed_columns=allowed_cols,
+            denied_columns=denied_cols,
             row_filters=scope_filters,
             scope=scope,
             tenant_id=user.tenant_id,

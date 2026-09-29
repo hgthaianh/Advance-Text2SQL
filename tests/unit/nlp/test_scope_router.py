@@ -58,3 +58,37 @@ def test_accentless_input_and_routing_diagnostics_are_deterministic(router):
     assert result.reasons == ['QUERY_ACTION_AND_ENTITY']
     assert 'ACTION:bao nhieu' in result.matched_signals
     assert 'ENTITY:nhan vien' in result.matched_signals
+
+
+@pytest.mark.parametrize('question', [
+    'Phòng HR đang có bao nhiêu người?',
+    'Headcount phòng nhân sự là bao nhiêu?',
+    'Số người phòng HR',
+    'hr co bao nhieu nguoi',
+    'Có bn nhân viên phòng hr?',
+    'phog HR có bao nhiêu ngừoi?',
+])
+def test_hr_headcount_paraphrases_are_in_scope_after_semantic_normalization(question):
+    from datetime import date
+    from src.nlp.robustness import NLPRobustnessProcessor
+
+    processed = NLPRobustnessProcessor().process_query(question, date(2026, 9, 29))
+    result = ScopeRouter().route(processed)
+
+    assert result.decision == ScopeDecision.IN_SCOPE
+    assert 'hr' in result.candidate_domains
+    assert {'employee', 'department'} <= set(result.candidate_entities)
+
+
+@pytest.mark.parametrize('question, domain, entity', [
+    ('Có bao nhiêu ticket OPEN?', 'support', 'ticket'),
+    ('Liệt kê vendor bill OVERDUE.', 'finance', 'vendor_bill'),
+    ('Có bao nhiêu serial đang được quản lý?', 'inventory', 'stock_serial'),
+    ('Tổng chi phí theo cost center.', 'finance', 'cost_center'),
+])
+def test_business_subject_without_legacy_entity_word_is_in_scope(router, question, domain, entity):
+    result = router.route(question)
+
+    assert result.decision == ScopeDecision.IN_SCOPE
+    assert domain in result.candidate_domains
+    assert entity in result.candidate_entities

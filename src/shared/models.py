@@ -20,6 +20,9 @@ class ScopeRoutingResult(BaseModel):
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     reasons: list[str] = Field(default_factory=list)
     matched_signals: list[str] = Field(default_factory=list)
+    candidate_domains: list[str] = Field(default_factory=list)
+    candidate_entities: list[str] = Field(default_factory=list)
+    scope_hints: list[str] = Field(default_factory=list)
 
 
 class UserContext(BaseModel):

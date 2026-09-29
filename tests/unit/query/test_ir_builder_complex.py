@@ -32,6 +32,16 @@ def test_group_having_and_direct_join_are_constructed_from_explicit_semantics():
     assert compiled.sql.count(' JOIN ') == 1
 
 
+def test_at_least_threshold_builds_having_without_top_k_limit():
+    registry, query = _build('doanh thu theo chi nhanh it nhat 300')
+
+    assert query.top_k is None
+    assert query.having[0].operator == FilterOperator.GTE
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'HAVING sum(' in compiled.sql
+    assert 'LIMIT' not in compiled.sql
+
+
 def test_multiple_catalog_code_filters_add_their_fk_owner_tables():
     registry, query = _build('doanh thu khach hang ma khach hang C1 tai ma chi nhanh B1')
 
@@ -109,6 +119,17 @@ def test_date_range_can_use_direct_transactional_neighbor_for_top_k():
     assert 'orders"."order_date' in compiled.sql
 
 
+def test_recent_years_adds_date_filters_to_revenue():
+    registry, query = _build('cho toi tong tien doanh thu 2 nam gan day')
+
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('sales.orders.order_date', date(2024, 9, 20)),
+        ('sales.orders.order_date', date(2026, 9, 21)),
+    ]
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert 'orders"."order_date' in compiled.sql
+
+
 def test_status_filter_uses_explicit_business_context():
     _, query = _build('don hang da hoan thanh')
 
@@ -116,6 +137,68 @@ def test_status_filter_uses_explicit_business_context():
         ('sales.orders.status', 'COMPLETED')
     ]
 
+
+def test_business_codes_status_tier_and_department_values_survive_ir_construction():
+    _, employee = _build('Cho toi thong tin nhan vien EMP000120')
+    _, order = _build('Cho toi thong tin don hang SO000123')
+    _, partial = _build('Co bao nhieu PO trang thai PARTIAL')
+    _, gold = _build('Co bao nhieu khach hang GOLD')
+    _, department = _build('Co bao nhieu nhan vien phong nhan su')
+
+    assert ('hr.employees.employee_code', 'EMP000120') in {
+        (item.column, item.value) for item in employee.filters
+    }
+    assert ('sales.orders.order_no', 'SO000123') in {
+        (item.column, item.value) for item in order.filters
+    }
+    assert ('procurement.purchase_orders.status', 'PARTIAL') in {
+        (item.column, item.value) for item in partial.filters
+    }
+    assert ('customer.customers.customer_tier', 'GOLD') in {
+        (item.column, item.value) for item in gold.filters
+    }
+    assert any(item.column == 'org.departments.name' and item.operator.value == 'like'
+               for item in department.filters)
+
+
+def test_compositional_aggregate_ranking_grouping_and_time_are_preserved():
+    _, customers = _build('Top 5 khach hang co doanh so cao nhat')
+    _, inventory = _build('Tong ton kho kha dung theo san pham')
+    _, cancelled = _build('So don hang CANCELLED theo chi nhanh')
+    _, monthly = _build('Doanh thu tung thang tu thang 1 den thang 9/2026')
+
+    assert customers.group_by == ['customer.customers.name']
+    assert customers.select[1].column == 'sales.orders.total_amount'
+    assert customers.select[1].aggregation.value == 'sum'
+    assert customers.top_k == 5
+    assert inventory.group_by == ['product.products.name']
+    assert inventory.select[1].column == 'inventory.inventory_balances.qty_available'
+    assert inventory.select[1].aggregation.value == 'sum'
+    assert cancelled.group_by == ['org.branches.name']
+    assert cancelled.select[1].aggregation.value == 'count'
+    assert monthly.time_group.column == 'sales.orders.order_date'
+    assert monthly.time_group.granularity == 'month'
+
+
+def test_superlative_top_k_ignores_numbers_from_date_filters():
+    _, query = _build('Nha cung cap co tong gia tri PO cao nhat trong thang 8/2026')
+
+    assert query.top_k == 1
+
+
+def test_named_status_comparison_becomes_grouped_count_with_in_filter():
+    _, query = _build('So sanh so PO RECEIVED va PARTIAL')
+
+    assert query.group_by == ['procurement.purchase_orders.status']
+    assert query.select[1].aggregation == Aggregation.COUNT
+    assert query.filters[0].operator == FilterOperator.IN
+    assert query.filters[0].value == ['RECEIVED', 'PARTIAL']
+
+
+def test_explicit_tenant_number_survives_as_an_ir_filter():
+    _, query = _build('Co bao nhieu nhan vien cua tenant 2')
+
+    assert ('org.tenants.id', 2) in {(item.column, item.value) for item in query.filters}
 
 def test_group_by_uses_the_dimension_after_theo():
     registry, query = _build('doanh thu khach hang theo chi nhanh')

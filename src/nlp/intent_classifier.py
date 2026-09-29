@@ -3,6 +3,7 @@ import re
 from abc import ABC, abstractmethod
 
 from src.nlp.normalizer import Normalizer
+from src.nlp.semantic_normalizer import SemanticNormalizer
 from src.shared.enums import Intent
 from src.shared.models import IntentResult
 
@@ -21,6 +22,7 @@ class RuleBasedIntentClassifier(IntentClassifier):
 
     def __init__(self, normalizer: Normalizer | None = None) -> None:
         self.normalizer = normalizer or Normalizer()
+        self.semantic_normalizer = SemanticNormalizer(self.normalizer)
 
     def classify(self, text: str) -> IntentResult:
         """Classify query text safely with error handling and fallback."""
@@ -33,7 +35,7 @@ class RuleBasedIntentClassifier(IntentClassifier):
             )
 
         try:
-            normalized = self.normalizer.normalize(text)
+            normalized = self.normalizer.normalize(self.semantic_normalizer.normalize(text))
             norm_text = normalized.normalized_text
             accent_stripped = normalized.accent_stripped_text
 
@@ -66,7 +68,7 @@ class RuleBasedIntentClassifier(IntentClassifier):
             # 3. TOP_N (ranking, highest, lowest, best selling)
             top_n_patterns = [
                 r"\btop\b", r"ban chay nhat", r"cao nhat", r"nhieu nhat",
-                r"thap nhat", r"it nhat", r"xep hang", r"hang dau", r"lon nhat", r"nho nhat"
+                r"thap nhat", r"it nhat(?!\s+\d)", r"xep hang", r"hang dau", r"lon nhat", r"nho nhat"
             ]
             for pat in top_n_patterns:
                 if re.search(pat, accent_stripped):
@@ -100,7 +102,21 @@ class RuleBasedIntentClassifier(IntentClassifier):
                         reason=f"Matched revenue keyword '{pat}'.",
                     )
 
-            # 6. SUM (summation of non-revenue values)
+            # 6. COUNT (headcount is semantic count even when phrased "tổng số")
+            count_patterns = [
+                r"co bao nhieu", r"\bso luong\b", r"\bdem\b", r"dem so", r"\bbao nhieu\b",
+                r"\bheadcount\b", r"\bso nguoi\b", r"\bmay nguoi\b",
+                r"\bso (?:\w+\s+){0,3}theo\b",
+            ]
+            for pat in count_patterns:
+                if re.search(pat, accent_stripped):
+                    return IntentResult(
+                        intent=Intent.COUNT,
+                        confidence=0.92,
+                        reason=f"Matched count pattern '{pat}'.",
+                    )
+
+            # 7. SUM (summation of non-revenue values)
             sum_patterns = [
                 r"tong so tien", r"tong chi phi", r"tong gia tri", r"tong thanh toan",
                 r"tinh tong", r"\btong\b"
@@ -111,18 +127,6 @@ class RuleBasedIntentClassifier(IntentClassifier):
                         intent=Intent.SUM,
                         confidence=0.90,
                         reason=f"Matched sum calculation keyword '{pat}'.",
-                    )
-
-            # 7. COUNT (counting entities / quantity inquiries)
-            count_patterns = [
-                r"co bao nhieu", r"\bso luong\b", r"\bdem\b", r"dem so", r"\bbao nhieu\b"
-            ]
-            for pat in count_patterns:
-                if re.search(pat, accent_stripped):
-                    return IntentResult(
-                        intent=Intent.COUNT,
-                        confidence=0.92,
-                        reason=f"Matched count pattern '{pat}'.",
                     )
 
             # 8. DETAIL (specific record/entity information lookup)
