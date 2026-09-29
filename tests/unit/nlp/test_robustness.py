@@ -76,6 +76,13 @@ def test_relative_date_expressions(processor: NLPRobustnessProcessor):
     assert res_prev_month.date_range.end == date(2026, 9, 1)
 
 
+def test_bare_year_range_is_parsed_as_inclusive_calendar_years(processor: NLPRobustnessProcessor):
+    result = processor.process_query('so nhan vien theo nam tu 2021 den 2025', date(2026, 9, 19))
+
+    assert result.date_range.start == date(2021, 1, 1)
+    assert result.date_range.end == date(2026, 1, 1)
+
+
 def test_fuzzy_matching(processor: NLPRobustnessProcessor):
     candidates = ["employees", "customers", "orders", "departments"]
     matched = processor.fuzzy_match("employes", candidates, max_distance=2)
