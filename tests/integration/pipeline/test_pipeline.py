@@ -255,7 +255,7 @@ class _CaptureObserver(PipelineObserver):
         self.events.append(event)
 
 
-def test_pipeline_observability_excludes_question_identity_and_values(pipeline: Text2SQLPipeline):
+def test_pipeline_observability_retains_question_but_excludes_identity(pipeline: Text2SQLPipeline):
     observer = _CaptureObserver()
     pipeline.observer = observer
     question = 'thoi tiet cua alice@example.com la gi'
@@ -267,10 +267,9 @@ def test_pipeline_observability_excludes_question_identity_and_values(pipeline: 
     assert observer.events[0].outcome == 'failure'
     assert observer.events[0].stage == 'scope_routing'
     assert observer.events[0].error_code == 'UNSUPPORTED_QUERY'
+    assert observer.events[0].question == question
     serialized = observer.events[0].model_dump_json()
-    assert question not in serialized
     assert 'private-user' not in serialized
-    assert 'alice@example.com' not in serialized
 
 
 def test_observer_failure_does_not_change_controlled_pipeline_failure(pipeline: Text2SQLPipeline):

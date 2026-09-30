@@ -15,13 +15,14 @@ from sqlalchemy import Engine, text
 
 
 class PipelineEvent(BaseModel):
-    """A request summary excluding question, identity, values, and secrets."""
+    """A request summary; sensitive text is redacted from ordinary logs."""
 
     query_id: str
     outcome: str
     stage: str
     duration_ms: float = Field(ge=0)
     error_code: str | None = None
+    question: str | None = None
     sql: str | None = None
     row_count: int | None = Field(default=None, ge=0)
     truncated: bool | None = None
@@ -44,8 +45,8 @@ class LoggingPipelineObserver(PipelineObserver):
         self.logger = logger or logging.getLogger('text2sql.pipeline')
 
     def record(self, event: PipelineEvent) -> None:
-        # SQL persistence is admin-only; ordinary application logs stay redacted.
-        safe_event = event.model_copy(update={'sql': None})
+        # Prompt and SQL persistence are admin-only; application logs stay redacted.
+        safe_event = event.model_copy(update={'question': None, 'sql': None})
         self.logger.info('pipeline_event=%s', json.dumps(safe_event.model_dump(), separators=(',', ':'), sort_keys=True))
 
 
@@ -84,6 +85,7 @@ class PersistedPipelineObserver(PipelineObserver):
                     stage VARCHAR(64) NOT NULL,
                     duration_ms DOUBLE PRECISION NOT NULL,
                     error_code VARCHAR(64),
+                    question_text TEXT,
                     sql_text TEXT,
                     row_count INTEGER,
                     truncated BOOLEAN,
@@ -96,6 +98,7 @@ class PersistedPipelineObserver(PipelineObserver):
     def _ensure_columns(self, connection) -> None:
         """Upgrade the lightweight audit table without a separate migration system."""
         expected = {
+            'question_text': 'TEXT',
             'sql_text': 'TEXT',
             'row_count': 'INTEGER',
             'truncated': 'BOOLEAN',
@@ -110,15 +113,15 @@ class PersistedPipelineObserver(PipelineObserver):
             connection.exec_driver_sql(f'ALTER TABLE {self._table} ADD COLUMN IF NOT EXISTS {name} {type_}')
 
     def record(self, event: PipelineEvent) -> None:
-        # Explicit column selection is the redaction boundary. SQL is retained
-        # exclusively for admin trace inspection; never retain question, actor,
-        # parameters, headers, secrets, or exception detail.
+        # Explicit column selection is the redaction boundary. Prompt and SQL
+        # are retained exclusively for admin trace inspection; never retain
+        # actor identity, parameters, headers, secrets, or exception detail.
         self._ensure_table()
         with self.engine.begin() as connection:
             connection.execute(text(
                 f'''INSERT INTO {self._table}
-                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, sql_text, row_count, truncated, stage_durations_json)
-                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :sql_text, :row_count, :truncated, :stage_durations_json)'''
+                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, question_text, sql_text, row_count, truncated, stage_durations_json)
+                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :question_text, :sql_text, :row_count, :truncated, :stage_durations_json)'''
             ), {
                 'query_id': event.query_id,
                 'recorded_at': datetime.now(timezone.utc),
@@ -126,6 +129,7 @@ class PersistedPipelineObserver(PipelineObserver):
                 'stage': event.stage,
                 'duration_ms': event.duration_ms,
                 'error_code': event.error_code,
+                'question_text': event.question,
                 'sql_text': event.sql,
                 'row_count': event.row_count,
                 'truncated': event.truncated,
@@ -182,7 +186,7 @@ class PersistedPipelineObserver(PipelineObserver):
         limit = max(1, min(limit, 100))
         statement = (
             f'''SELECT query_id, recorded_at, outcome, stage, duration_ms, error_code,
-                       sql_text, row_count, truncated, stage_durations_json
+                       question_text, sql_text, row_count, truncated, stage_durations_json
                 FROM {self._table}'''
         )
         params: dict[str, Any] = {'limit': limit}
@@ -204,6 +208,7 @@ class PersistedPipelineObserver(PipelineObserver):
             'stage': record['stage'],
             'duration_ms': float(record['duration_ms']),
             'error_code': record['error_code'],
+            'question': record['question_text'],
             'sql': record['sql_text'],
             'row_count': record['row_count'],
             'truncated': record['truncated'],

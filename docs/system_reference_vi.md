@@ -274,7 +274,7 @@ Khác với các hệ sinh thái Text-to-SQL sử dụng LLM (vốn gặp vấn 
 
 ### 3.9. Tầng Quan sát & Giám sát An toàn (Privacy-Safe Observability)
 * **[`src/pipeline/observability.py`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/observability.py)**:
-  * [`PipelineEvent`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/observability.py#L17): Sự kiện ghi nhận kết thúc: `query_id`, `outcome` (success/failure), `stage` (chặng kết thúc), `duration_ms`, `error_code`, `stage_durations_ms`. **Tuyệt đối không lưu text câu hỏi, user_id, raw SQL hay param**.
+  * [`PipelineEvent`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/observability.py#L17): Sự kiện ghi nhận kết thúc: `query_id`, `outcome` (success/failure), `stage` (chặng kết thúc), `duration_ms`, `error_code`, `stage_durations_ms`. Prompt và SQL chỉ được lưu trong audit history dành cho admin, đồng thời bị loại khỏi application log; hệ thống không lưu `user_id`, bind params, header hay secret.
   * [`LoggingPipelineObserver`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/observability.py#L37): Ghi log định dạng JSON phục vụ hệ thống tập trung log (ELK, Datadog).
   * [`PersistedPipelineObserver`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/observability.py#L47): Lưu trữ an toàn vào bảng `audit.text2sql_query_audits` (giới hạn 10,000 dòng gần nhất) và tổng hợp số liệu thống kê cho dashboard.
 * **[`src/pipeline/orchestrator.py`](file:///c:/Workspace/Advance-Text2SQL/src/pipeline/orchestrator.py)**:
