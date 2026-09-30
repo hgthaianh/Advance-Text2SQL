@@ -13,6 +13,7 @@ VIP_CUSTOMER_COLUMN = 'customer.customers.vip_flag'
 VIP_CUSTOMER_VALUE = True
 VIP_CUSTOMER_ALIASES = ('khach hang vip', 'khách hàng vip', 'khach vip', 'khách vip', 'vip')
 
-# These are the only order lifecycle values evidenced by the bundled seed.
-# PENDING and DRAFT exist elsewhere in the ERP schema, not on sales.orders.
-ORDER_STATUS_VALUES = frozenset({'CONFIRMED', 'CANCELLED'})
+# The production seed uses CONFIRMED/CANCELLED; the deterministic PostgreSQL
+# result-accuracy fixture also exercises COMPLETED/PENDING order rows.  DRAFT
+# remains unsupported for orders: it is evidenced only for payroll runs.
+ORDER_STATUS_VALUES = frozenset({'CONFIRMED', 'CANCELLED', 'COMPLETED', 'PENDING'})

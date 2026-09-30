@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS org.branches (
     id text PRIMARY KEY, tenant_id text NOT NULL, name text NOT NULL
 );
 CREATE TABLE IF NOT EXISTS customer.customers (
-    id text PRIMARY KEY, tenant_id text NOT NULL, customer_type text, name text
+    id text PRIMARY KEY, tenant_id text NOT NULL, customer_type text, vip_flag boolean, name text
 );
 CREATE TABLE IF NOT EXISTS sales.orders (
     id text PRIMARY KEY, tenant_id text NOT NULL, customer_id text,
@@ -51,9 +51,9 @@ INSERTS = (
         {'id': 'B1', 'tenant': 'T1', 'name': 'HCM'}, {'id': 'B2', 'tenant': 'T1', 'name': 'Ha Noi'},
         {'id': 'B3', 'tenant': 'T2', 'name': 'Other Branch'},
     ]),
-    ("INSERT INTO customer.customers VALUES (:id, :tenant, :type, :name)", [
-        {'id': 'C1', 'tenant': 'T1', 'type': 'VIP', 'name': 'VIP Co'}, {'id': 'C2', 'tenant': 'T1', 'type': 'NORMAL', 'name': 'Normal Co'},
-        {'id': 'C3', 'tenant': 'T2', 'type': 'VIP', 'name': 'Other VIP'},
+    ("INSERT INTO customer.customers VALUES (:id, :tenant, :type, :vip, :name)", [
+        {'id': 'C1', 'tenant': 'T1', 'type': 'BUSINESS', 'vip': True, 'name': 'VIP Co'}, {'id': 'C2', 'tenant': 'T1', 'type': 'BUSINESS', 'vip': False, 'name': 'Normal Co'},
+        {'id': 'C3', 'tenant': 'T2', 'type': 'INDIVIDUAL', 'vip': True, 'name': 'Other VIP'},
     ]),
     ("INSERT INTO sales.orders VALUES (:id, :tenant, :customer, :branch, :date, :amount)", [
         {'id': 'O1', 'tenant': 'T1', 'customer': 'C1', 'branch': 'B1', 'date': '2026-08-10', 'amount': 100},
@@ -68,7 +68,7 @@ _CORE_COLUMNS = {
     'hr.employees': {'id', 'tenant_id', 'department_id', 'branch_id', 'team_id', 'full_name', 'base_salary'},
     'org.branches': {'id', 'tenant_id', 'code', 'name', 'status'},
     'org.departments': {'id', 'tenant_id', 'branch_id', 'code', 'name', 'status'},
-    'customer.customers': {'id', 'tenant_id', 'branch_id', 'code', 'customer_type', 'name', 'status'},
+    'customer.customers': {'id', 'tenant_id', 'branch_id', 'code', 'customer_type', 'vip_flag', 'name', 'status'},
     'product.products': {'id', 'tenant_id', 'code', 'name', 'base_price', 'status'},
     'sales.orders': {'id', 'tenant_id', 'customer_id', 'branch_id', 'order_date', 'status', 'total_amount'},
     'sales.order_items': {'id', 'order_id', 'product_id', 'quantity', 'line_total'},
@@ -210,9 +210,9 @@ def _insert_core_rows(connection) -> None:
             {'id': 'D3', 'tenant_id': 'T2', 'branch_id': 'B3', 'code': 'D3', 'name': 'Other', 'status': 'COMPLETED'},
         ],
         'customer.customers': [
-            {'id': 'C1', 'tenant_id': 'T1', 'branch_id': 'B1', 'code': 'C1', 'customer_type': 'VIP', 'name': 'VIP Co', 'status': 'COMPLETED'},
-            {'id': 'C2', 'tenant_id': 'T1', 'branch_id': 'B2', 'code': 'C2', 'customer_type': 'NORMAL', 'name': 'Normal Co', 'status': 'COMPLETED'},
-            {'id': 'C3', 'tenant_id': 'T2', 'branch_id': 'B3', 'code': 'C3', 'customer_type': 'VIP', 'name': 'Other VIP', 'status': 'COMPLETED'},
+            {'id': 'C1', 'tenant_id': 'T1', 'branch_id': 'B1', 'code': 'C1', 'customer_type': 'BUSINESS', 'vip_flag': True, 'name': 'VIP Co', 'status': 'COMPLETED'},
+            {'id': 'C2', 'tenant_id': 'T1', 'branch_id': 'B2', 'code': 'C2', 'customer_type': 'BUSINESS', 'vip_flag': False, 'name': 'Normal Co', 'status': 'COMPLETED'},
+            {'id': 'C3', 'tenant_id': 'T2', 'branch_id': 'B3', 'code': 'C3', 'customer_type': 'INDIVIDUAL', 'vip_flag': True, 'name': 'Other VIP', 'status': 'COMPLETED'},
         ],
         'product.products': [
             {'id': 'P1', 'tenant_id': 'T1', 'code': 'P1', 'name': 'Widget A', 'base_price': 50, 'status': 'COMPLETED'},

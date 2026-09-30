@@ -145,10 +145,22 @@ def test_status_filter_uses_explicit_business_context(question, status):
     ]
 
 
-@pytest.mark.parametrize('status', ['PENDING', 'DRAFT'])
+@pytest.mark.parametrize('status', ['DRAFT'])
 def test_order_statuses_without_schema_evidence_are_rejected(status):
     with pytest.raises(MissingEntityError, match='Unsupported order status'):
         _build(f'don hang {status}')
+
+
+@pytest.mark.parametrize('question, status', [
+    ('don hang cho xu ly', 'PENDING'),
+    ('don hang da hoan thanh', 'COMPLETED'),
+])
+def test_order_statuses_exercised_by_postgresql_regression_are_supported(question, status):
+    _, query = _build(question)
+
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('sales.orders.status', status)
+    ]
 
 
 def test_vip_customer_is_filtered_by_the_canonical_boolean_flag():
