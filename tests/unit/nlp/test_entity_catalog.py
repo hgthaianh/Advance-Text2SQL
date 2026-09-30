@@ -25,6 +25,12 @@ def test_code_abbreviation_does_not_mistake_customer_phrase_for_a_code():
     assert ('customer_code', 'ACH') not in {(item.entity_type, item.normalized_value) for item in values}
 
 
+def test_vip_customer_is_a_boolean_flag_not_customer_type_or_tier():
+    values = DeterministicEntityExtractor().extract('danh sach khach hang vip')
+
+    assert {(item.entity_type, item.normalized_value) for item in values} == {('vip_flag', True)}
+
+
 def test_catalog_prefers_longest_overlapping_phrase():
     catalog = EntityCatalog((
         CatalogEntry('branch_name', 'North', ('north',)),

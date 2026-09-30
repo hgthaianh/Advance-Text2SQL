@@ -5,6 +5,10 @@ from decimal import Decimal
 import re
 import unicodedata
 
+from src.business_semantics import (
+    COLLECTED_AMOUNT_COLUMN, INVOICE_AMOUNT_COLUMN, ORDER_STATUS_VALUES,
+    REVENUE_COLUMN, VIP_CUSTOMER_COLUMN,
+)
 from src.nlp.entity_extractor import ExtractedEntity
 from src.query.ir import (
     ColumnRef, HavingCondition, InstanceJoinRequest, OrderBy, QueryFilter,
@@ -233,12 +237,14 @@ class QueryIRBuilder:
             (r'\bitem dat mua\b', 'procurement.purchase_order_items.ordered_qty'),
             (r'\bhang da nhan\b', 'procurement.goods_receipt_items.received_qty'),
             (r'\bdieu chuyen kho\b', 'inventory.stock_transfer_items.received_qty'),
-            (r'\bthanh toan\b', 'sales.payments.amount'),
+            (r'\b(?:tien|so tien)\s+da\s+thu\b', COLLECTED_AMOUNT_COLUMN),
+            (r'\bthanh toan\b', COLLECTED_AMOUNT_COLUMN),
             (r'\bphat sinh but toan\b', 'finance.journal_entry_lines.debit_amount'),
             (r'\bchi phi\b', 'finance.journal_entry_lines.debit_amount'),
             (r'\bngan sach\b', 'finance.budgets.budget_amount'),
             (r'\b(?:doanh thu|doanh so)\b.*\b(?:thuong hieu|danh muc|san pham)\b', 'sales.order_items.line_total'),
-            (r'\b(?:doanh thu|doanh so)\b', 'sales.orders.total_amount'),
+            (r'\b(?:doanh thu|doanh so)\b.*\bhoa don\b', INVOICE_AMOUNT_COLUMN),
+            (r'\b(?:doanh thu|doanh so)\b', REVENUE_COLUMN),
         )
         for pattern, column in rules:
             if re.search(pattern, text) and column in self.registry.columns:
@@ -621,6 +627,7 @@ class QueryIRBuilder:
             'tenant_id': 'org.tenants.id',
             'customer_type': 'customer.customers.customer_type',
             'customer_tier': 'customer.customers.customer_tier',
+            'vip_flag': VIP_CUSTOMER_COLUMN,
             'priority': 'support.support_tickets.priority',
             'department_name': 'org.departments.name',
             'department_code': 'org.departments.code',
@@ -643,6 +650,11 @@ class QueryIRBuilder:
                 if emitted_status_filter:
                     continue
                 status_columns = self._status_columns(preprocessed, all_tables)
+                if ('don hang' in preprocessed.accent_stripped_text
+                        and entity.normalized_value not in ORDER_STATUS_VALUES):
+                    raise MissingEntityError(
+                        f'Unsupported order status: {entity.normalized_value}'
+                    )
                 target = self._one(status_columns, 'status column')
                 emitted_status_filter = True
             if not target:
