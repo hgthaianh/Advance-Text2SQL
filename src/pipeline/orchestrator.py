@@ -82,6 +82,9 @@ class Text2SQLPipeline:
         stage_durations: dict[str, float] = {}
         permissions = None
         compiled = None
+        audit_identity = user_context.model_dump(include={
+            'user_id', 'username', 'role', 'tenant_id', 'department_id', 'branch_id', 'team_id',
+        })
         try:
             preprocessed = self.nlp.process_query(question, reference_date or date.today())
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'scope_routing')
@@ -121,7 +124,7 @@ class Text2SQLPipeline:
                                        duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations,
                                        question=question, sql=compiled.sql,
                                        row_count=result.row_count, truncated=result.truncated,
-                                       safe_params=safe_bind_params(compiled.params)))
+                                       safe_params=safe_bind_params(compiled.params), **audit_identity))
             return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
             stage_durations[stage] = elapsed_ms(stage_started_at)
@@ -131,7 +134,8 @@ class Text2SQLPipeline:
                                        stage_durations_ms=stage_durations,
                                        question=question,
                                        sql=compiled.sql if compiled is not None else None,
-                                       safe_params=safe_bind_params(compiled.params) if compiled is not None else {}))
+                                       safe_params=safe_bind_params(compiled.params) if compiled is not None else {},
+                                       **audit_identity))
             return QueryResult(
                 success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
                 ambiguity=self._safe_ambiguity(exc, permissions),

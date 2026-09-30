@@ -39,7 +39,7 @@ class AuthenticationProvider(ABC):
 
 
 _USER_BY_USERNAME = text("""
-    SELECT u.id, u.tenant_id, u.branch_id, u.department_id, u.team_id, u.employee_id, r.code AS role_code
+    SELECT u.id, u.username, u.tenant_id, u.branch_id, u.department_id, u.team_id, u.employee_id, r.code AS role_code
     FROM iam.users u
     JOIN iam.user_roles ur ON ur.user_id = u.id AND (ur.valid_to IS NULL OR ur.valid_to > CURRENT_TIMESTAMP)
     JOIN iam.roles r ON r.id = ur.role_id AND r.is_active = TRUE
@@ -49,7 +49,7 @@ _USER_BY_USERNAME = text("""
     ORDER BY r.id LIMIT 1
 """)
 _USER_BY_ID = text("""
-    SELECT u.id, u.tenant_id, u.branch_id, u.department_id, u.team_id, u.employee_id, r.code AS role_code
+    SELECT u.id, u.username, u.tenant_id, u.branch_id, u.department_id, u.team_id, u.employee_id, r.code AS role_code
     FROM iam.users u
     JOIN iam.user_roles ur ON ur.user_id = u.id AND (ur.valid_to IS NULL OR ur.valid_to > CURRENT_TIMESTAMP)
     JOIN iam.roles r ON r.id = ur.role_id AND r.is_active = TRUE
@@ -103,7 +103,8 @@ class DefaultAuthenticationProvider(AuthenticationProvider):
 
     def _identity(self, row: dict) -> AuthenticatedIdentity:
         return AuthenticatedIdentity(
-            user_id=str(row['id']), role=_role_from_code(str(row['role_code'])), tenant_id=str(row['tenant_id']),
+            user_id=str(row['id']), username=str(row['username']),
+            role=_role_from_code(str(row['role_code'])), tenant_id=str(row['tenant_id']),
             employee_id=str(row['employee_id']) if row['employee_id'] is not None else None,
             department_id=str(row['department_id']) if row['department_id'] is not None else None,
             branch_id=str(row['branch_id']) if row['branch_id'] is not None else None,

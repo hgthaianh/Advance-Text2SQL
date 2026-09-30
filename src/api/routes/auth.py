@@ -146,6 +146,7 @@ def get_me(request: Request) -> IdentityResponse | JSONResponse:
 
     return IdentityResponse(
         user_id=identity.user_id,
+        username=identity.username,
         role=identity.role,
         tenant_id=identity.tenant_id,
         employee_id=identity.employee_id,

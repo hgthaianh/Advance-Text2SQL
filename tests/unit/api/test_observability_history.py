@@ -18,6 +18,8 @@ def test_admin_history_is_authorized_and_returns_only_masked_bound_values() -> N
         question='nhân viên có mã E1 là ai?',
         sql='SELECT name FROM employees WHERE id = :p0', row_count=1, truncated=False,
         safe_params={'p0': '***', 'p1': '2026-09-30'},
+        user_id='user-id-401', username='user0401', role='sales_manager',
+        tenant_id='3', department_id='25', branch_id='7',
     ))
     original_get_engine = observability_module.get_engine
     observability_module.get_engine = lambda: engine
@@ -35,7 +37,12 @@ def test_admin_history_is_authorized_and_returns_only_masked_bound_values() -> N
                 assert body['sql'] == 'SELECT name FROM employees WHERE id = :p0'
                 assert body['row_count'] == 1
                 assert body['params'] == {'p0': '***', 'p1': '2026-09-30'}
-                assert 'employee_id' not in body
+                assert body['user_id'] == 'user-id-401'
+                assert body['username'] == 'user0401'
+                assert body['role'] == 'sales_manager'
+                assert body['tenant_id'] == '3'
+                assert body['department_id'] == '25'
+                assert body['branch_id'] == '7'
     finally:
         observability_module.get_engine = original_get_engine
         app.dependency_overrides.pop(get_authentication_provider, None)

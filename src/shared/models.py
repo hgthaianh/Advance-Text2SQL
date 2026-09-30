@@ -27,6 +27,7 @@ class ScopeRoutingResult(BaseModel):
 
 class UserContext(BaseModel):
     user_id: str = Field(min_length=1)
+    username: str | None = None
     role: str = Field(min_length=1)
     tenant_id: str | None = None
     employee_id: str | None = None

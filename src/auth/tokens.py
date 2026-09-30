@@ -61,6 +61,7 @@ def create_access_token(
 
     payload: dict[str, Any] = {
         "sub": identity.user_id,
+        "username": identity.username,
         "role": identity.role,
         "tenant_id": identity.tenant_id,
         "employee_id": identity.employee_id,
@@ -95,6 +96,7 @@ def create_refresh_token(
 
     payload: dict[str, Any] = {
         "sub": identity.user_id,
+        "username": identity.username,
         "role": identity.role,
         "tenant_id": identity.tenant_id,
         "employee_id": identity.employee_id,
@@ -147,6 +149,7 @@ def decode_access_token(token: str) -> AuthenticatedIdentity:
 
     return AuthenticatedIdentity(
         user_id=str(user_id),
+        username=payload.get("username"),
         role=str(role),
         tenant_id=str(tenant_id),
         employee_id=payload.get("employee_id"),
@@ -189,6 +192,7 @@ def decode_refresh_token(token: str) -> AuthenticatedIdentity:
 
     return AuthenticatedIdentity(
         user_id=str(user_id),
+        username=payload.get("username"),
         role=str(role),
         tenant_id=str(tenant_id),
         employee_id=payload.get("employee_id"),
