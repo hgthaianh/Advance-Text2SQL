@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+from decimal import Decimal
 import json
 import logging
 from time import perf_counter
@@ -29,6 +30,8 @@ class PipelineEvent(BaseModel):
     # A bounded map of pipeline stage names to elapsed milliseconds.  It never
     # contains request text, identities, SQL, or bound values.
     stage_durations_ms: dict[str, float] = Field(default_factory=dict)
+    # Bound values are retained only after masking for the admin-only trace.
+    safe_params: dict[str, Any] = Field(default_factory=dict)
 
 
 class PipelineObserver(ABC):
@@ -89,7 +92,8 @@ class PersistedPipelineObserver(PipelineObserver):
                     sql_text TEXT,
                     row_count INTEGER,
                     truncated BOOLEAN,
-                    stage_durations_json TEXT NOT NULL
+                    stage_durations_json TEXT NOT NULL,
+                    safe_params_json TEXT NOT NULL DEFAULT '{{}}'
                 )'''
             )
             self._ensure_columns(connection)
@@ -102,6 +106,7 @@ class PersistedPipelineObserver(PipelineObserver):
             'sql_text': 'TEXT',
             'row_count': 'INTEGER',
             'truncated': 'BOOLEAN',
+            'safe_params_json': "TEXT NOT NULL DEFAULT '{}'",
         }
         if self.engine.dialect.name == 'sqlite':
             existing = {row[1] for row in connection.exec_driver_sql(f'PRAGMA table_info({self._table})')}
@@ -120,8 +125,8 @@ class PersistedPipelineObserver(PipelineObserver):
         with self.engine.begin() as connection:
             connection.execute(text(
                 f'''INSERT INTO {self._table}
-                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, question_text, sql_text, row_count, truncated, stage_durations_json)
-                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :question_text, :sql_text, :row_count, :truncated, :stage_durations_json)'''
+                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json)
+                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :question_text, :sql_text, :row_count, :truncated, :stage_durations_json, :safe_params_json)'''
             ), {
                 'query_id': event.query_id,
                 'recorded_at': datetime.now(timezone.utc),
@@ -133,7 +138,10 @@ class PersistedPipelineObserver(PipelineObserver):
                 'sql_text': event.sql,
                 'row_count': event.row_count,
                 'truncated': event.truncated,
-                'stage_durations_json': json.dumps(event.stage_durations_ms, separators=(',', ':'), sort_keys=True),
+                # Preserve the pipeline's insertion order so the admin UI can
+                # render the actual trace order, including semantic_review.
+                'stage_durations_json': json.dumps(event.stage_durations_ms, separators=(',', ':')),
+                'safe_params_json': json.dumps(event.safe_params, separators=(',', ':'), sort_keys=True),
             })
             # The dashboard is operational history, not an immutable event
             # archive. Retention bounds table growth and Python aggregation.
@@ -186,7 +194,7 @@ class PersistedPipelineObserver(PipelineObserver):
         limit = max(1, min(limit, 100))
         statement = (
             f'''SELECT query_id, recorded_at, outcome, stage, duration_ms, error_code,
-                       question_text, sql_text, row_count, truncated, stage_durations_json
+                       question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json
                 FROM {self._table}'''
         )
         params: dict[str, Any] = {'limit': limit}
@@ -213,6 +221,7 @@ class PersistedPipelineObserver(PipelineObserver):
             'row_count': record['row_count'],
             'truncated': record['truncated'],
             'stage_durations_ms': json.loads(record['stage_durations_json']),
+            'params': json.loads(record['safe_params_json'] or '{}'),
         }
 
 
@@ -229,3 +238,28 @@ class CompositePipelineObserver(PipelineObserver):
 
 def elapsed_ms(started_at: float) -> float:
     return round((perf_counter() - started_at) * 1000, 3)
+
+
+def safe_bind_params(params: dict[str, Any]) -> dict[str, Any]:
+    """Return an admin-debuggable but non-sensitive representation of binds.
+
+    SQL bind names are positional (``p0`` etc.), so a text value cannot be
+    classified safely from its key.  Preserve only non-sensitive scalar types
+    and ISO calendar values; mask every other string and nested text value.
+    """
+    def mask(value: Any) -> Any:
+        if value is None or isinstance(value, (bool, int, float)):
+            return value
+        if isinstance(value, (date, datetime, Decimal)):
+            return value.isoformat() if isinstance(value, (date, datetime)) else str(value)
+        if isinstance(value, str):
+            try:
+                return date.fromisoformat(value).isoformat()
+            except ValueError:
+                return '***'
+        if isinstance(value, (list, tuple)):
+            return [mask(item) for item in value]
+        # Unknown values could contain credentials or driver internals.
+        return '***'
+
+    return {str(key): mask(value) for key, value in params.items()}
