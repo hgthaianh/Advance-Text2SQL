@@ -19,7 +19,7 @@ from src.permission.resolver import DefaultPermissionResolver, PermissionResolve
 from src.permission.row_policy import ScopedRowPolicy
 from src.pipeline.observability import (
     CompositePipelineObserver, LoggingPipelineObserver, PersistedPipelineObserver,
-    PipelineEvent, PipelineObserver, elapsed_ms,
+    PipelineEvent, PipelineObserver, elapsed_ms, safe_bind_params,
 )
 from src.query.handlers.basic import BasicQueryHandler
 from src.query.ir_builder import QueryIRBuilder
@@ -120,7 +120,8 @@ class Text2SQLPipeline:
             self._record(PipelineEvent(query_id=query_id, outcome='success', stage=stage,
                                        duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations,
                                        question=question, sql=compiled.sql,
-                                       row_count=result.row_count, truncated=result.truncated))
+                                       row_count=result.row_count, truncated=result.truncated,
+                                       safe_params=safe_bind_params(compiled.params)))
             return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
             stage_durations[stage] = elapsed_ms(stage_started_at)
@@ -129,7 +130,8 @@ class Text2SQLPipeline:
                                        duration_ms=elapsed_ms(started_at), error_code=error_code,
                                        stage_durations_ms=stage_durations,
                                        question=question,
-                                       sql=compiled.sql if compiled is not None else None))
+                                       sql=compiled.sql if compiled is not None else None,
+                                       safe_params=safe_bind_params(compiled.params) if compiled is not None else {}))
             return QueryResult(
                 success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
                 ambiguity=self._safe_ambiguity(exc, permissions),
