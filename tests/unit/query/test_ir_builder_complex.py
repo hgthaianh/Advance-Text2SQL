@@ -1,5 +1,7 @@
 from datetime import date
 
+import pytest
+
 from src.nlp.entity_extractor import DeterministicEntityExtractor
 from src.nlp.robustness import NLPRobustnessProcessor
 from src.query.handlers.basic import BasicQueryHandler
@@ -7,7 +9,7 @@ from src.query.ir_builder import QueryIRBuilder
 from src.schema.linker import SchemaLinker
 from src.schema.registry import SchemaRegistry
 from src.shared.enums import Aggregation, FilterOperator, SortDirection
-from src.shared.exceptions import AmbiguousQueryError
+from src.shared.exceptions import AmbiguousQueryError, MissingEntityError
 from src.shared.models import UserContext
 
 
@@ -131,12 +133,52 @@ def test_recent_years_adds_date_filters_to_revenue():
     assert 'orders"."order_date' in compiled.sql
 
 
-def test_status_filter_uses_explicit_business_context():
-    _, query = _build('don hang da hoan thanh')
+@pytest.mark.parametrize('question, status', [
+    ('don hang da huy', 'CANCELLED'),
+    ('don hang da xac nhan', 'CONFIRMED'),
+])
+def test_status_filter_uses_explicit_business_context(question, status):
+    _, query = _build(question)
 
     assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
-        ('sales.orders.status', 'COMPLETED')
+        ('sales.orders.status', status)
     ]
+
+
+@pytest.mark.parametrize('status', ['DRAFT'])
+def test_order_statuses_without_schema_evidence_are_rejected(status):
+    with pytest.raises(MissingEntityError, match='Unsupported order status'):
+        _build(f'don hang {status}')
+
+
+@pytest.mark.parametrize('question, status', [
+    ('don hang cho xu ly', 'PENDING'),
+    ('don hang da hoan thanh', 'COMPLETED'),
+])
+def test_order_statuses_exercised_by_postgresql_regression_are_supported(question, status):
+    _, query = _build(question)
+
+    assert [(filter_.column, filter_.value) for filter_ in query.filters] == [
+        ('sales.orders.status', status)
+    ]
+
+
+def test_vip_customer_is_filtered_by_the_canonical_boolean_flag():
+    _, query = _build('tong doanh thu khach hang vip')
+
+    assert ('customer.customers.vip_flag', True) in {
+        (item.column, item.value) for item in query.filters
+    }
+
+
+@pytest.mark.parametrize('question, column', [
+    ('doanh thu', 'sales.orders.total_amount'),
+    ('doanh thu hoa don', 'sales.invoices.total_amount'),
+    ('tong tien da thu', 'sales.payments.amount'),
+])
+def test_sales_amount_terms_keep_distinct_canonical_measures(question, column):
+    _, query = _build(question)
+    assert query.select[0].column == column
 
 
 def test_business_codes_status_tier_and_department_values_survive_ir_construction():

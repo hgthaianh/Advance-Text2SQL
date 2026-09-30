@@ -32,6 +32,8 @@ def test_table_mentions(linker, question, table):
 
 @pytest.mark.parametrize('question, column', [
     ('doanh thu', 'sales.orders.total_amount'),
+    ('doanh thu hóa đơn', 'sales.invoices.total_amount'),
+    ('tiền đã thu', 'sales.payments.amount'),
     ('lương nhân viên', 'hr.employees.base_salary'),
     ('employee salary', 'hr.employees.base_salary'),
     ('salary employee', 'hr.employees.base_salary'),
