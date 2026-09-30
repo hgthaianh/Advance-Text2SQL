@@ -28,8 +28,8 @@ def pipeline():
         )
         connection.exec_driver_sql('CREATE TABLE org.branches (id TEXT, tenant_id TEXT, name TEXT)')
         connection.exec_driver_sql("INSERT INTO org.branches VALUES ('B1', 'T1', 'HCM'), ('B2', 'T1', 'Ha Noi'), ('B3', 'T2', 'Other Branch')")
-        connection.exec_driver_sql('CREATE TABLE customer.customers (id TEXT, tenant_id TEXT, customer_type TEXT, name TEXT)')
-        connection.exec_driver_sql("INSERT INTO customer.customers VALUES ('C1', 'T1', 'VIP', 'VIP Co'), ('C2', 'T1', 'NORMAL', 'Normal Co'), ('C3', 'T2', 'VIP', 'Other VIP')")
+        connection.exec_driver_sql('CREATE TABLE customer.customers (id TEXT, tenant_id TEXT, customer_type TEXT, vip_flag BOOLEAN, name TEXT)')
+        connection.exec_driver_sql("INSERT INTO customer.customers VALUES ('C1', 'T1', 'BUSINESS', 1, 'VIP Co'), ('C2', 'T1', 'BUSINESS', 0, 'Normal Co'), ('C3', 'T2', 'INDIVIDUAL', 1, 'Other VIP')")
         connection.exec_driver_sql('CREATE TABLE product.products (id TEXT, tenant_id TEXT, name TEXT)')
         connection.exec_driver_sql("INSERT INTO product.products VALUES ('P1', 'T1', 'Widget A'), ('P2', 'T1', 'Widget B'), ('P3', 'T2', 'Other Widget')")
         connection.exec_driver_sql(

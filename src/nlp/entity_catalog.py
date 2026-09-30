@@ -11,6 +11,7 @@ import re
 from dataclasses import dataclass
 from typing import Iterable
 
+from src.business_semantics import VIP_CUSTOMER_ALIASES, VIP_CUSTOMER_VALUE
 from src.nlp.normalizer import Normalizer, strip_accents
 
 
@@ -84,7 +85,7 @@ class EntityCatalog:
             CatalogEntry('department_name', 'Kinh doanh', ('kinh doanh', 'sales')),
             CatalogEntry('department_name', 'Nhân sự', ('nhan su', 'nhân sự', 'hr')),
             CatalogEntry('department_name', 'Kế toán', ('ke toan', 'kế toán', 'accounting')),
-            CatalogEntry('customer_type', 'VIP', ('vip',)),
+            CatalogEntry('vip_flag', VIP_CUSTOMER_VALUE, VIP_CUSTOMER_ALIASES),
             CatalogEntry('customer_tier', 'STANDARD', ('standard',)),
             CatalogEntry('customer_tier', 'SILVER', ('silver',)),
             CatalogEntry('customer_tier', 'GOLD', ('gold',)),
@@ -96,11 +97,12 @@ class EntityCatalog:
             CatalogEntry('status', 'COMPLETED', ('da hoan thanh', 'đã hoàn thành', 'hoan thanh', 'hoàn thành', 'completed')),
             CatalogEntry('status', 'PENDING', ('cho xu ly', 'chờ xử lý', 'dang xu ly', 'đang xử lý', 'pending')),
             CatalogEntry('status', 'CANCELLED', ('huy', 'hủy', 'cancelled', 'canceled')),
+            CatalogEntry('status', 'DRAFT', ('nhap', 'nháp', 'draft')),
             CatalogEntry('status', 'ACTIVE', ('active',)),
             CatalogEntry('status', 'INACTIVE', ('inactive',)),
             CatalogEntry('status', 'APPROVED', ('approved',)),
             CatalogEntry('status', 'REJECTED', ('rejected',)),
-            CatalogEntry('status', 'CONFIRMED', ('confirmed',)),
+            CatalogEntry('status', 'CONFIRMED', ('da xac nhan', 'đã xác nhận', 'xac nhan', 'xác nhận', 'confirmed')),
             CatalogEntry('status', 'OPEN', ('open',)),
             CatalogEntry('status', 'OVERDUE', ('overdue',)),
             CatalogEntry('status', 'PAID', ('paid',)),

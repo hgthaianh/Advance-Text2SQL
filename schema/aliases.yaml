@@ -2395,6 +2395,8 @@ columns:
     aliases:
     - tổng tiền của hóa đơn bán hàng
     - tổng giá trị của hóa đơn bán hàng
+    - doanh thu hóa đơn
+    - doanh số hóa đơn
     - tổng tiền
     - tổng giá trị
   sales.invoice_items.invoice_id:
@@ -2440,6 +2442,9 @@ columns:
     - số tiền
     - tiền khách hàng thanh toán
     - tiền thu khách hàng
+    - số tiền đã thu
+    - tiền đã thu
+    - doanh thu đã thu
     - collected amount
   sales.payments.payment_method:
     aliases:
