@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     cors_allowed_origins: str = ""
     ollama_base_url: str = "http://host.docker.internal:11434"
     ollama_model: str = "gemma4:31b-cloud"
+    ollama_api_key: SecretStr = SecretStr("")
     ollama_timeout_seconds: float = Field(default=10, ge=1, le=60)
 
     @field_validator("auth_secret_key")

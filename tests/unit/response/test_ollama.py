@@ -11,6 +11,7 @@ def _settings() -> Settings:
         auth_secret_key=SecretStr('x' * 32),
         ollama_base_url='http://host.docker.internal:11434',
         ollama_model='gemma4:31b-cloud',
+        ollama_api_key=SecretStr('cloud-secret'),
     )
 
 
@@ -49,6 +50,7 @@ def test_ollama_parses_a_valid_natural_language_response() -> None:
     assert answer == 'Co 7 ket qua.'
     assert call.call_args.kwargs['timeout'] == 10
     assert call.call_args.args[0].full_url == 'http://host.docker.internal:11434/api/chat'
+    assert call.call_args.args[0].get_header('Authorization') == 'Bearer cloud-secret'
 
 
 def test_pipeline_response_provider_failure_falls_back_without_failing_execution() -> None:
