@@ -11,6 +11,7 @@ from sqlalchemy.engine import Engine
 from src.config import get_settings
 from src.database.executor import ReadOnlyExecutor
 from src.nlp.entity_extractor import DeterministicEntityExtractor, EntityExtractor
+from src.nlp.ollama_semantic import OllamaSemanticReviewer, SemanticReviewer
 from src.nlp.robustness import NLPRobustnessProcessor
 from src.nlp.scope_router import ScopeRouter
 from src.permission.column_policy import DefaultColumnPolicy
@@ -45,6 +46,7 @@ class Text2SQLPipeline:
                  permission_resolver: PermissionResolver | None = None,
                  validator: SQLValidator | None = None, executor: ReadOnlyExecutor | None = None,
                  observer: PipelineObserver | None = None,
+                 semantic_reviewer: SemanticReviewer | None = None,
                  responder: NaturalLanguageResponder | None = None) -> None:
         self.registry = registry or SchemaRegistry()
         self.nlp = nlp or NLPRobustnessProcessor()
@@ -63,6 +65,7 @@ class Text2SQLPipeline:
             engine = engine or create_engine(get_settings().database_url, pool_pre_ping=True)
             executor = ReadOnlyExecutor(engine, timeout_ms=get_settings().query_timeout_ms)
         self.executor = executor
+        self.semantic_reviewer = semantic_reviewer or OllamaSemanticReviewer()
         self.responder = responder or OllamaNaturalLanguageResponder()
         # A caller-provided observer remains untouched for tests/integrations.
         # The default combines existing logs with durable, redacted audit data.
@@ -93,6 +96,8 @@ class Text2SQLPipeline:
             entities = self.entity_extractor.extract(preprocessed.normalized_text)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'ir_construction')
             query = self.ir_builder.build(preprocessed, links, entities, user_context)
+            stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'semantic_review')
+            self.semantic_reviewer.validate(question, preprocessed, query)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'permission_resolution')
             permissions = self.permission_resolver.resolve(user_context)
             query = self.row_policy.apply(query, permissions)
