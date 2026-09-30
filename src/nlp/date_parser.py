@@ -10,7 +10,7 @@ from src.shared.models import DateRange
 
 _DAY = r"(?:\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{4}|\d{1,2}-\d{1,2}-\d{4}|\d{1,2}\s+thang\s+\d{1,2}\s+nam\s+\d{4})"
 _MONTH = r"thang\s+\d{1,2}(?:(?:\s+nam\s+|/)\d{4})?"
-_ATOM = rf"(?:{_DAY}|{_MONTH}|quy\s+\d+(?:\s+nam\s+\d{{4}})?|nam\s+\d{{4}}|hom\s+(?:nay|qua)|(?:tuan|thang)\s+(?:nay|truoc)|nam\s+(?:nay|truoc))"
+_ATOM = rf"(?:{_DAY}|{_MONTH}|quy\s+(?:\d+(?:\s+nam\s+\d{{4}})?|nay|truoc)|nam\s+\d{{4}}|hom\s+(?:nay|qua)|(?:tuan|thang)\s+(?:nay|truoc)|nam\s+(?:nay|truoc))"
 _EXPRESSION = re.compile(
     rf"(?<![\w/\-])(?:(?:tu\s+)?{_ATOM}\s+den\s+{_ATOM}|{_ATOM})(?![\w/\-])"
 )
@@ -52,12 +52,14 @@ def _interval(expression: str, reference: date) -> tuple[date, date, str]:
             start = _month_start(year, month, -1)
         return start, _month_start(start.year, start.month, 1), "month"
     if expression.startswith("quy"):
-        quarter = numbers[0]
+        quarter = numbers[0] if numbers else (reference.month - 1) // 3 + 1
         if not 1 <= quarter <= 4:
             raise ValueError("Quarter must be between 1 and 4")
         year = numbers[1] if len(numbers) > 1 else reference.year
         start = date(year, quarter * 3 - 2, 1)
-        return start, _month_start(year, start.month, 3), "quarter"
+        if not numbers and previous:
+            start = _month_start(start.year, start.month, -3)
+        return start, _month_start(start.year, start.month, 3), "quarter"
     year = numbers[0] if numbers else reference.year - previous
     return date(year, 1, 1), date(year + 1, 1, 1), "year"
 

@@ -131,6 +131,16 @@ def test_revenue_date_and_entity_filters_execute(pipeline: Text2SQLPipeline):
     assert result.scalar == 300
 
 
+def test_current_quarter_revenue_applies_quarter_boundaries(pipeline: Text2SQLPipeline):
+    result = _run(pipeline, 'doanh thu tổng của quý này', UserContext(
+        user_id='admin', role='admin', tenant_id='T1',
+    ))
+
+    assert result.success
+    assert result.scalar == 1200
+    assert {date(2026, 7, 1), date(2026, 10, 1)} <= set(result.params.values())
+
+
 def test_recent_years_revenue_uses_contextual_dates_and_returns_execution_data(pipeline: Text2SQLPipeline):
     result = _run(pipeline, 'cho toi tong tien doanh thu 2 nam gan day', UserContext(
         user_id='admin', role='admin', tenant_id='T1',

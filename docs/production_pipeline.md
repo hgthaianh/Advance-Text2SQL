@@ -2,9 +2,11 @@
 
 `POST /query` delegates to `Text2SQLPipeline`; the API route contains no NLP, schema, permission, or SQL logic.
 
-The pipeline calls, in order: `NLPRobustnessProcessor`, `DeterministicEntityExtractor`, `SchemaLinker`, `QueryIRBuilder`, permission resolution and row-policy injection, `BasicQueryHandler`, `ReadOnlySQLValidator`, and `ReadOnlyExecutor`.
+The pipeline calls, in order: `NLPRobustnessProcessor`, `DeterministicEntityExtractor`, `SchemaLinker`, `QueryIRBuilder`, optional Ollama semantic review, permission resolution and row-policy injection, `BasicQueryHandler`, `ReadOnlySQLValidator`, and `ReadOnlyExecutor`.
 
 The bridge is deterministic. `QueryIRBuilder` only uses schema-linked candidates and schema metadata. It raises controlled errors for missing values, ambiguous columns, and unsupported intents instead of generating guessed SQL.
+
+When Ollama is configured, it receives the original question, the deterministic semantic plan, and the three nearest covered regression examples. It can reject a high-confidence semantic mismatch before permissions and SQL compilation, but it cannot create SQL, introduce schema identifiers, or bypass validation/RBAC. Provider failures fall back to the deterministic path.
 
 `ReadOnlySQLValidator` accepts only typed SQLAlchemy `Select` statements and rejects raw SQL fragments. `ReadOnlyExecutor` accepts only `CompiledQuery`, binds parameters, starts PostgreSQL transactions as `READ ONLY`, applies `statement_timeout`, and returns a generic execution error without connection details.
 

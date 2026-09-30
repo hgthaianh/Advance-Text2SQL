@@ -1,7 +1,7 @@
 # Tài liệu Kỹ thuật Toàn diện: Kiến trúc, Modules, Luồng Xử lý và Thuật toán trong Advance-Text2SQL
 
 > **Dự án**: Advance-Text2SQL  
-> **Đặc tả**: Vietnamese Text2SQL without LLMs (Chuyển đổi ngôn ngữ tự nhiên tiếng Việt sang SQL chuyên biệt cho ERP/Doanh nghiệp, hoàn toàn không sử dụng LLM).  
+> **Đặc tả**: Vietnamese Text2SQL tất định với Ollama tùy chọn để kiểm tra semantic trước thực thi và diễn đạt kết quả sau thực thi; LLM không trực tiếp sinh SQL.
 > **Nguyên tắc cốt lõi**: Tất định (Deterministic), Không đoán mò (Zero-guess), Thất bại an toàn (Fail-closed), Bảo mật đa tầng (Multi-tier RBAC/ABAC), Tham số hóa tuyệt đối (100% Parameterized AST).
 
 ---
