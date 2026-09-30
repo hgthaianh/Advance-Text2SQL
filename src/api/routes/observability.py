@@ -1,4 +1,4 @@
-"""Authenticated, aggregate-only observability output."""
+"""Authenticated observability output."""
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -28,7 +28,7 @@ def observability_history(
 
 @router.get('/observability/history/{query_id}')
 def observability_history_detail(query_id: str, _: ObservabilityAdmin) -> dict:
-    """Return one retained admin trace record without parameters or identity data."""
+    """Return one admin trace, including its prompt but no identity or parameters."""
     records = PersistedPipelineObserver(get_engine()).history(query_id=query_id, limit=1)
     if not records:
         raise HTTPException(status_code=404, detail={

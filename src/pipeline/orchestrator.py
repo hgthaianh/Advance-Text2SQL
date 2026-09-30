@@ -114,7 +114,8 @@ class Text2SQLPipeline:
             stage_durations[stage] = elapsed_ms(stage_started_at)
             self._record(PipelineEvent(query_id=query_id, outcome='success', stage=stage,
                                        duration_ms=elapsed_ms(started_at), stage_durations_ms=stage_durations,
-                                       sql=compiled.sql, row_count=result.row_count, truncated=result.truncated))
+                                       question=question, sql=compiled.sql,
+                                       row_count=result.row_count, truncated=result.truncated))
             return result
         except Exception as exc:  # The API contract deliberately converts all stage failures.
             stage_durations[stage] = elapsed_ms(stage_started_at)
@@ -122,6 +123,7 @@ class Text2SQLPipeline:
             self._record(PipelineEvent(query_id=query_id, outcome='failure', stage=stage,
                                        duration_ms=elapsed_ms(started_at), error_code=error_code,
                                        stage_durations_ms=stage_durations,
+                                       question=question,
                                        sql=compiled.sql if compiled is not None else None))
             return QueryResult(
                 success=False, query_id=query_id, error_code=error_code, message=self._message(exc),
