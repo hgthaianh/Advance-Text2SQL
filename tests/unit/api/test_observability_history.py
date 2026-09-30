@@ -15,6 +15,7 @@ def test_admin_history_is_authorized_and_excludes_bound_values() -> None:
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False}, poolclass=StaticPool)
     PersistedPipelineObserver(engine).record(PipelineEvent(
         query_id='trace-1', outcome='success', stage='execution', duration_ms=12,
+        question='nhân viên có mã E1 là ai?',
         sql='SELECT name FROM employees WHERE id = :p0', row_count=1, truncated=False,
     ))
     original_get_engine = observability_module.get_engine
@@ -29,6 +30,7 @@ def test_admin_history_is_authorized_and_excludes_bound_values() -> None:
             assert response.status_code == expected_status
             if expected_status == 200:
                 body = response.json()
+                assert body['question'] == 'nhân viên có mã E1 là ai?'
                 assert body['sql'] == 'SELECT name FROM employees WHERE id = :p0'
                 assert body['row_count'] == 1
                 assert 'params' not in body
