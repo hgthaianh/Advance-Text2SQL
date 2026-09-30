@@ -30,6 +30,11 @@ class OllamaNaturalLanguageResponder:
         if not base_url:
             return None
 
+        headers = {'Content-Type': 'application/json'}
+        api_key = self.settings.ollama_api_key.get_secret_value().strip()
+        if api_key:
+            headers['Authorization'] = f'Bearer {api_key}'
+
         payload = {
             'model': self.settings.ollama_model,
             'stream': False,
@@ -50,7 +55,7 @@ class OllamaNaturalLanguageResponder:
         request = Request(
             f'{base_url}/api/chat',
             data=json.dumps(payload, default=str).encode('utf-8'),
-            headers={'Content-Type': 'application/json'},
+            headers=headers,
             method='POST',
         )
         try:
