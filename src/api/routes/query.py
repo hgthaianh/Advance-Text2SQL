@@ -13,7 +13,10 @@ pipeline = Text2SQLPipeline()
     403: {'model': ErrorResponse}, 422: {'model': ErrorResponse}, 503: {'model': ErrorResponse},
 })
 def query(request: QueryRequest, user: AuthenticatedUser) -> PublicQueryResult:
-    result = pipeline.execute(request.question, user, previous_question=request.previous_question)
+    if request.previous_question is None:
+        result = pipeline.execute(request.question, user)
+    else:
+        result = pipeline.execute(request.question, user, previous_question=request.previous_question)
     if not result.success:
         return error_response(result)
     # This is a strict backend boundary: no role calling /query receives SQL,
