@@ -22,6 +22,21 @@ def _build(question: str):
     return registry, query
 
 
+def test_numbered_order_lookup_returns_display_fields_and_exact_row_limit():
+    registry, query = _build('show ra 5 don hang trang thai confirmed')
+
+    assert query.intent.value == 'lookup'
+    assert query.limit == 5
+    assert query.select == [
+        'sales.orders.order_no', 'sales.orders.order_date',
+        'sales.orders.status', 'sales.orders.total_amount',
+    ]
+    compiled = BasicQueryHandler(registry).handle(query)
+    assert compiled.params['limit'] == 5
+    assert 'ORDER BY' in compiled.sql
+    assert '"sales"."orders"."status"' in compiled.sql
+
+
 def test_group_having_and_direct_join_are_constructed_from_explicit_semantics():
     registry, query = _build('doanh thu theo chi nhanh tren 500')
 

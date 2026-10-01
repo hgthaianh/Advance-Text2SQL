@@ -144,6 +144,11 @@ class QueryIRBuilder:
             select = [group_column, SelectItem(column=value_column, aggregation=ranking_aggregation)]
         else:
             select = [self._lookup_column(schema_links, tables)]
+            if tables[0] == 'sales.orders' and re.search(r'\bdon hang\b', preprocessed.accent_stripped_text):
+                select = [
+                    'sales.orders.order_no', 'sales.orders.order_date',
+                    'sales.orders.status', 'sales.orders.total_amount',
+                ]
 
         # JoinResolver builds a rooted tree. For an aggregate, root it at the
         # fact table that owns the measure so dimensions join outward from the
@@ -220,9 +225,19 @@ class QueryIRBuilder:
         having_column = next((item.column for item in select if isinstance(item, SelectItem)), None)
         having = self._having(preprocessed, having_column,
                               aggregate or (Aggregation.SUM if intent == Intent.TOP_N else None), group_by)
+        lookup_limit = None
+        if intent == Intent.LOOKUP and tables[0] == 'sales.orders':
+            count = re.search(r'\b(\d{1,3})\s+don hang\b', preprocessed.accent_stripped_text)
+            if count:
+                lookup_limit = int(count.group(1))
+                if lookup_limit < 1:
+                    raise AmbiguousQueryError('Requested row count must be positive')
+                order_by = [OrderBy(column='sales.orders.order_date', direction=SortDirection.DESC),
+                            OrderBy(column='sales.orders.id', direction=SortDirection.DESC)]
         return QueryIR(intent=intent, tables=tables, select=select, filters=filters,
                        having=having, group_by=group_by, order_by=order_by, top_k=top_k,
-                       time_group=time_group, join_hints=join_hints, outer_joins=outer_joins)
+                       limit=lookup_limit or 100, time_group=time_group,
+                       join_hints=join_hints, outer_joins=outer_joins)
 
     def _semantic_value_column(self, preprocessed: PreprocessedQuery, tables: list[str]) -> str | None:
         """Resolve explicit business measures before falling back to column rank."""

@@ -97,6 +97,14 @@ class Text2SQLPipeline:
                     and re.search(r'\bdoanh thu\b', previous)
                     and re.search(r'\b\d+ thang (?:gan nhat|gan day|qua|tro lai)\b', previous)):
                 effective_question = f'{previous_question} theo từng tháng'
+            elif re.search(r'\bdon hang do\b', follow_up) and not re.search(r'\bso\d+\b', follow_up):
+                if (previous_question and re.search(r'\bdon hang\b', previous)
+                        and (re.search(r'\bso\d+\b', previous)
+                             or (re.search(r'\b\d+\s+don hang\b', follow_up)
+                                 and re.search(r'\b\d+\s+don hang\b', previous)))):
+                    effective_question = previous_question
+                else:
+                    raise AmbiguousQueryError('Specify an order number or repeat the order list criteria')
             preprocessed = self.nlp.process_query(effective_question, reference_date or date.today())
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'scope_routing')
             scope = self.scope_router.route(preprocessed)
