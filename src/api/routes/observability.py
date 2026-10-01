@@ -28,7 +28,7 @@ def observability_history(
 
 @router.get('/observability/history/{query_id}')
 def observability_history_detail(query_id: str, _: ObservabilityAdmin) -> dict:
-    """Return one admin trace, including its prompt but no identity or parameters."""
+    """Return one admin trace with actor context and masked parameters."""
     records = PersistedPipelineObserver(get_engine()).history(query_id=query_id, limit=1)
     if not records:
         raise HTTPException(status_code=404, detail={

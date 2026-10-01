@@ -27,6 +27,7 @@ class ScopeRoutingResult(BaseModel):
 
 class UserContext(BaseModel):
     user_id: str = Field(min_length=1)
+    username: str | None = None
     role: str = Field(min_length=1)
     tenant_id: str | None = None
     employee_id: str | None = None
@@ -134,6 +135,7 @@ class QueryRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     question: str = Field(min_length=1, max_length=2000, pattern=r"\S")
+    previous_question: str | None = Field(default=None, min_length=1, max_length=2000)
 
 
 class ErrorResponse(BaseModel):

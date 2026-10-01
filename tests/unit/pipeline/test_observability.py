@@ -28,6 +28,7 @@ def test_persisted_audit_keeps_safe_fields_and_aggregates_stage_failures():
     assert set(row) == {
         'query_id', 'recorded_at', 'outcome', 'stage', 'duration_ms', 'error_code', 'stage_durations_json',
         'question_text', 'sql_text', 'row_count', 'truncated', 'safe_params_json',
+        'user_id', 'username', 'role', 'tenant_id', 'department_id', 'branch_id', 'team_id',
     }
     assert row['question_text'] == 'show employee salaries'
     assert 'token' not in str(row).lower()
@@ -45,11 +46,19 @@ def test_admin_trace_masks_text_binds_but_retains_safe_calendar_values_and_stage
         query_id='trace-with-binds', outcome='success', stage='execution', duration_ms=12,
         stage_durations_ms={'preprocess': 1.0, 'semantic_review': 2.0, 'execution': 3.0},
         safe_params=safe_bind_params({'p0': 'secret-token', 'p1': '2026-09-30', 'p2': 3}),
+        user_id='user-id-401', username='user0401', role='sales_manager', tenant_id='3',
+        department_id='25', branch_id='7',
     ))
 
     history = observer.history(query_id='trace-with-binds')[0]
     assert list(history['stage_durations_ms']) == ['preprocess', 'semantic_review', 'execution']
     assert history['params'] == {'p0': '***', 'p1': '2026-09-30', 'p2': 3}
+    assert history['user_id'] == 'user-id-401'
+    assert history['username'] == 'user0401'
+    assert history['role'] == 'sales_manager'
+    assert history['tenant_id'] == '3'
+    assert history['department_id'] == '25'
+    assert history['branch_id'] == '7'
 
 
 def test_persisted_audit_retains_only_the_configured_recent_records():
