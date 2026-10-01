@@ -2,6 +2,7 @@
 
 from datetime import date
 import logging
+import re
 from time import perf_counter
 from uuid import uuid4
 
@@ -13,6 +14,7 @@ from src.database.executor import ReadOnlyExecutor
 from src.nlp.entity_extractor import DeterministicEntityExtractor, EntityExtractor
 from src.nlp.ollama_semantic import OllamaSemanticReviewer, SemanticReviewer
 from src.nlp.robustness import NLPRobustnessProcessor
+from src.nlp.normalizer import strip_accents
 from src.nlp.scope_router import ScopeRouter
 from src.permission.column_policy import DefaultColumnPolicy
 from src.permission.resolver import DefaultPermissionResolver, PermissionResolver
@@ -73,7 +75,8 @@ class Text2SQLPipeline:
             LoggingPipelineObserver(), PersistedPipelineObserver(self.executor.engine),
         )
 
-    def execute(self, question: str, user_context: UserContext, *, reference_date: date | None = None) -> QueryResult:
+    def execute(self, question: str, user_context: UserContext, *, reference_date: date | None = None,
+                previous_question: str | None = None) -> QueryResult:
         """Return data or a controlled public failure; never expose a traceback."""
         query_id = uuid4().hex
         started_at = perf_counter()
@@ -86,7 +89,15 @@ class Text2SQLPipeline:
             'user_id', 'username', 'role', 'tenant_id', 'department_id', 'branch_id', 'team_id',
         })
         try:
-            preprocessed = self.nlp.process_query(question, reference_date or date.today())
+            effective_question = question
+            follow_up = strip_accents(question).lower()
+            previous = strip_accents(previous_question or '').lower()
+            if (previous_question and re.search(r'\b(?:chi tiet|tung thang|moi thang)\b', follow_up)
+                    and re.search(r'\b(?:so lieu (?:do|tren)|cac so lieu tren|6 thang gan nhat)\b', follow_up)
+                    and re.search(r'\bdoanh thu\b', previous)
+                    and re.search(r'\b\d+ thang (?:gan nhat|gan day|qua|tro lai)\b', previous)):
+                effective_question = f'{previous_question} theo từng tháng'
+            preprocessed = self.nlp.process_query(effective_question, reference_date or date.today())
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'scope_routing')
             scope = self.scope_router.route(preprocessed)
             if scope.decision == ScopeDecision.OUT_OF_SCOPE:
@@ -100,7 +111,7 @@ class Text2SQLPipeline:
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'ir_construction')
             query = self.ir_builder.build(preprocessed, links, entities, user_context)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'semantic_review')
-            self.semantic_reviewer.validate(question, preprocessed, query)
+            self.semantic_reviewer.validate(effective_question, preprocessed, query)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'permission_resolution')
             permissions = self.permission_resolver.resolve(user_context)
             query = self.row_policy.apply(query, permissions)
@@ -116,7 +127,7 @@ class Text2SQLPipeline:
             self.validator.validate(compiled.statement, permissions)
             stage, stage_started_at = self._next_stage(stage, stage_started_at, stage_durations, 'execution')
             result = self.executor.execute(compiled).model_copy(update={'query_id': query_id})
-            answer = self._generate_response(question, result)
+            answer = self._generate_response(effective_question, result)
             if answer:
                 result = result.model_copy(update={'natural_language_response': answer})
             stage_durations[stage] = elapsed_ms(stage_started_at)

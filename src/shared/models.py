@@ -135,6 +135,7 @@ class QueryRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
     question: str = Field(min_length=1, max_length=2000, pattern=r"\S")
+    previous_question: str | None = Field(default=None, min_length=1, max_length=2000)
 
 
 class ErrorResponse(BaseModel):

@@ -15,6 +15,9 @@ from src.shared.models import UserContext
 def pipeline():
     engine = create_engine('sqlite://', connect_args={'check_same_thread': False}, poolclass=StaticPool)
     with engine.begin() as connection:
+        connection.connection.driver_connection.create_function(
+            'date_trunc', 2, lambda granularity, value: value[:7] + '-01' if granularity == 'month' else value,
+        )
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS hr")
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS sales")
         connection.exec_driver_sql("ATTACH DATABASE ':memory:' AS org")
@@ -150,6 +153,25 @@ def test_recent_years_revenue_uses_contextual_dates_and_returns_execution_data(p
     assert result.scalar == 1200
     assert result.rows == [{'sum_1': 1200}]
     assert {date(2024, 9, 20), date(2026, 9, 21)} <= set(result.params.values())
+
+
+def test_recent_months_follow_up_groups_same_window(pipeline: Text2SQLPipeline):
+    user = UserContext(user_id='admin', role='admin', tenant_id='T1')
+    previous = 'doanh thu 6 tháng gần nhất'
+    total = pipeline.execute(previous, user, reference_date=date(2026, 10, 1))
+    detail = pipeline.execute('chi tiết về số liệu đó', user, previous_question=previous,
+                              reference_date=date(2026, 10, 1))
+
+    assert total.success and total.scalar == 1200
+    assert detail.success
+    assert detail.row_count == 1
+    assert any(value == 1200 for value in detail.rows[0].values())
+    assert {date(2026, 4, 1), date(2026, 10, 1)} <= set(detail.params.values())
+    assert 'GROUP BY' in detail.sql
+
+    suggested_detail = pipeline.execute('Chi tiết hơn về các số liệu trên', user,
+                                        previous_question=previous, reference_date=date(2026, 10, 1))
+    assert suggested_detail.success and 'GROUP BY' in suggested_detail.sql
 
 
 def test_grouped_revenue_join_executes(pipeline: Text2SQLPipeline):
