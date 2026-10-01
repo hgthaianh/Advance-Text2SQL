@@ -57,6 +57,9 @@ def pipeline():
             "('O3', 'T1', 'C2', 'B2', '2026-08-20', 900), "
             "('O4', 'T2', 'C3', 'B3', '2026-08-20', 700)"
         )
+        connection.exec_driver_sql('ALTER TABLE sales.orders ADD COLUMN order_no TEXT')
+        connection.exec_driver_sql('ALTER TABLE sales.orders ADD COLUMN status TEXT')
+        connection.exec_driver_sql("UPDATE sales.orders SET order_no = id, status = 'CONFIRMED'")
         connection.exec_driver_sql(
             "INSERT INTO hr.employees VALUES "
             "('E1', 'D1', 'B1', 'T1', 'T1', 'An', 100, 'E2'), "
@@ -172,6 +175,28 @@ def test_recent_months_follow_up_groups_same_window(pipeline: Text2SQLPipeline):
     suggested_detail = pipeline.execute('Chi tiết hơn về các số liệu trên', user,
                                         previous_question=previous, reference_date=date(2026, 10, 1))
     assert suggested_detail.success and 'GROUP BY' in suggested_detail.sql
+
+
+def test_unresolved_order_reference_does_not_return_arbitrary_orders(pipeline: Text2SQLPipeline):
+    user = UserContext(user_id='admin', role='admin', tenant_id='T1')
+    result = pipeline.execute('đơn hàng đó cụ thể là đơn hàng gì', user,
+                              previous_question='show ra 5 đơn hàng trạng thái confirmed')
+
+    assert not result.success
+    assert result.error_code == 'AMBIGUOUS_QUERY'
+    assert 'order number' in result.message
+
+
+def test_order_list_follow_up_reuses_exact_criteria(pipeline: Text2SQLPipeline):
+    user = UserContext(user_id='admin', role='admin', tenant_id='T1')
+    previous = 'show ra 5 đơn hàng trạng thái confirmed'
+    first = pipeline.execute(previous, user)
+    follow_up = pipeline.execute('tên 5 đơn hàng đó', user, previous_question=previous)
+
+    assert first.success and follow_up.success
+    assert first.rows == follow_up.rows
+    assert first.columns == ['order_no', 'order_date', 'status', 'total_amount']
+    assert first.params['limit'] == 5
 
 
 def test_grouped_revenue_join_executes(pipeline: Text2SQLPipeline):
