@@ -73,6 +73,28 @@ def test_query_success_does_not_expose_sql_or_params(monkeypatch):
         app.dependency_overrides.pop(get_authentication_provider, None)
 
 
+def test_query_passes_previous_question_only_when_provided(monkeypatch):
+    app.dependency_overrides[get_authentication_provider] = lambda: MockAuthenticationProvider(
+        AuthenticatedIdentity(user_id='demo', role='viewer', tenant_id='T1')
+    )
+    captured = []
+
+    def execute(question, user, *, previous_question):
+        captured.append((question, previous_question))
+        return QueryResult(success=True, scalar=1)
+
+    monkeypatch.setattr('src.api.routes.query.pipeline.execute', execute)
+    try:
+        with TestClient(app) as client:
+            response = client.post('/query', json={
+                'question': 'chi tiết về số liệu đó', 'previous_question': 'doanh thu 6 tháng gần nhất',
+            })
+        assert response.status_code == 200
+        assert captured == [('chi tiết về số liệu đó', 'doanh thu 6 tháng gần nhất')]
+    finally:
+        app.dependency_overrides.pop(get_authentication_provider, None)
+
+
 def test_query_rejects_request_body_identity_and_requires_auth_context():
     app.dependency_overrides.pop(get_authentication_provider, None)
     with TestClient(app) as client:

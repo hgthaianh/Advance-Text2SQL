@@ -28,6 +28,7 @@ def test_authenticated_identity_maps_all_seven_fields_to_user_context():
     """Verify that all seven identity fields map correctly to UserContext."""
     identity = AuthenticatedIdentity(
         user_id="user_100",
+        username="user0100",
         role="team_lead",
         tenant_id="TENANT_A",
         employee_id="EMP_100",
@@ -39,6 +40,7 @@ def test_authenticated_identity_maps_all_seven_fields_to_user_context():
 
     assert isinstance(user_context, UserContext)
     assert user_context.user_id == "user_100"
+    assert user_context.username == "user0100"
     assert user_context.role == "team_lead"
     assert user_context.tenant_id == "TENANT_A"
     assert user_context.employee_id == "EMP_100"

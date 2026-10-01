@@ -32,6 +32,13 @@ class PipelineEvent(BaseModel):
     stage_durations_ms: dict[str, float] = Field(default_factory=dict)
     # Bound values are retained only after masking for the admin-only trace.
     safe_params: dict[str, Any] = Field(default_factory=dict)
+    user_id: str | None = None
+    username: str | None = None
+    role: str | None = None
+    tenant_id: str | None = None
+    department_id: str | None = None
+    branch_id: str | None = None
+    team_id: str | None = None
 
 
 class PipelineObserver(ABC):
@@ -49,7 +56,10 @@ class LoggingPipelineObserver(PipelineObserver):
 
     def record(self, event: PipelineEvent) -> None:
         # Prompt and SQL persistence are admin-only; application logs stay redacted.
-        safe_event = event.model_copy(update={'question': None, 'sql': None})
+        safe_event = event.model_copy(update={
+            'question': None, 'sql': None, 'user_id': None, 'username': None,
+            'tenant_id': None, 'department_id': None, 'branch_id': None, 'team_id': None,
+        })
         self.logger.info('pipeline_event=%s', json.dumps(safe_event.model_dump(), separators=(',', ':'), sort_keys=True))
 
 
@@ -93,7 +103,14 @@ class PersistedPipelineObserver(PipelineObserver):
                     row_count INTEGER,
                     truncated BOOLEAN,
                     stage_durations_json TEXT NOT NULL,
-                    safe_params_json TEXT NOT NULL DEFAULT '{{}}'
+                    safe_params_json TEXT NOT NULL DEFAULT '{{}}',
+                    user_id TEXT,
+                    username TEXT,
+                    role TEXT,
+                    tenant_id TEXT,
+                    department_id TEXT,
+                    branch_id TEXT,
+                    team_id TEXT
                 )'''
             )
             self._ensure_columns(connection)
@@ -107,6 +124,13 @@ class PersistedPipelineObserver(PipelineObserver):
             'row_count': 'INTEGER',
             'truncated': 'BOOLEAN',
             'safe_params_json': "TEXT NOT NULL DEFAULT '{}'",
+            'user_id': 'TEXT',
+            'username': 'TEXT',
+            'role': 'TEXT',
+            'tenant_id': 'TEXT',
+            'department_id': 'TEXT',
+            'branch_id': 'TEXT',
+            'team_id': 'TEXT',
         }
         if self.engine.dialect.name == 'sqlite':
             existing = {row[1] for row in connection.exec_driver_sql(f'PRAGMA table_info({self._table})')}
@@ -119,14 +143,16 @@ class PersistedPipelineObserver(PipelineObserver):
 
     def record(self, event: PipelineEvent) -> None:
         # Explicit column selection is the redaction boundary. Prompt and SQL
-        # are retained exclusively for admin trace inspection; never retain
-        # actor identity, parameters, headers, secrets, or exception detail.
+        # and actor scope are retained exclusively for admin trace inspection;
+        # never retain raw parameters, headers, secrets, or exception detail.
         self._ensure_table()
         with self.engine.begin() as connection:
             connection.execute(text(
                 f'''INSERT INTO {self._table}
-                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json)
-                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :question_text, :sql_text, :row_count, :truncated, :stage_durations_json, :safe_params_json)'''
+                    (query_id, recorded_at, outcome, stage, duration_ms, error_code, question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json,
+                     user_id, username, role, tenant_id, department_id, branch_id, team_id)
+                    VALUES (:query_id, :recorded_at, :outcome, :stage, :duration_ms, :error_code, :question_text, :sql_text, :row_count, :truncated, :stage_durations_json, :safe_params_json,
+                            :user_id, :username, :role, :tenant_id, :department_id, :branch_id, :team_id)'''
             ), {
                 'query_id': event.query_id,
                 'recorded_at': datetime.now(timezone.utc),
@@ -142,6 +168,13 @@ class PersistedPipelineObserver(PipelineObserver):
                 # render the actual trace order, including semantic_review.
                 'stage_durations_json': json.dumps(event.stage_durations_ms, separators=(',', ':')),
                 'safe_params_json': json.dumps(event.safe_params, separators=(',', ':'), sort_keys=True),
+                'user_id': event.user_id,
+                'username': event.username,
+                'role': event.role,
+                'tenant_id': event.tenant_id,
+                'department_id': event.department_id,
+                'branch_id': event.branch_id,
+                'team_id': event.team_id,
             })
             # The dashboard is operational history, not an immutable event
             # archive. Retention bounds table growth and Python aggregation.
@@ -194,7 +227,8 @@ class PersistedPipelineObserver(PipelineObserver):
         limit = max(1, min(limit, 100))
         statement = (
             f'''SELECT query_id, recorded_at, outcome, stage, duration_ms, error_code,
-                       question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json
+                       question_text, sql_text, row_count, truncated, stage_durations_json, safe_params_json,
+                       user_id, username, role, tenant_id, department_id, branch_id, team_id
                 FROM {self._table}'''
         )
         params: dict[str, Any] = {'limit': limit}
@@ -222,6 +256,13 @@ class PersistedPipelineObserver(PipelineObserver):
             'truncated': record['truncated'],
             'stage_durations_ms': json.loads(record['stage_durations_json']),
             'params': json.loads(record['safe_params_json'] or '{}'),
+            'user_id': record['user_id'],
+            'username': record['username'],
+            'role': record['role'],
+            'tenant_id': record['tenant_id'],
+            'department_id': record['department_id'],
+            'branch_id': record['branch_id'],
+            'team_id': record['team_id'],
         }
 
 

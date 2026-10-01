@@ -15,6 +15,7 @@ _EXPRESSION = re.compile(
     rf"(?<![\w/\-])(?:(?:tu\s+)?{_ATOM}\s+den\s+{_ATOM}|{_ATOM})(?![\w/\-])"
 )
 _RECENT_YEARS = re.compile(r"(?<![\w/\-])(?:trong\s+)?(\d+)\s+nam\s+(?:gan\s+(?:day|nhat)|tro\s+lai|qua)(?![\w/\-])")
+_RECENT_MONTHS = re.compile(r"(?<![\w/\-])(?:trong\s+)?(\d+)\s+thang\s+(?:gan\s+(?:day|nhat)|tro\s+lai|qua)(?![\w/\-])")
 _BARE_YEAR_RANGE = re.compile(r"(?<![\w/\-])tu\s+(\d{4})\s+den\s+(\d{4})(?![\w/\-])")
 
 
@@ -74,6 +75,18 @@ class DateParser:
         """
         text = unicodedata.normalize("NFC", text)
         stripped = strip_accents(text).lower()
+        recent_months = _RECENT_MONTHS.search(stripped)
+        if recent_months:
+            count = int(recent_months.group(1))
+            if not 1 <= count <= 120:
+                return None
+            end = date(reference_date.year, reference_date.month, 1)
+            try:
+                start = _month_start(end.year, end.month, -count)
+            except ValueError:
+                return None
+            return DateRange(start=start, end=end, granularity="range",
+                             raw_text=text[recent_months.start():recent_months.end()])
         bare_year_range = _BARE_YEAR_RANGE.search(stripped)
         if bare_year_range:
             start_year, end_year = map(int, bare_year_range.groups())

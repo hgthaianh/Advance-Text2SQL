@@ -25,9 +25,12 @@ def cleanup_overrides_and_revocations():
     """Ensure clean test environment before and after each test."""
     clear_revoked_tokens()
     credentials = {
-        "admin": ("test-admin-password", AuthenticatedIdentity(user_id="admin", role="admin", tenant_id="1")),
+        "admin": ("test-admin-password", AuthenticatedIdentity(
+            user_id="admin", username="admin", role="admin", tenant_id="1",
+        )),
         "user0001": ("test-viewer-password", AuthenticatedIdentity(
-            user_id="user0001", role="viewer", tenant_id="1", employee_id="1", department_id="1", branch_id="1", team_id="1",
+            user_id="user0001", username="user0001", role="viewer", tenant_id="1",
+            employee_id="1", department_id="1", branch_id="1", team_id="1",
         )),
     }
     app.dependency_overrides[get_authentication_provider] = lambda: MockAuthenticationProvider(credentials=credentials)
@@ -231,6 +234,7 @@ def test_refresh_preserves_immutable_identity(viewer_credentials):
     assert me_res.status_code == 200
     identity = me_res.json()
     assert identity["user_id"] == "user0001"
+    assert identity["username"] == "user0001"
     assert identity["role"] == "viewer"
     assert identity["tenant_id"] == "1"
     assert identity["employee_id"] == "1"
@@ -260,6 +264,7 @@ def test_authenticated_auth_me_returns_identity(admin_credentials):
     assert response.status_code == 200
     data = response.json()
     assert data["user_id"] == "admin"
+    assert data["username"] == "admin"
     assert data["role"] == "admin"
     assert data["tenant_id"] == "1"
 
@@ -348,6 +353,7 @@ def test_identity_consistency_between_auth_me_and_query(viewer_credentials):
             query_identity = captured_user[0]
 
             assert query_identity.user_id == me_identity["user_id"]
+            assert query_identity.username == me_identity["username"]
             assert query_identity.role == me_identity["role"]
             assert query_identity.tenant_id == me_identity["tenant_id"]
             assert query_identity.employee_id == me_identity["employee_id"]

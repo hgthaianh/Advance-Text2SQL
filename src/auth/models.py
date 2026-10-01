@@ -11,6 +11,7 @@ class AuthenticatedIdentity(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     user_id: str = Field(min_length=1)
+    username: str | None = None
     role: str = Field(min_length=1)
     tenant_id: str = Field(min_length=1)
     employee_id: str | None = None
@@ -22,6 +23,7 @@ class AuthenticatedIdentity(BaseModel):
         """Convert trusted identity into authorization UserContext."""
         return UserContext(
             user_id=self.user_id,
+            username=self.username,
             role=self.role,
             tenant_id=self.tenant_id,
             employee_id=self.employee_id,
@@ -88,6 +90,7 @@ class IdentityResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     user_id: str = Field(min_length=1)
+    username: str | None = None
     role: str = Field(min_length=1)
     tenant_id: str = Field(min_length=1)
     employee_id: str | None = None

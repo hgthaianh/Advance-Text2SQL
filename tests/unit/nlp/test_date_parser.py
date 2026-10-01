@@ -30,6 +30,7 @@ REFERENCE = date(2026, 9, 18)
     ("năm 2025", "2025-01-01", "2026-01-01", "year"),
     ("2 năm gần đây", "2024-09-18", "2026-09-19", "range"),
     ("trong 2 năm qua", "2024-09-18", "2026-09-19", "range"),
+    ("6 tháng gần nhất", "2026-03-01", "2026-09-01", "range"),
     ("18/09/2026", "2026-09-18", "2026-09-19", "day"),
     ("18-09-2026", "2026-09-18", "2026-09-19", "day"),
     ("2026-09-18", "2026-09-18", "2026-09-19", "day"),
@@ -63,6 +64,11 @@ def test_invalid_dates(text):
 def test_calendar_boundaries(text, reference, start, end):
     result = DateParser().parse(text, reference)
     assert (result.start, result.end) == (start, end)
+
+
+def test_recent_months_cross_year_boundary():
+    result = DateParser().parse("doanh thu 6 tháng gần nhất", date(2026, 1, 15))
+    assert (result.start, result.end) == (date(2025, 7, 1), date(2026, 1, 1))
 
 
 def test_range_whitespace():
